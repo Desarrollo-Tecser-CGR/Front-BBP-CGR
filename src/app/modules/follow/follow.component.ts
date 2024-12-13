@@ -5,7 +5,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 
-
 // Definición de rutas
 const routes: Routes = [
     { path: 'characterization', component: CharacterizationComponent },
