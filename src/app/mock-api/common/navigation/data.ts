@@ -66,6 +66,15 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
         roles: ['administrador']
+    },
+    {
+        id   : 'create',
+        title: 'Creación de Formularios',
+        type : 'basic',
+        icon : 'heroicons_outline:newspaper',
+        link : '/create',
+        roles: ['administrador', 'validador']
+
     }
 ];
 export const compactNavigation: FuseNavigationItem[] = [

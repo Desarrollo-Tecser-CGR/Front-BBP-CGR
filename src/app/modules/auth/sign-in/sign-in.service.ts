@@ -7,6 +7,7 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
     providedIn: 'root',
 })
 export class SignInService {
+
     private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
 
     constructor(private http: HttpClient) {}
