@@ -8,7 +8,10 @@ import { CONFIG } from '../../../config/config';
     providedIn: 'root',
 })
 export class SignInService {
+
+   // private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
     private apiUrl = `${CONFIG.apiHost}/api/v1/auth/loginActiveDirectory`;
+
 
 
     constructor(private http: HttpClient) {}
