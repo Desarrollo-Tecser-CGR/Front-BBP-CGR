@@ -126,7 +126,7 @@ export class AuthService {
             password: credentials.password,
         };
 
-        return this._httpClient.post('http://192.168.2.4:5500/api/v1/auth/loginActiveDirectory', auth).pipe(
+        return this._httpClient.post('http://192.168.2.19:5500/api/v1/auth/loginActiveDirectory', auth).pipe(
             switchMap((response: any) => {
                 console.log(response);
 
