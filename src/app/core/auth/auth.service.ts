@@ -17,6 +17,7 @@ export class AuthService {
     private _authenticated: boolean = false;
     private _httpClient = inject(HttpClient);
     private _userService = inject(UserService);
+    private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
 
     private _user: any = userData;
     private _roles: ReplaySubject<Rol[]> = new ReplaySubject<Rol[]>(1);
@@ -48,6 +49,14 @@ export class AuthService {
 
     get accessToken(): string {
         return localStorage.getItem('accessToken') ?? '';
+    }
+
+    set accessNombre(token: string) {
+        localStorage.setItem('accessNombre', token);
+    }
+
+    get accessNombre(): string {
+        return localStorage.getItem('accessNombre') ?? '';
     }
 
     /**
@@ -134,6 +143,7 @@ export class AuthService {
 
                 // Store the access token in the local storage
                 this.accessToken = response.user.token;
+                this.accessNombre = credentials.sAMAccountName;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
