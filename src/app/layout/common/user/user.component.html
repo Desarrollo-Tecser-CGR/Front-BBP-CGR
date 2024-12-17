@@ -1,14 +1,14 @@
 <!-- Button -->
-<button mat-icon-button [matMenuTriggerFor]="userActions" style="margin-right: 100px;">
+<button mat-icon-button [matMenuTriggerFor]="userActions" style="margin-right: 70px;">
     <span class="relative">
         <div style="display: flex; align-items: center; padding-left: 100px;">
             @if (showAvatar && user.avatar) {
-                <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 10px;"></mat-icon>
+                <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 5px;"></mat-icon>
             }
-            <p style="font-size: 12px; margin-left: auto;">Daniela&nbsp;Cardoso<br><p style="font-size: 10px; margin-right: 25px; font-weight: bold;">Admnistrador</p></p>
+            <p style="font-size: 12px; margin-left: auto;">{{ user?.fullName || 'Usuario' }}<br><p style="font-size: 10px; margin-right: 25px; font-weight: bold;">{{ user?.cargo || 'Cargo' }}</p></p>
 
             @if (!showAvatar || !user.avatar) {
-                <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-left: auto;"></mat-icon>
+                <!-- <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-left: auto;"></mat-icon> -->
             }
         </div>
 

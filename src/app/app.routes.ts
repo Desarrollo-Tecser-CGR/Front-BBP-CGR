@@ -236,5 +236,21 @@ export const appRoutes: Route[] = [
                 data: { requiredRoles: ['validador','administrador'], module: '' }
             },
         ]
+    },
+
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'resumen-edit', loadChildren: () =>
+                import('app/modules/resumen-edit/resumen-edit.routes'),
+                data: { requiredRoles: ['validador','administrador'], module: '' }
+            },
+        ]
     }
 ];

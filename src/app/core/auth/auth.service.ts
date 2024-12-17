@@ -6,9 +6,8 @@ import { UserService } from 'app/core/user/user.service';
 import { catchError, map, Observable, of, ReplaySubject, switchMap, tap, throwError } from 'rxjs';
 import { user as userData } from 'app/mock-api/common/user/data';
 import { Rol } from '../user/rol.types';
-
-import { GlobalConstants } from '../constants/GlobalConstants';
-
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
+//import { GlobalConstants } from '../constants/GlobalConstants';
 import { CONFIG } from '../../config/config';
 
 
@@ -18,6 +17,7 @@ export class AuthService {
     private _authenticated: boolean = false;
     private _httpClient = inject(HttpClient);
     private _userService = inject(UserService);
+    private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
 
     private _user: any = userData;
     private _roles: ReplaySubject<Rol[]> = new ReplaySubject<Rol[]>(1);
@@ -49,6 +49,14 @@ export class AuthService {
 
     get accessToken(): string {
         return localStorage.getItem('accessToken') ?? '';
+    }
+
+    set accessNombre(token: string) {
+        localStorage.setItem('accessNombre', token);
+    }
+
+    get accessNombre(): string {
+        return localStorage.getItem('accessNombre') ?? '';
     }
 
     /**
@@ -124,13 +132,18 @@ export class AuthService {
 
         // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
 
+
+        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
+
         return this._httpClient.post(`${CONFIG.apiHost}/api/v1/auth/loginActiveDirectory`, auth).pipe(
+
 
             switchMap((response: any) => {
                 console.log(response);
 
                 // Store the access token in the local storage
                 this.accessToken = response.user.token;
+                this.accessNombre = credentials.sAMAccountName;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
