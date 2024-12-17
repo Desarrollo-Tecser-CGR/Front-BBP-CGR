@@ -7,7 +7,6 @@ import { catchError, map, Observable, of, ReplaySubject, switchMap, tap, throwEr
 import { user as userData } from 'app/mock-api/common/user/data';
 import { Rol } from '../user/rol.types';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
-//import { GlobalConstants } from '../constants/GlobalConstants';
 import { CONFIG } from '../../config/config';
 
 
