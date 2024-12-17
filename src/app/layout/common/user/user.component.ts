@@ -1,5 +1,4 @@
 import { BooleanInput } from '@angular/cdk/coercion';
-import { NgClass } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -25,13 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'user',
     standalone: true,
-    imports: [
-        MatButtonModule,
-        MatMenuModule,
-        MatIconModule,
-        NgClass,
-        MatDividerModule,
-    ],
+    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule],
 })
 export class UserComponent implements OnInit, OnDestroy {
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -39,7 +32,10 @@ export class UserComponent implements OnInit, OnDestroy {
     /* eslint-enable @typescript-eslint/naming-convention */
 
     @Input() showAvatar: boolean = true;
-    user: User;
+    user: User = {
+        fullName: '', // Inicialización con valores predeterminados
+        cargo: '',
+    };
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -60,13 +56,34 @@ export class UserComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        // Subscribe to user changes
+        // Recuperar datos desde el localStorage
+        const fullName = localStorage.getItem('accessNombre') || 'Usuario';
+        const roles = localStorage.getItem('accessRoles');
+        const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
+
+
+        console.log(fullName);
+        console.log(cargo);
+
+        // Inicializar `this.user` con datos del Local Storage
+        this.user = {
+            fullName: fullName,
+            cargo: cargo,
+        };
+
+        // Marcar para detección de cambios
+        this._changeDetectorRef.markForCheck();
+
+        // Suscribirse a cambios del usuario desde el servicio
         this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user: User) => {
-                this.user = user;
+                this.user = {
+                    ...this.user, // Conservar datos existentes
+                    ...user, // Actualizar con datos recibidos del servicio
+                };
 
-                // Mark for check
+                // Marcar para detección de cambios
                 this._changeDetectorRef.markForCheck();
             });
     }
@@ -75,7 +92,7 @@ export class UserComponent implements OnInit, OnDestroy {
      * On destroy
      */
     ngOnDestroy(): void {
-        // Unsubscribe from all subscriptions
+        // Desuscribirse de todas las suscripciones
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
@@ -90,12 +107,12 @@ export class UserComponent implements OnInit, OnDestroy {
      * @param status
      */
     updateUserStatus(status: string): void {
-        // Return if user is not available
+        // Retornar si el usuario no está disponible
         if (!this.user) {
             return;
         }
 
-        // Update the user
+        // Actualizar el estado del usuario
         this._userService
             .update({
                 ...this.user,
@@ -109,5 +126,10 @@ export class UserComponent implements OnInit, OnDestroy {
      */
     signOut(): void {
         this._router.navigate(['/sign-out']);
+    }
+
+    private capitalizeFirstLetter(value: string): string {
+        if (!value) return '';
+        return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
     }
 }

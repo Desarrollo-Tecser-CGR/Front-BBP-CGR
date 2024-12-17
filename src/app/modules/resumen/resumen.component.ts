@@ -4,9 +4,7 @@ import {
     ReactiveFormsModule,
     UntypedFormBuilder,
     UntypedFormGroup,
-    Validators,
-    FormBuilder, 
-    FormGroup
+    Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -20,8 +18,17 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
-import { ResumenService } from './resumen.service'; 
+import { ResumenService } from './resumen.service';
+import { MatMenuModule } from '@angular/material/menu';
 import Swal from 'sweetalert2';
+import { RouterModule, Routes } from '@angular/router';
+import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
+
+// Definición de rutas
+const routes: Routes = [
+    { path: 'characterization', component: CharacterizationComponent },
+    { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
+];
 
 @Component({
     selector: 'resumen',
@@ -44,6 +51,11 @@ import Swal from 'sweetalert2';
         MatRadioModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        RouterModule,
+        MatIconModule,
+        MatMenuModule,
+        RouterModule
+
     ],
     providers: [MatDatepickerModule],
 })
@@ -55,13 +67,13 @@ export class ResumenComponent implements OnInit {
     isModalOpen: boolean = false;
 
 
-    constructor(private _formBuilder: UntypedFormBuilder, 
+    constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService) {}
 
         toggleModal(): void {
           this.isModalOpen = !this.isModalOpen;
       }
-      
+
     triggerFileInput(): void {
         const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
         fileInput?.click();
@@ -75,8 +87,8 @@ export class ResumenComponent implements OnInit {
         } else {
             console.log('No se seleccionó ningún archivo.');
         }
-    }    
-    
+    }
+
     submitForm(): void {
         if (this.horizontalStepperForm.valid) {
           // Definir los campos multiseleccionables
@@ -87,10 +99,10 @@ export class ResumenComponent implements OnInit {
             'taxonomiaEvento',
             'tipoMaterialProducido',
           ];
-      
+
           // Obtener los valores del formulario
           const formValues = this.horizontalStepperForm.getRawValue();
-      
+
           // Transformar los campos multiseleccionables en cadenas separadas por comas
           multiSelectFields.forEach((field) => {
             Object.keys(formValues).forEach((step) => {
@@ -103,10 +115,10 @@ export class ResumenComponent implements OnInit {
               }
             });
           });
-      
+
           // Aplana el objeto si es necesario y envía los datos
           const flattenedValues = this.flattenObject(formValues);
-      
+
           this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
             (response) => {
               // Mostrar alerta de éxito usando SweetAlert2
@@ -117,7 +129,7 @@ export class ResumenComponent implements OnInit {
                 confirmButtonText: 'Aceptar',
               }).then(() => {
                 // Redirigir a otra página o vista después de un segundo
-                window.location.href = './example'; 
+                window.location.href = './example';
               });
             },
             (error) => {
@@ -130,13 +142,13 @@ export class ResumenComponent implements OnInit {
               });
             }
           );
-          
-          
+
+
         } else {
           console.warn('Formulario no válido');
         }
-    }      
-      
+    }
+
     ngOnInit(): void {
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
@@ -162,22 +174,22 @@ export class ResumenComponent implements OnInit {
                 objetivoPrincipalPractica: [''],
             }),
             step4: this._formBuilder.group({
-                impactoEsperado: [''], 
-                metodologiaUsada: ['', [Validators.maxLength(500)]], 
-                duracionImplementacion: [''], 
-                etapasMetodologia: [''], 
+                impactoEsperado: [''],
+                metodologiaUsada: ['', [Validators.maxLength(500)]],
+                duracionImplementacion: [''],
+                etapasMetodologia: [''],
                 periodoDesarrolloInicio: [''],
                 periodoDesarrolloFin: [''],
             }),
             step5: this._formBuilder.group({
-                tipoMaterialProducido: [''], 
-                apoyoRecibido: [''], 
-                reconocimientosNacionalesInternacionales: [''], 
-                objetoControl: [''], 
-                taxonomiaEvento: [''], 
-                tipoActuacion: [''], 
-                descripcionResultados: [''], 
-            }),            
+                tipoMaterialProducido: [''],
+                apoyoRecibido: [''],
+                reconocimientosNacionalesInternacionales: [''],
+                objetoControl: [''],
+                taxonomiaEvento: [''],
+                tipoActuacion: [''],
+                descripcionResultados: [''],
+            }),
             step6: this._formBuilder.group({
               documentoActuacion: [Validators.required],
           }),
@@ -209,18 +221,18 @@ export class ResumenComponent implements OnInit {
         const date = event.value;
         const formattedDate = this.formatDate(date);
         this.horizontalStepperForm.get(`${stepName}.${controlName}`)?.setValue(formattedDate);
-    }    
+    }
 
     formatDate(date: Date): string {
         const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2); 
-        const day = ('0' + date.getDate()).slice(-2); 
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
         return `${year}-${month}-${day}`;
     }
 
     flattenObject(obj: any): any {
         let result: any = {};
-      
+
         for (const key in obj) {
           if (obj.hasOwnProperty(key)) {
             if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -240,19 +252,19 @@ export class ResumenComponent implements OnInit {
           }
         }
         return result;
-      }      
+      }
       submitDocumentoActuacion(): void {
         console.log('Intentando enviar los documentos...');
-      
+
         if (this.selectedFiles.length > 0) {
           const formData = new FormData();
-      
+
           this.selectedFiles.forEach((file) => {
             formData.append('file', file, file.name);
           });
-      
+
           console.log('FormData construido:', formData);
-      
+
           // Enviamos los archivos al servicio
           this.resumenService.uploadFile(formData).subscribe(
             (response) => {
@@ -267,8 +279,8 @@ export class ResumenComponent implements OnInit {
         } else {
           console.warn('No hay archivos seleccionados.');
         }
-      }      
-      
+      }
+
     onDragOver(event: DragEvent): void {
       event.preventDefault();
     }
@@ -283,12 +295,12 @@ export class ResumenComponent implements OnInit {
       const formGroups = Object.keys(this.horizontalStepperForm.controls);
       let totalControls = 0;
       let filledControls = 0;
-  
+
       formGroups.forEach((step) => {
           const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
           if (group) {
               const controls = group.controls;
-  
+
               Object.values(controls).forEach((control) => {
                   if (!control.disabled) {
                       totalControls++;
@@ -300,12 +312,12 @@ export class ResumenComponent implements OnInit {
               });
           }
       });
-  
+
       // Evitar dividir por cero
       if (totalControls === 0) {
           return 0;
       }
-  
+
       // Calcular progreso
       const progressValue = Math.round((filledControls / totalControls) * 100);
       console.log(`Total controles: ${totalControls}, Controles llenos: ${filledControls}, Progreso: ${progressValue}%`);
@@ -319,5 +331,5 @@ export class ResumenComponent implements OnInit {
     } else {
         return 'green'; // 63% - 100%: Verde
     }
-}  
+}
 }

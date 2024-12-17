@@ -1,11 +1,34 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-advanced-search-modal',
+  selector: 'quick-chat',
   templateUrl: './advanced-search-modal.component.html',
-  styleUrls: ['./advanced-search-modal.component.scss']
+  styleUrls: ['./advanced-search-modal.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  exportAs: 'quickChat',
+  standalone: true,
+  imports: [
+      MatIconModule,
+      MatButtonModule,
+      MatFormFieldModule,
+      MatInputModule,
+      MatDialogModule,      
+      MatDatepickerModule,    
+      MatNativeDateModule,
+      TextFieldModule,
+      ReactiveFormsModule
+  ],
 })
 export class AdvancedSearchModalComponent {
   advancedSearchForm: FormGroup;
