@@ -35,6 +35,8 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations/public-api';
 import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
+import { AdvancedSearchModalComponent } from '../advanced-search-modal/advanced-search-modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector: 'search',
@@ -68,7 +70,7 @@ import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
     ],
 })
 export class SearchComponent implements OnChanges, OnInit, OnDestroy {
-    @Input() appearance: 'basic' | 'bar' = 'basic';
+    @Input() appearance: 'bar' | 'basic' = 'bar';
     @Input() debounce: number = 300;
     @Input() minLength: number = 2;
     @Output() search: EventEmitter<any> = new EventEmitter<any>();
@@ -85,7 +87,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     constructor(
         private _elementRef: ElementRef,
         private _httpClient: HttpClient,
-        private _renderer2: Renderer2
+        private _renderer2: Renderer2,
+        private _dialog: MatDialog
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -254,4 +257,20 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
+    openAdvancedSearch(): void {
+        const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
+            width: '600px',
+            data: {
+                // Puedes pasar parámetros iniciales aquí si es necesario
+            },
+        });
+    
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                // Maneja los datos retornados del modal
+                this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
+                this.search.emit(result); // Emitir el resultado avanzado
+            }
+        });
+    }    
 }

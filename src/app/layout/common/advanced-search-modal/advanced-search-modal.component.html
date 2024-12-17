@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Busqueda Avanzada</h2>
+<mat-dialog-content>
+  <form [formGroup]="advancedSearchForm">
+    <mat-form-field class="full-width">
+      <mat-label>Fecha de Diligenciamiento</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="fechaDiligenciamiento">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+ 
+    <mat-form-field class="full-width">
+      <mat-label>Nombre de la Entidad</mat-label>
+      <input matInput formControlName="nombreEntidad">
+    </mat-form-field>
+ 
+    <mat-form-field class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre">
+    </mat-form-field>
+ 
+    <mat-form-field class="full-width">
+      <mat-label>Tipo de Estrategia de Identificación</mat-label>
+      <input matInput formControlName="tipoEstrategiaIdentificacion">
+    </mat-form-field>
+ 
+    <mat-form-field class="full-width">
+      <mat-label>Tipo de Práctica</mat-label>
+      <input matInput formControlName="tipoPractica">
+    </mat-form-field>
+ 
+    <mat-form-field class="full-width">
+      <mat-label>Código de Práctica</mat-label>
+      <input matInput formControlName="codigoPractica">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="closeDialog()">Cancelar</button>
+  <button mat-button (click)="applySearch()">Aplicar búsqueda</button>
+</mat-dialog-actions>
+ 

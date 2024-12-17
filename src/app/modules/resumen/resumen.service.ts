@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import { CONFIG } from '../../config/config';
 
 @Injectable({
@@ -8,8 +9,12 @@ import { CONFIG } from '../../config/config';
 })
 export class ResumenService {
 
+  // private apiUrl = `${GlobalConstants.API_BASE_URL}hojadevida/guardar`;
+  // private uploadUrl = `${GlobalConstants.API_BASE_URL}hojadevida/cargar-archivo`;
+
   private apiUrl =  `${CONFIG.apiHost}/api/v1/hojadevida/guardar`;
   private uploadUrl = `${CONFIG.apiHost}/api/v1/hojadevida/cargar-archivo`;
+
 
   constructor(private http: HttpClient) {}
 
