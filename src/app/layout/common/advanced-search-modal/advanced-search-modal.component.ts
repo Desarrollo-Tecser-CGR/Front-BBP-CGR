@@ -1,11 +1,15 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-advanced-search-modal',
   templateUrl: './advanced-search-modal.component.html',
-  styleUrls: ['./advanced-search-modal.component.scss']
+  styleUrls: ['./advanced-search-modal.component.scss'],
+  standalone: true,
+  imports: [
+    MatDialogModule,
+  ],
 })
 export class AdvancedSearchModalComponent {
   advancedSearchForm: FormGroup;
