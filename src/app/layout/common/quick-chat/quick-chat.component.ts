@@ -58,6 +58,7 @@ export class QuickChatComponent implements OnInit, AfterViewInit, OnDestroy {
     /**
      * Constructor
      */
+
     constructor(
         @Inject(DOCUMENT) private _document: Document,
         private _elementRef: ElementRef,

@@ -1,6 +1,7 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { CONFIG } from '../../../config/config';
 import {
     Component,
     ElementRef,
@@ -162,29 +163,32 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
                 debounceTime(this.debounce),
                 takeUntil(this._unsubscribeAll),
                 map((value) => {
-                    // Set the resultSets to null if there is no value or
-                    // the length of the value is smaller than the minLength
-                    // so the autocomplete panel can be closed
+                    // Set the resultSets to null if no value or too short
                     if (!value || value.length < this.minLength) {
                         this.resultSets = null;
                     }
-
-                    // Continue
+    
                     return value;
                 }),
-                // Filter out undefined/null/false statements and also
-                // filter out the values that are smaller than minLength
+                // Filter out values that don't meet the minLength
                 filter((value) => value && value.length >= this.minLength)
             )
             .subscribe((value) => {
+                const endpoint = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
+    
+                // Llamada GET con parámetros en la URL
                 this._httpClient
-                    .post('api/common/search', { query: value })
+                    .get(endpoint, { params: { query: value } }) // Pasa el valor como parámetro
                     .subscribe((resultSets: any) => {
-                        // Store the result sets
+                        
+                        console.log('Resultados de la API:', resultSets);
+                        // Guarda los resultados
                         this.resultSets = resultSets;
-
-                        // Execute the event
+    
+                        // Emite el evento con los resultados
                         this.search.next(resultSets);
+                    }, error => {
+                        console.error('Error en la llamada API:', error);
                     });
             });
     }

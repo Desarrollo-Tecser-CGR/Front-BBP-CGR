@@ -14,7 +14,6 @@ export class SignInService {
 
     //private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
 
-
     constructor(private http: HttpClient) {}
 
     sendFormData(data: { sAMAccountName: string; password: string }): Observable<any> {
