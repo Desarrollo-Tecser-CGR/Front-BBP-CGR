@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../optionsDropdown/characterization/characterization.component';
 import { ResumenComponent } from '../resumen/resumen.component';
+import { ResumenService } from '../resumen/resumen.service';
 
 // Definición de rutas
 const routes: Routes = [
@@ -29,12 +30,17 @@ const routes: Routes = [
 export class ResumenEditComponent {
 
     @Input() Id: number;
-    id: string | null = null; // Variable para almacenar el ID
+    id: string | null = null; 
+    isEdit: boolean = true;
+    formData: any = {};
 
     /**
      * Constructor
      */
-    constructor(private activatedRoute: ActivatedRoute) {
+    constructor(private activatedRoute: ActivatedRoute,
+        private resumenService: ResumenService
+
+    ) {
 
     }
 
@@ -43,10 +49,26 @@ export class ResumenEditComponent {
         this.activatedRoute.params.subscribe((params) => {
             this.id = params['id']; // Capturar el ID de la URL
             console.log('ID capturado:', this.id);
+            
+            if (this.id) {
+                this.loadFormData(this.id);
+            }
         });
 
         // Método 2: Obtener el parámetro directamente (para rutas estáticas)
         // this.id = this.activatedRoute.snapshot.params['id'];
         // console.log('ID capturado:', this.id);
     }
+    private loadFormData(id: string): void {
+        this.resumenService.getDataAsJson(id).subscribe({
+            next: (data) => {
+                this.formData = data;
+                console.log('Datos cargados para edición:', this.formData);
+            },
+            error: (error) => {
+                console.error('Error al cargar los datos del formulario:', error);
+            }
+        });
+    }
+    
 }

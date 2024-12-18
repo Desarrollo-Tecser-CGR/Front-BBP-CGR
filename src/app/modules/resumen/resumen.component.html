@@ -5,7 +5,7 @@
     <div class="mt-2">
         <h2
             class="truncate text-3xl font-extrabold leading-7 tracking-tight sm:leading-10 md:text-4xl">
-            Hoja de Vida
+            {{ isEdit ? 'Editar Hoja' : 'Hoja de Vida' }}
         </h2>
     </div>
 <!-- Barra de progreso personalizada -->
@@ -637,11 +637,10 @@
             <button
             type="button"
             class="submit-button"
-            [disabled]="selectedFiles.length === 0"
-            (click)="submitDocumentoActuacion()"
-          >
+            [disabled]="!formData || !id"
+            (click)="submitDocumentoActuacion()">
             Enviar Documentos
-          </button>
+        </button>
           </div>
           <div class="modal-actions">
             <button style="background: #f0ba41; color: #fff;" mat-raised-button (click)="toggleModal()">Cancelar</button>

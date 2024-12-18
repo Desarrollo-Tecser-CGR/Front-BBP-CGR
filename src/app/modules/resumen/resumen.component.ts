@@ -66,7 +66,8 @@ export class ResumenComponent implements OnInit {
     progress: number = 0;
     isModalOpen: boolean = false;
     @Input() Id: number;
-
+    @Input() isEdit: boolean = false;
+    
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService) { }
 
@@ -91,63 +92,85 @@ export class ResumenComponent implements OnInit {
 
     submitForm(): void {
         if (this.horizontalStepperForm.valid) {
-          // Definir los campos multiseleccionables
-          const multiSelectFields = [
-            'apoyoRecibido',
-            'etapasMetodologia',
-            'impactoEsperado',
-            'taxonomiaEvento',
-            'tipoMaterialProducido',
-          ];
-
-          // Obtener los valores del formulario
-          const formValues = this.horizontalStepperForm.getRawValue();
-
-          // Transformar los campos multiseleccionables en cadenas separadas por comas
-          multiSelectFields.forEach((field) => {
-            Object.keys(formValues).forEach((step) => {
-              if (
-                formValues[step] &&
-                formValues[step][field] &&
-                Array.isArray(formValues[step][field])
-              ) {
-                formValues[step][field] = formValues[step][field].join(',');
-              }
+            // Procesar los valores del formulario
+            const multiSelectFields = [
+                'apoyoRecibido',
+                'etapasMetodologia',
+                'impactoEsperado',
+                'taxonomiaEvento',
+                'tipoMaterialProducido',
+            ];
+    
+            const formValues = this.horizontalStepperForm.getRawValue();
+    
+            // Transformar los campos multiseleccionables
+            multiSelectFields.forEach((field) => {
+                Object.keys(formValues).forEach((step) => {
+                    if (
+                        formValues[step] &&
+                        formValues[step][field] &&
+                        Array.isArray(formValues[step][field])
+                    ) {
+                        formValues[step][field] = formValues[step][field].join(',');
+                    }
+                });
             });
-          });
-
-          // Aplana el objeto si es necesario y envía los datos
-          const flattenedValues = this.flattenObject(formValues);
-
-          this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
-            (response) => {
-              // Mostrar alerta de éxito usando SweetAlert2
-              Swal.fire({
-                title: '¡Formulario Enviado!',
-                text: 'Tu formulario ha sido enviado con éxito.',
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-              }).then(() => {
-                // Redirigir a otra página o vista después de un segundo
-                window.location.href = './example';
-              });
-            },
-            (error) => {
-              // Mostrar alerta de error usando SweetAlert2
-              Swal.fire({
-                title: 'Error',
-                text: 'Hubo un problema al enviar el formulario. Intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-              });
+    
+            // Aplanar los datos
+            const flattenedValues = this.flattenObject(formValues);
+    
+            // Lógica para decidir si se crea o se actualiza
+            if (this.isEdit && this.Id) {
+                // Llamar al servicio de actualización
+                this.resumenService.updateDataAsJson(this.Id, flattenedValues).subscribe(
+                    (response) => {
+                        Swal.fire({
+                            title: '¡Actualización Exitosa!',
+                            text: 'El formulario ha sido actualizado.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                        }).then(() => {
+                            window.location.href = './example';
+                        });
+                    },
+                    (error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                        });
+                    }
+                );
+            } else {
+                // Llamar al servicio de creación
+                this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
+                    (response) => {
+                        Swal.fire({
+                            title: '¡Formulario Enviado!',
+                            text: 'Tu formulario ha sido enviado con éxito.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                        }).then(() => {
+                            window.location.href = './example';
+                        });
+                    },
+                    (error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo enviar el formulario. Intenta nuevamente.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                        });
+                    }
+                );
             }
-          );
-
         } else {
             console.warn('Formulario no válido');
         }
     }
-
+    
+    
     ngOnInit(): void {
         console.log('Id Practica ' + this.Id);
 

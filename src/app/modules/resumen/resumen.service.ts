@@ -12,7 +12,8 @@ export class ResumenService {
   private apiUrl =  `${CONFIG.apiHost}/api/v1/hojadevida/guardar`;
   private uploadUrl = `${CONFIG.apiHost}/api/v1/hojadevida/cargar-archivo`;
   private apiUrlGet = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
-
+  private apiUrlUpdate = `${CONFIG.apiHost}/api/v1/updateIdentity`;
+  
     constructor(private http: HttpClient) { }
 
     sendFormDataAsJson(formData: any): Observable<any> {
@@ -27,4 +28,11 @@ export class ResumenService {
     getDataAsJson( id: string ): Observable<any> {
         return this.http.get<any>(this.apiUrlGet + '/' + id);
     }
+
+    updateDataAsJson(id: number, formData: any): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        const url = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity/${id}`;
+        return this.http.put(url, formData, { headers });
+    }    
+       
 }
