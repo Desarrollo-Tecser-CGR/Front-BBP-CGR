@@ -14,6 +14,7 @@ import { rol } from 'app/mock-api/common/rol/data';
 export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
   columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
+  cargo: string
   buttons = [
     {
       label: 'Edit',
@@ -21,9 +22,9 @@ export class InboxComponent implements OnInit {
       action: (row: any) => this.editRow(row),
     },
     {
-      label: 'Delete',
+      label: 'Validar',
       color: 'warn',
-      action: (row: any) => this.deleteRow(row),
+      action: (row: any) => this.validateRow(row),
     },
   ]; // Botones dinámicos
 
@@ -31,12 +32,13 @@ export class InboxComponent implements OnInit {
 
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
-    const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+    this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
 
-    if(cargo === 'administrador'){
-      const requestBody = { rol: 'evaluador ' }; // Cuerpo de la solicitud
+    if(this.cargo === 'validador'){
+      const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (response) => {
+          console.log('holi',response);
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({
@@ -65,9 +67,27 @@ export class InboxComponent implements OnInit {
     // Lógica para editar una fila
   }
 
-  deleteRow(row: any): void {
-    console.log('Delete row:', row);
-    // Lógica para eliminar una fila
+  validateRow(row: any): void {
+    const requestBody = { rol: this.cargo, id:row.id }; // Cuerpo de la solicitud
+      this.inboxService.setValidateStatus(requestBody).subscribe(
+        (response) => {
+          console.log('holi',response);
+          if (response.length > 0) {
+            // Extraer las columnas dinámicamente de la primera fila
+            this.columns = Object.keys(response[0]).map((key) => ({
+              key: key,
+              label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+            }));
+          }
+          this.data = response; // Asignar los datos de la API
+          console.log('API Response:', this.data); // Verificar los datos devueltos
+          console.log('API columns:', this.columns); // Verificar los datos devueltos
+        },
+        (error) => {
+          console.error('Error al cargar los datos:', error);
+          // Manejo del error
+        }
+      );
   }
 
   private formatLabel(key: string): string {
