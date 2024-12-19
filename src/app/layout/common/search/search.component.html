@@ -1,96 +1,46 @@
-<!-- Bar search -->
-@if (appearance === 'bar') {
-    @if (opened) {
-        <div
-            class="bg-card absolute inset-0 z-99 flex shrink-0 items-center"
-            @slideInTop
-            @slideOutTop
-        >
-            <mat-icon
-                class="absolute ml-6 sm:ml-8"
-                [svgIcon]="'heroicons_outline:magnifying-glass'"
-            ></mat-icon>
-            <input
-                class="h-full w-full px-16 sm:px-18"
-                [formControl]="searchControl"
-                [matAutocomplete]="matAutocomplete"
-                [placeholder]="'Search...'"
-                (keydown)="onKeydown($event)"
-                #barSearchInput
-            />
-            <mat-autocomplete
-                class="max-h-128 rounded-b border-t shadow-md sm:px-2"
-                [autoSelectActiveOption]="true"
-                [disableRipple]="true"
-                #matAutocomplete="matAutocomplete"
-            >
-                @if (resultSets && !resultSets.length) {
-                    <mat-option
-                        class="text-secondary pointer-events-none bg-transparent px-6 py-0 text-md"
-                    >
-                        No results found!
-                    </mat-option>
-                }
-                @for (
-                    resultSet of resultSets;
-                    track trackByFn($index, resultSet)
-                ) {
-                    <mat-optgroup class="mt-2 flex items-center px-2">
-                        <span
-                            class="text-secondary text-sm font-semibold tracking-wider"
-                            >{{ resultSet.label.toUpperCase() }}</span
-                        >
-                    </mat-optgroup>
-                    @for (
-                        result of resultSet.results;
-                        track trackByFn($index, result)
-                    ) {
-                        <mat-option
-                            class="group relative mb-1 rounded-md px-6 py-0 text-md dark:hover:bg-hover hover:bg-gray-100"
-                            [routerLink]="result.link"
-                            [value]="result.value"
-                        >
-                            <!-- Contacts -->
-                            @if (resultSet.id === 'contacts') {
-                                <ng-container
-                                    *ngTemplateOutlet="
-                                        contactResult;
-                                        context: { $implicit: result }
-                                    "
-                                ></ng-container>
-                            }
-                            <!-- Pages -->
-                            @if (resultSet.id === 'pages') {
-                                <ng-container
-                                    *ngTemplateOutlet="
-                                        pageResult;
-                                        context: { $implicit: result }
-                                    "
-                                ></ng-container>
-                            }
-                            <!-- Tasks -->
-                            @if (resultSet.id === 'tasks') {
-                                <ng-container
-                                    *ngTemplateOutlet="
-                                        taskResult;
-                                        context: { $implicit: result }
-                                    "
-                                ></ng-container>
-                            }
-                        </mat-option>
-                    }
-                }
-            </mat-autocomplete>
-            <button
-                class="absolute right-5 top-1/2 -mt-5 h-10 w-10 shrink-0 sm:right-7"
-                mat-icon-button
-                (click)="close()"
-            >
-                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
-            </button>
-        </div>
-    }
-}
+<div class="bg-card relative flex items-center justify-start px-4 py-2 w-full max-w-lg">
+    <!-- Input de búsqueda -->
+    <input
+        class="h-12 w-[400px] px-4 text-lg rounded-lg"
+        [formControl]="searchControl"
+        [matAutocomplete]="matAutocomplete"
+        [placeholder]="'Search...'"
+        (keydown)="onKeydown($event)"
+    />
+
+    <!-- Botón de búsqueda avanzada -->
+    <button
+        mat-icon-button
+        aria-label="Advanced search"
+        (click)="openAdvancedSearch()"
+    >
+        <mat-icon>filter_list</mat-icon>
+    </button>
+
+    <!-- Resultados del autocomplete -->
+    <mat-autocomplete
+        class="max-h-128 rounded-b border-t shadow-md sm:px-2"
+        [autoSelectActiveOption]="true"
+        [disableRipple]="true"
+        #matAutocomplete="matAutocomplete"
+    >
+        <mat-option *ngIf="!resultSets?.length">
+            No results found!
+        </mat-option>
+        <ng-container *ngFor="let resultSet of resultSets">
+            <mat-optgroup [label]="resultSet.label.toUpperCase()">
+                <mat-option
+                    *ngFor="let result of resultSet.results"
+                    [value]="result.value"
+                    [routerLink]="result.link"
+                >
+                    {{ result.title }}
+                </mat-option>
+            </mat-optgroup>
+        </ng-container>
+    </mat-autocomplete>
+</div>
+
 
 <!-- Basic search -->
 @if (appearance === 'basic') {
