@@ -533,7 +533,16 @@
                             <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                         </mat-form-field>
                 </div>
-
+                @if (Id != undefined) {
+                <div class="mt-8 flex justify-end">
+                    <button
+                        type="button"
+                        mat-raised-button
+                        color="primary"
+                        (click)="openCaracterizationModal(undefined)">
+                        Caracterización
+                    </button>
+                </div>}
                 <div class="mt-8 flex justify-end">
                     <button
                         type="button"
