@@ -12,12 +12,12 @@ import { Router } from '@angular/router';
   selector: 'app-inbox',
   standalone: true,
   templateUrl: './inbox.component.html',
-  styleUrls: ['./inbox.component.scss'], // Corrección: Usar styleUrls
-  imports: [GenericTableComponent, MatDatepickerModule], // Corrección: Mover MatDatepickerModule a imports ///// ,DialogOverviewExample, DialogOverviewExampleDialog
+  styleUrls: ['./inbox.component.scss'], 
+  imports: [GenericTableComponent, MatDatepickerModule],
 })
 export class InboxComponent implements OnInit {
-  data: any[] = []; // Datos para la tabla genérica
-  columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
+  data: any[] = []; 
+  columns: { key: string; label: string }[] = []; 
   buttons = [
     {
       // label: 'Edit',
@@ -37,6 +37,7 @@ export class InboxComponent implements OnInit {
     //   action: (row: any) => this.openCaracterizationModal(row), // Enviar datos de la fila al modal
     // },
   ]; // Botones dinámicos
+  private _router: any;
 
   constructor(private inboxService: InboxService, private dialog: MatDialog) {}
 
@@ -95,7 +96,6 @@ export class InboxComponent implements OnInit {
   //   });
   // }  
   private formatLabel(key: string): string {
-    // Insertar espacios antes de cada mayúscula (excepto la primera letra)
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
   
     // Convertir la primera letra de cada palabra en mayúscula
