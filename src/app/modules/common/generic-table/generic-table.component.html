@@ -7,14 +7,27 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Actions</th>
       <td mat-cell *matCellDef="let element">
+        <!-- Botón principal con tres puntos -->
         <button
-          *ngFor="let button of buttons"
-          mat-raised-button
-          [color]="button.color || 'primary'"
-          (click)="button.action(element)"
+        mat-icon-button
+        aria-label="More actions"
+        (click)="toggleMenu(element)"
         >
-          {{ button.label }}
+        <mat-icon svgIcon="heroicons_outline:bars-3"></mat-icon>
         </button>
+  
+        <!-- Submenú con los botones secundarios -->
+        <div *ngIf="expandedRow === element" class="menu-container">
+          <button
+            *ngFor="let button of buttons"
+            mat-raised-button
+            [color]="button.color || 'primary'"
+            (click)="button.action(element)"
+          >
+          <mat-icon *ngIf="button.icon" [svgIcon]="button.icon"></mat-icon>
+            {{ button.label }}
+          </button>
+        </div>
       </td>
     </ng-container>
   

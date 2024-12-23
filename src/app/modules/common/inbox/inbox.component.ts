@@ -2,37 +2,43 @@ import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
 import { InboxService } from './inbox.service';
+import { MatDialog } from '@angular/material/dialog'; 
+// import { DialogOverviewExample, DialogOverviewExampleDialog } from '../caracterization-modal/caracterization-modal.component';
 import { rol } from 'app/mock-api/common/rol/data';
 import { Router } from '@angular/router';
 
 
 @Component({
-    selector: 'app-inbox',
-    standalone: true,
-    templateUrl: './inbox.component.html',
-    styleUrls: ['./inbox.component.scss'], // Corrección: Usar styleUrls
-    imports: [GenericTableComponent, MatDatepickerModule], // Corrección: Mover MatDatepickerModule a imports
+  selector: 'app-inbox',
+  standalone: true,
+  templateUrl: './inbox.component.html',
+  styleUrls: ['./inbox.component.scss'], // Corrección: Usar styleUrls
+  imports: [GenericTableComponent, MatDatepickerModule], // Corrección: Mover MatDatepickerModule a imports ///// ,DialogOverviewExample, DialogOverviewExampleDialog
 })
 export class InboxComponent implements OnInit {
-    data: any[] = []; // Datos para la tabla genérica
-    columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
-    buttons = [
-        {
-            label: 'Edit',
-            color: 'primary',
-            action: (row: any) => this.editRow(row),
-        },
-        {
-            label: 'Delete',
-            color: 'warn',
-            action: (row: any) => this.deleteRow(row),
-        },
-    ]; // Botones dinámicos
+  data: any[] = []; // Datos para la tabla genérica
+  columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
+  buttons = [
+    {
+      // label: 'Edit',
+      icon: 'heroicons_outline:pencil-square',
+      color: 'primary',
+      action: (row: any) => this.editRow(row),
+    },
+    {
+      // label: 'Delete',
+      icon: 'heroicons_outline:check-circle',
+      color: 'warn',
+      action: (row: any) => this.deleteRow(row),
+    },
+    // {
+    //   label: 'Open Modal',
+    //   color: 'accent', // Puedes elegir un color diferente
+    //   action: (row: any) => this.openCaracterizationModal(row), // Enviar datos de la fila al modal
+    // },
+  ]; // Botones dinámicos
 
-    constructor(
-        private inboxService: InboxService,
-        private _router: Router
-    ) { }
+  constructor(private inboxService: InboxService, private dialog: MatDialog) {}
 
     ngOnInit(): void {
         const roles = localStorage.getItem('accessRoles');
@@ -75,10 +81,25 @@ export class InboxComponent implements OnInit {
         console.log('Delete row:', row);
         // Lógica para eliminar una fila
     }
+  // ======================== Logica que muestra el modal en la vista ======================== //
 
-    private formatLabel(key: string): string {
-        // Formatear etiquetas (opcional: transformar "user_name" a "User Name")
-        return key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-    }
+  // openCaracterizationModal(row: any): void {
+  //   const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+  //     width: '500px',
+  //     data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
+  //   });
+  
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     console.log('Modal cerrado con:', result);
+  //     // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
+  //   });
+  // }  
+  private formatLabel(key: string): string {
+    // Insertar espacios antes de cada mayúscula (excepto la primera letra)
+    key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
+  
+    // Convertir la primera letra de cada palabra en mayúscula
+    return key.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
 }
 
