@@ -1,26 +1,21 @@
 <div class="min-w-0 flex-1">
 
-<!-- Main -->
-<div class="flex-auto p-6 sm:p-10">
-    <div class="mt-2">
-        <h2
-            class="truncate text-3xl font-extrabold leading-7 tracking-tight sm:leading-10 md:text-4xl">
-            {{ isEdit ? 'Editar Hoja' : 'Hoja de Vida' }}
-        </h2>
-    </div>
-<!-- Barra de progreso personalizada -->
-<div class="progress-container">
-    <span class="progress-text">{{ progress }}%</span>
-    <div
-        class="progress-bar"
-        [style.width.%]="progress"
-        [ngClass]="progressColor"
-    ></div>
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="mt-2">
+            <h2 class="truncate text-3xl font-extrabold leading-7 tracking-tight sm:leading-10 md:text-4xl">
+                {{ isEdit ? 'Editar Hoja' : 'Hoja de Vida' }}
+            </h2>
+        </div>
+        <!-- Barra de progreso personalizada -->
+        <div class="progress-container">
+            <span class="progress-text">{{ progress }}%</span>
+            <div class="progress-bar" [style.width.%]="progress" [ngClass]="progressColor"></div>
 
-</div>
+        </div>
 
 
-    <!-- <form [formGroup]="horizontalStepperForm.get('newFields')" class="filters-form" style="display: flex; gap: 16px;">
+        <!-- <form [formGroup]="horizontalStepperForm.get('newFields')" class="filters-form" style="display: flex; gap: 16px;">
         <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
             <mat-label>Nombre de la práctica</mat-label>
             <input matInput formControlName="nombrePractica" />
@@ -54,548 +49,457 @@
         </mat-form-field>
     </form> -->
 
-<div class="max-w-3x">
-    <!-- Horizontal stepper -->
-    <form
-        class="bg-transparent overflow-hidden rounded p-4"
-        [formGroup]="horizontalStepperForm"
-    >
-        <mat-horizontal-stepper [linear]="true" #horizontalStepper>
-            <mat-step
-                [formGroupName]="'step1'"
-                [stepControl]="horizontalStepperForm.get('step1')"
-                #horizontalStepperStep1
-            >
-                <ng-template matStepLabel
-                    >Fecha de diligenciamiento</ng-template
-                >
-                <div class="flex">
-                    <mat-form-field class="flex-auto" appearance="fill">
-                        <input
-                            matInput
-                            [matDatepicker]="picker1"
-                            formControlName="fechaDiligenciamiento"
-                            (dateChange)="onDateChange($event, 'step1', 'fechaDiligenciamiento')"
+        <div class="max-w-3x">
+            <!-- Horizontal stepper -->
+            <form class="bg-transparent overflow-hidden rounded p-4" [formGroup]="horizontalStepperForm">
+                <mat-horizontal-stepper [linear]="true" #horizontalStepper>
+                    <mat-step [formGroupName]="'step1'" [stepControl]="horizontalStepperForm.get('step1')"
+                        #horizontalStepperStep1>
+                        <ng-template matStepLabel>Fecha de diligenciamiento</ng-template>
+                        <div class="flex">
+                            <mat-form-field class="flex-auto" appearance="fill">
+                                <input matInput [matDatepicker]="picker1" formControlName="fechaDiligenciamiento"
+                                    (dateChange)="onDateChange($event, 'step1', 'fechaDiligenciamiento')"
+                                    placeholder="Fecha de Diligenciamiento" />
+                                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                                <mat-datepicker #picker1></mat-datepicker>
+                            </mat-form-field>
 
-                            placeholder="Fecha de Diligenciamiento"
-                        />
-                        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-                        <mat-datepicker #picker1></mat-datepicker>
-                    </mat-form-field>
+                        </div>
 
-                </div>
+                        <div class="gt-xs:flex-row flex flex-col">
+                            <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
+                                <input matInput placeholder="Nombre de la entidad" formControlName="nombreEntidad"
+                                    type="text" />
+                                <mat-icon class="icon-size-5" matPrefix
+                                    [svgIcon]="'heroicons_solid:map-pin'"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
+                                <input matInput placeholder="Nombre de la dependencia"
+                                    formControlName="nombreDependenciaArea" type="text" />
+                                <mat-icon class="icon-size-5" matPrefix
+                                    [svgIcon]="'heroicons_solid:language'"></mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="flex justify-end">
+                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                                Next
+                            </button>
+                        </div>
+                    </mat-step>
 
-                <div class="gt-xs:flex-row flex flex-col">
-                    <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
-                        <input
-                            matInput
-                            placeholder="Nombre de la entidad"
-                            formControlName="nombreEntidad"
-                            type="text"
-                        />
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:map-pin'"
-                        ></mat-icon>
-                    </mat-form-field>
-                    <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
-                        <input
-                            matInput
-                            placeholder="Nombre de la dependencia"
-                            formControlName="nombreDependenciaArea"
-                            type="text"
-                        />
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:language'"
-                        ></mat-icon>
-                    </mat-form-field>
-                </div>
-                <div class="flex justify-end">
-                    <button
-                        class="px-8"
-                        mat-flat-button
-                        [color]="'primary'"
-                        type="button"
-                        matStepperNext
-                    >
-                        Next
-                    </button>
-                </div>
-            </mat-step>
+                    <mat-step [formGroupName]="'step2'" [stepControl]="horizontalStepperForm.get('step2')"
+                        #horizontalStepperStep2>
+                        <ng-template matStepLabel>Fuente (Proponente)</ng-template>
+                        <p class="my-6 font-medium">
+                            Por favor, proporciona la información de contacto del proponente.
+                        </p>
+                        <div class="gt-xs:flex-row flex flex-col">
+                            <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
+                                <input matInput [formControlName]="'nombre'" placeholder="Nombre" type="text"
+                                    maxlength="50" />
+                                <mat-icon class="icon-size-5" matPrefix
+                                    [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
+                                <input matInput [formControlName]="'cargo'" placeholder="Cargo" type="text"
+                                    maxlength="50" />
+                                <mat-icon class="icon-size-5" matPrefix
+                                    [svgIcon]="'heroicons_solid:briefcase'"></mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="flex">
+                            <mat-form-field class="flex-auto w-full" appearance="fill">
+                                <input matInput [formControlName]="'correo'" placeholder="Correo electrónico"
+                                    type="email" />
+                                <mat-icon class="icon-size-5" matPrefix
+                                    [svgIcon]="'heroicons_solid:envelope'"></mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="flex">
+                            <mat-form-field class="flex-auto w-full" appearance="fill">
+                                <input matInput [formControlName]="'contacto'" placeholder="Contacto" type="number"
+                                    maxlength="10" />
+                                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:phone'"></mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="flex justify-end">
+                            <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
+                                matStepperPrevious>
+                                Back
+                            </button>
+                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                                Next
+                            </button>
+                        </div>
+                    </mat-step>
 
-            <mat-step
-                [formGroupName]="'step2'"
-                [stepControl]="horizontalStepperForm.get('step2')"
-                #horizontalStepperStep2
-            >
-                <ng-template matStepLabel>Fuente (Proponente)</ng-template>
-                <p class="my-6 font-medium">
-                    Por favor, proporciona la información de contacto del proponente.
-                </p>
-                <div class="gt-xs:flex-row flex flex-col">
-                    <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
-                        <input
-                            matInput
-                            [formControlName]="'nombre'"
-                            placeholder="Nombre"
-                            type="text"
-                            maxlength="50"
-                        />
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:user-circle'"
-                        ></mat-icon>
-                    </mat-form-field>
-                    <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
-                        <input
-                            matInput
-                            [formControlName]="'cargo'"
-                            placeholder="Cargo"
-                            type="text"
-                            maxlength="50"
-                        />
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:briefcase'"
-                        ></mat-icon>
-                    </mat-form-field>
-                </div>
-                <div class="flex">
-                    <mat-form-field class="flex-auto w-full" appearance="fill">
-                        <input
-                            matInput
-                            [formControlName]="'correo'"
-                            placeholder="Correo electrónico"
-                            type="email"
-                        />
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:envelope'"
-                        ></mat-icon>
-                    </mat-form-field>
-                </div>
-                <div class="flex">
-                    <mat-form-field class="flex-auto w-full" appearance="fill">
-                        <input
-                            matInput
-                            [formControlName]="'contacto'"
-                            placeholder="Contacto"
-                            type="number"
-                            maxlength="10"
-                        />
-                        <mat-icon
-                            class="icon-size-5"
-                            matPrefix
-                            [svgIcon]="'heroicons_solid:phone'"
-                        ></mat-icon>
-                    </mat-form-field>
-                </div>
-                <div class="flex justify-end">
-                    <button
-                        class="mr-2 px-8"
-                        mat-flat-button
-                        [color]="'accent'"
-                        type="button"
-                        matStepperPrevious
-                    >
-                        Back
-                    </button>
-                    <button
-                        class="px-8"
-                        mat-flat-button
-                        [color]="'primary'"
-                        type="button"
-                        matStepperNext
-                    >
-                        Next
-                    </button>
-                </div>
-            </mat-step>
-
-            <mat-step
-                [formGroupName]="'step3'"
-                [stepControl]="horizontalStepperForm.get('step3')"
-            >
-                <ng-template matStepLabel>Trámite registro</ng-template>
-                <p class="my-6 font-medium">
-                    Por favor, complete los detalles de la buena práctica.
-                </p>
-                <div class="gt-sm:flex-row flex flex-col">
-                    <div class="flex flex-col">
-                        <mat-form-field class="flex-auto">
-                            <mat-label>Tipo de estrategia de identificación</mat-label>
-                            <mat-select formControlName="tipoEstrategiaIdentificacion">
-                                <mat-option value="interna">Identificación interna</mat-option>
-                                <mat-option value="indagacion">Identificación por indagación</mat-option>
-                                <mat-option value="asesoria">Identificación por asesoría</mat-option>
-                                <mat-option value="campañas">Identificación por campañas temáticas</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                    <div
-                        class="flex"
-                    >
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Tipo de práctica</mat-label>
-                        <mat-select formControlName="tipoPractica" (selectionChange)="onPracticaChange($event)">
-                            <mat-option value="BP">Buena Práctica - BP (Candidata)</mat-option>
-                            <mat-option value="MP">Mala Práctica - MP (Candidata)</mat-option>
-                            <mat-option value="IS">Ideas y Soluciones - IS (Candidata)</mat-option>
-                            <mat-option value="PE">Práctica Estándar - PE (Candidata)</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    </div>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Código de la práctica</mat-label>
-                        <input matInput formControlName="codigoPractica" readonly />
-                    </mat-form-field>
-
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Tipología</mat-label>
-                        <mat-select formControlName="tipologia">
-                            <mat-option value="gestion_conocimiento">Gestión del Conocimiento e Innovación</mat-option>
-                            <mat-option value="servicio_ciudadano">Servicio al Ciudadano</mat-option>
-                            <mat-option value="planeacion_estrategica">Planeación Estratégica</mat-option>
-                            <mat-option value="gestion_financiera">Gestión Financiera y Presupuestal</mat-option>
-                            <mat-option value="gestion_talento">Gestión del Talento Humano</mat-option>
-                            <mat-option value="gestion_ambiental">Gestión Ambiental y Sostenibilidad</mat-option>
-                            <mat-option value="gestion_transparencia">Gestión de la Transparencia y Rendición de Cuentas</mat-option>
-                            <mat-option value="innovacion_tecnologica">Innovación Tecnológica y Transformación Digital</mat-option>
-                            <mat-option value="gestion_riesgo">Gestión del Riesgo y Continuidad Operativa</mat-option>
-                            <mat-option value="gestion_proyectos">Gestión de Proyectos</mat-option>
-                            <mat-option value="inclusion_social">Inclusión y Participación Social</mat-option>
-                            <mat-option value="eficiencia_operativa">Eficiencia Operativa y Simplificación de Procesos</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Estado Flujo</mat-label>
-                        <mat-select formControlName="estadoFlujo">
-                            <mat-option value="Candidata">Buena Practica Candidata</mat-option>
-                            <mat-option value="validación">“Buena práctica en validación</mat-option>
-                            <mat-option value="Caracterización">Buena práctica en caracterización</mat-option>
-                            <mat-option value="Evaluación">Buena Práctica en Evaluación</mat-option>
-                            <mat-option value="Establecida">Buena práctica establecida</mat-option>
-                            <mat-option value="Descartada">Buena práctica Descartada</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Nivel de la buena práctica</mat-label>
-                        <mat-select formControlName="nivelBuenaPractica">
-                            <mat-option value="nivel1">Primer nivel (aprendizaje y ejemplos)</mat-option>
-                            <mat-option value="nivel2">Segundo nivel (resultados concretos)</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Nombre descriptivo de la buena práctica</mat-label>
-                        <input matInput formControlName="nombreDescriptivoBuenaPractica" maxlength="100" />
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Propósito de la práctica</mat-label>
-                        <textarea
-                            matInput
-                            formControlName="propositoPractica"
-                            maxlength="300"
-                            rows="3"
-                        ></textarea>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Objetivo principal de la práctica</mat-label>
-                        <mat-select formControlName="objetivoPrincipalPractica">
-                            <mat-option value="mejorar_eficiencia">Mejorar eficiencia operativa</mat-option>
-                            <mat-option value="incrementar_satisfaccion">Incrementar satisfacción del cliente</mat-option>
-                            <mat-option value="optimizar_recursos">Optimizar el uso de recursos</mat-option>
-                            <mat-option value="reducir_costos">Reducir costos</mat-option>
-                            <mat-option value="mejorar_calidad">Mejorar la calidad del producto/servicio</mat-option>
-                            <mat-option value="fomentar_innovacion">Fomentar la innovación</mat-option>
-                            <mat-option value="aumentar_compromiso">Aumentar el compromiso del personal</mat-option>
-                            <mat-option value="otra_cual">Otra/Cuál</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </div>
-                <div class="mt-8 flex justify-end">
-                    <button
-                        class="mr-2 px-8"
-                        mat-flat-button
-                        [color]="'accent'"
-                        type="button"
-                        matStepperPrevious
-                    >
-                        Back
-                    </button>
-                    <button
-                        class="px-8"
-                        mat-flat-button
-                        [color]="'primary'"
-                        type="button"
-                        matStepperNext
-                    >
-                        Next
-                    </button>
-                </div>
-            </mat-step>
-    <mat-step
-                [formGroupName]="'step4'"
-                [stepControl]="horizontalStepperForm.get('step4')"
-            >
-                <ng-template matStepLabel>Caracterización</ng-template>
-                <p class="my-6 font-medium">
-                    Por favor, complete los datos de la Caracterización.
-                </p>
-                <div class="gt-sm:flex-row flex flex-col">
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Impacto esperado</mat-label>
-                        <mat-select formControlName="impactoEsperado" multiple>
-                            <mat-option value="aumento_productividad">Aumento de la productividad</mat-option>
-                            <mat-option value="reduccion_tiempos">Reducción de tiempos de ejecución</mat-option>
-                            <mat-option value="mejoras_calidad_servicio">Mejoras en la calidad del servicio</mat-option>
-                            <mat-option value="mejora_toma_decisiones">Mejora en la toma de decisiones</mat-option>
-                            <mat-option value="reduccion_desperdicios">Reducción de desperdicios</mat-option>
-                            <mat-option value="aumento_seguridad">Aumento de la seguridad</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Metodología usada</mat-label>
-                        <textarea
-                            matInput
-                            formControlName="metodologiaUsada"
-                            rows="5"
-                            maxlength="500"
-                            placeholder="Describe brevemente la metodología usada (máx. 500 caracteres)"
-                        ></textarea>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Duración de la implementación</mat-label>
-                        <mat-select formControlName="duracionImplementacion">
-                            <mat-option value="menos_3_meses">Menos de 3 meses</mat-option>
-                            <mat-option value="3_6_meses">3-6 meses</mat-option>
-                            <mat-option value="6_12_meses">6-12 meses</mat-option>
-                            <mat-option value="mas_12_meses">Más de 12 meses</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Etapas de la metodología</mat-label>
-                        <mat-select formControlName="etapasMetodologia" multiple>
-                            <mat-option value="diagnostico_analisis">Diagnóstico y análisis</mat-option>
-                            <mat-option value="diseno_solucion">Diseño de la solución</mat-option>
-                            <mat-option value="implementacion">Implementación</mat-option>
-                            <mat-option value="evaluacion_ajustes">Evaluación y ajustes</mat-option>
-                            <mat-option value="monitoreo_seguimiento">Monitoreo y seguimiento</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <div class="flex flex-col gap-4">
-                        <mat-form-field class="flex-auto">
-                            <mat-label>Inicio</mat-label>
-                            <input matInput [matDatepicker]="inicioPicker" formControlName="periodoDesarrolloInicio" (dateChange)="onDateChange($event, 'step4', 'periodoDesarrolloInicio')"/>
-                            <mat-datepicker-toggle matSuffix [for]="inicioPicker"></mat-datepicker-toggle>
-                            <mat-datepicker #inicioPicker></mat-datepicker>
-                        </mat-form-field>
-
-                        <mat-form-field class="flex-auto">
-                            <mat-label>Fin</mat-label>
-                            <input matInput [matDatepicker]="finPicker" formControlName="periodoDesarrolloFin" (dateChange)="onDateChange($event, 'step4', 'periodoDesarrolloFin')"/>
-                            <mat-datepicker-toggle matSuffix [for]="finPicker"></mat-datepicker-toggle>
-                            <mat-datepicker #finPicker></mat-datepicker>
-                        </mat-form-field>
-
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-end">
-                    <button
-                        class="mr-2 px-8"
-                        mat-flat-button
-                        [color]="'accent'"
-                        type="button"
-                        matStepperPrevious
-                    >
-                        Back
-                    </button>
-                    <button
-                        class="px-8"
-                        mat-flat-button
-                        [color]="'primary'"
-                        type="button"
-                        matStepperNext
-                    >
-                        Next
-                    </button>
-                </div>
-            </mat-step>
-
-
-            <mat-step
-                [formGroupName]="'step5'"
-                [stepControl]="horizontalStepperForm.get('step4')"
-            >
-                <ng-template matStepLabel>Gestión</ng-template>
-                <p class="my-6 font-medium">
-                    Por favor, complete los datos de la Gestión.
-                </p>
-                <div class="gt-sm:flex-row flex flex-col">
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Tipo de material producido</mat-label>
-                        <mat-select formControlName="tipoMaterialProducido" multiple>
-                            <mat-option value="guias">Guías</mat-option>
-                            <mat-option value="manuales">Manuales</mat-option>
-                            <mat-option value="directrices">Directrices</mat-option>
-                            <mat-option value="fichas_tecnicas">Fichas técnicas</mat-option>
-                            <mat-option value="carteles">Carteles</mat-option>
-                            <mat-option value="fotografias">Fotografías</mat-option>
-                            <mat-option value="videos">Videos</mat-option>
-                            <mat-option value="audios">Audios</mat-option>
-                            <mat-option value="otros">Otros</mat-option>
-                            <mat-option value="no_aplica">No aplica</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Apoyo recibido</mat-label>
-                        <mat-select formControlName="apoyoRecibido" multiple>
-                            <mat-option value="no_aplica">No aplica (no se recibió apoyo)</mat-option>
-                            <mat-option value="apoyo_financiero">Apoyo financiero</mat-option>
-                            <mat-option value="asistencia_tecnica">Asistencia técnica</mat-option>
-                            <mat-option value="donacion_insumos">Donación de insumos</mat-option>
-                            <mat-option value="colaboracion_institucional">Colaboración institucional</mat-option>
-                            <mat-option value="otro_apoyo">Otro tipo de apoyo (especificar)</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Reconocimientos nacionales o internacionales</mat-label>
-                        <mat-select formControlName="reconocimientosNacionalesInternacionales">
-                            <mat-option value="no">No</mat-option>
-                            <mat-option value="si">Sí</mat-option>
-                            <mat-option value="no_aplica">No aplica</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field class="flex-auto">
-                        <mat-label>Objeto de control (OC)</mat-label>
-                        <mat-select formControlName="objetoControl">
-                            <mat-option value="gestion_administrativa">Gestión Administrativa y Organizacional</mat-option>
-                            <mat-option value="gestion_financiera">Gestión Financiera</mat-option>
-                            <mat-option value="gestion_conocimiento">Gestión del Conocimiento e Innovación</mat-option>
-                            <mat-option value="gestion_recursos_humanos">Gestión de Recursos Humanos</mat-option>
-                            <mat-option value="gestion_ambiental">Gestión Ambiental</mat-option>
-                            <mat-option value="servicios_ciudadano">Servicios al Ciudadano</mat-option>
-                            <mat-option value="gestion_seguridad_riesgos">Gestión de Seguridad y Riesgos</mat-option>
-                            <mat-option value="gestion_tecnologia">Gestión de Tecnología e Innovación Digital</mat-option>
-                            <mat-option value="participacion_transparencia">Participación y Transparencia</mat-option>
-                            <mat-option value="gestion_resultados">Gestión de Resultados</mat-option>
-                            <mat-option value="gestion_interinstitucional">Gestión Interinstitucional y Alianzas</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                        <mat-form-field class="flex-auto">
-                            <mat-label>Taxonomía del Evento</mat-label>
-                            <mat-select formControlName="taxonomiaEvento" multiple>
-                                <mat-option value="iso_9001">ISO 9001: Sistemas de gestión de la calidad</mat-option>
-                                <mat-option value="efqm">EFQM: Modelo europeo de excelencia en la gestión</mat-option>
-                                <mat-option value="iso_14001">ISO 14001: Sistemas de gestión ambiental</mat-option>
-                                <mat-option value="iso_50001">ISO 50001: Gestión de la energía</mat-option>
-                                <mat-option value="iso_56002">ISO 56002: Sistema de gestión de la innovación</mat-option>
-                                <mat-option value="oecd_guidelines">OECD Guidelines for Innovation in Public Sector</mat-option>
-                                <mat-option value="iso_37001">ISO 37001: Gestión antisoborno</mat-option>
-                                <mat-option value="iso_37301">ISO 37301: Gestión de cumplimiento normativo</mat-option>
-                                <mat-option value="iso_30401">ISO 30401: Gestión del conocimiento</mat-option>
-                                <mat-option value="apqc">APQC: Modelos de madurez en gestión del conocimiento</mat-option>
-                                <mat-option value="iso_26000">ISO 26000: Responsabilidad social</mat-option>
-                                <mat-option value="gri">GRI: Estándares para reportes de sostenibilidad</mat-option>
-                                <mat-option value="iso_31000">ISO 31000: Gestión de riesgos</mat-option>
-                                <mat-option value="coso_erm">COSO ERM: Marco integrado para la gestión de riesgos</mat-option>
-                                <mat-option value="pmi_pmbok">PMI PMBOK: Guía de los Fundamentos para la Dirección de Proyectos</mat-option>
-                                <mat-option value="prince2">PRINCE2: Gestión de proyectos basada en procesos</mat-option>
-                                <mat-option value="open_data_charter">Open Data Charter: Principios para datos abiertos</mat-option>
-                                <mat-option value="iso_27001">ISO 27001: Gestión de la seguridad de la información</mat-option>
-                                <mat-option value="wcag">WCAG: Directrices para la accesibilidad de contenido web</mat-option>
-                                <mat-option value="iso_9241_11">ISO 9241-11: Ergonomía de interacción humano-sistema</mat-option>
-                                <mat-option value="damas">DAMAS: Data Management Association Standards</mat-option>
-                                <mat-option value="togaf">TOGAF: The Open Group Architecture Framework</mat-option>
-                                <mat-option value="mipg">Modelo Integrado de Planeación y Gestión (MIPG)</mat-option>
-                                <mat-option value="ley_1712">Ley 1712 de 2014 (Ley de Transparencia)</mat-option>
-                                <mat-option value="estrategias_gobierno_digital">Estrategias de Gobierno Digital</mat-option>
-                                <mat-option value="normas_calidad_gestion_publica">Normas de Calidad en la Gestión Pública</mat-option>
-                                <mat-option value="premio_nacional">Premio Nacional de Alta Gerencia (PNAG)</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                        <mat-form-field class="flex-auto">
-                            <mat-label>Tipo de actuación</mat-label>
-                            <mat-select formControlName="tipoActuacion">
-                                <mat-option value="preventiva">Preventiva</mat-option>
-                                <mat-option value="correctiva">Correctiva</mat-option>
-                                <mat-option value="innovadora">Innovadora</mat-option>
-                                <mat-option value="mantenimiento">De Mantenimiento</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                        <mat-form-field class="flex-auto">
-                            <mat-label>Descripción de resultados</mat-label>
-                            <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
-                        </mat-form-field>
-                </div>
-
-                <div class="mt-8 flex justify-end">
-                    <button
-                        type="button"
-                        mat-raised-button
-                        color="primary"
-                        (click)="submitForm()">
-                        Enviar Formulario
-                    </button>
-                </div>
-            </mat-step>
-            <mat-step [stepControl]="horizontalStepperForm.get('step6')">
-                <form [formGroup]="horizontalStepperForm.get('step6')">
-                    <div class="file-upload-container">
-                        <!-- Encabezado con título y línea -->
-                        <div class="upload-header">
-                            <i class="upload-header-icon">☁️</i>
-                            <div class="upload-header-text">
-                              <h3>Seleccione archivos</h3>
-                              <p>Seleccione archivos desde su dispositivo</p>
+                    <mat-step [formGroupName]="'step3'" [stepControl]="horizontalStepperForm.get('step3')">
+                        <ng-template matStepLabel>Trámite registro</ng-template>
+                        <p class="my-6 font-medium">
+                            Por favor, complete los detalles de la buena práctica.
+                        </p>
+                        <div class="gt-sm:flex-row flex flex-col">
+                            <div class="flex flex-col">
+                                <mat-form-field class="flex-auto">
+                                    <mat-label>Tipo de estrategia de identificación</mat-label>
+                                    <mat-select formControlName="tipoEstrategiaIdentificacion">
+                                        <mat-option value="interna">Identificación interna</mat-option>
+                                        <mat-option value="indagacion">Identificación por indagación</mat-option>
+                                        <mat-option value="asesoria">Identificación por asesoría</mat-option>
+                                        <mat-option value="campañas">Identificación por campañas temáticas</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
                             </div>
-                          </div>
-                          <hr />
+                            <div class="flex">
+                                <mat-form-field class="flex-auto">
+                                    <mat-label>Tipo de práctica</mat-label>
+                                    <mat-select formControlName="tipoPractica"
+                                        (selectionChange)="onPracticaChange($event)">
+                                        <mat-option value="BP">Buena Práctica - BP (Candidata)</mat-option>
+                                        <mat-option value="MP">Mala Práctica - MP (Candidata)</mat-option>
+                                        <mat-option value="IS">Ideas y Soluciones - IS (Candidata)</mat-option>
+                                        <mat-option value="PE">Práctica Estándar - PE (Candidata)</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Código de la práctica</mat-label>
+                                <input matInput formControlName="codigoPractica" readonly />
+                            </mat-form-field>
 
-                        <!-- Zona de carga de archivos -->
-                        <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
-                            <i class="upload-icon">☁️</i>
-                            <button type="button" (click)="fileInput.click()">Escoger archivos</button>
-                            <input
-                              type="file"
-                              #fileInput
-                              hidden
-                              (change)="onFilesSelected($event)"
-                              accept=".jpeg,.png,.csv,.pdf"
-                              multiple
-                            />
-                            <p>Escoja sus archivos o arrastre y suelte aquí</p>
-                            <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
-                          </div>
-                        <!-- Lista de archivos seleccionados -->
-                        <div *ngIf="selectedFiles.length > 0" class="file-info">
-                           <p><strong>Archivos seleccionados:</strong></p>
-                           <ul>
-                             <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 | number: '1.0-2' }} KB)</li>
-                           </ul>
-                         </div>
-                        <!-- Botón Enviar Documento -->
-                        <button
-                        type="button"
-                        class="submit-button"
-                        [disabled]="selectedFiles.length === 0"
-                        (click)="submitDocumentoActuacion()"
-                      >
-                        Enviar Documentos
-                      </button>
-                      </div>
-                </form>
-            </mat-step>
-        </mat-horizontal-stepper>
-        <button mat-raised-button color="primary" (click)="toggleModal()">Carga Automática</button>
-    </form>
-</div>
-</div>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Tipología</mat-label>
+                                <mat-select formControlName="tipologia">
+                                    <mat-option value="gestion_conocimiento">Gestión del Conocimiento e
+                                        Innovación</mat-option>
+                                    <mat-option value="servicio_ciudadano">Servicio al Ciudadano</mat-option>
+                                    <mat-option value="planeacion_estrategica">Planeación Estratégica</mat-option>
+                                    <mat-option value="gestion_financiera">Gestión Financiera y
+                                        Presupuestal</mat-option>
+                                    <mat-option value="gestion_talento">Gestión del Talento Humano</mat-option>
+                                    <mat-option value="gestion_ambiental">Gestión Ambiental y
+                                        Sostenibilidad</mat-option>
+                                    <mat-option value="gestion_transparencia">Gestión de la Transparencia y Rendición de
+                                        Cuentas</mat-option>
+                                    <mat-option value="innovacion_tecnologica">Innovación Tecnológica y Transformación
+                                        Digital</mat-option>
+                                    <mat-option value="gestion_riesgo">Gestión del Riesgo y Continuidad
+                                        Operativa</mat-option>
+                                    <mat-option value="gestion_proyectos">Gestión de Proyectos</mat-option>
+                                    <mat-option value="inclusion_social">Inclusión y Participación Social</mat-option>
+                                    <mat-option value="eficiencia_operativa">Eficiencia Operativa y Simplificación de
+                                        Procesos</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Estado Flujo</mat-label>
+                                <mat-select formControlName="estadoFlujo">
+                                    <mat-option value="Candidata">Buena Practica Candidata</mat-option>
+                                    <mat-option value="validación">“Buena práctica en validación</mat-option>
+                                    <mat-option value="Caracterización">Buena práctica en caracterización</mat-option>
+                                    <mat-option value="Evaluación">Buena Práctica en Evaluación</mat-option>
+                                    <mat-option value="Establecida">Buena práctica establecida</mat-option>
+                                    <mat-option value="Descartada">Buena práctica Descartada</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Nivel de la buena práctica</mat-label>
+                                <mat-select formControlName="nivelBuenaPractica">
+                                    <mat-option value="nivel1">Primer nivel (aprendizaje y ejemplos)</mat-option>
+                                    <mat-option value="nivel2">Segundo nivel (resultados concretos)</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Nombre descriptivo de la buena práctica</mat-label>
+                                <input matInput formControlName="nombreDescriptivoBuenaPractica" maxlength="100" />
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Propósito de la práctica</mat-label>
+                                <textarea matInput formControlName="propositoPractica" maxlength="300"
+                                    rows="3"></textarea>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Objetivo principal de la práctica</mat-label>
+                                <mat-select formControlName="objetivoPrincipalPractica">
+                                    <mat-option value="mejorar_eficiencia">Mejorar eficiencia operativa</mat-option>
+                                    <mat-option value="incrementar_satisfaccion">Incrementar satisfacción del
+                                        cliente</mat-option>
+                                    <mat-option value="optimizar_recursos">Optimizar el uso de recursos</mat-option>
+                                    <mat-option value="reducir_costos">Reducir costos</mat-option>
+                                    <mat-option value="mejorar_calidad">Mejorar la calidad del
+                                        producto/servicio</mat-option>
+                                    <mat-option value="fomentar_innovacion">Fomentar la innovación</mat-option>
+                                    <mat-option value="aumentar_compromiso">Aumentar el compromiso del
+                                        personal</mat-option>
+                                    <mat-option value="otra_cual">Otra/Cuál</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="mt-8 flex justify-end">
+                            <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
+                                matStepperPrevious>
+                                Back
+                            </button>
+                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                                Next
+                            </button>
+                        </div>
+                    </mat-step>
+                    <mat-step [formGroupName]="'step4'" [stepControl]="horizontalStepperForm.get('step4')">
+                        <ng-template matStepLabel>Caracterización</ng-template>
+                        <p class="my-6 font-medium">
+                            Por favor, complete los datos de la Caracterización.
+                        </p>
+                        <div class="gt-sm:flex-row flex flex-col">
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Impacto esperado</mat-label>
+                                <mat-select formControlName="impactoEsperado" multiple>
+                                    <mat-option value="aumento_productividad">Aumento de la productividad</mat-option>
+                                    <mat-option value="reduccion_tiempos">Reducción de tiempos de ejecución</mat-option>
+                                    <mat-option value="mejoras_calidad_servicio">Mejoras en la calidad del
+                                        servicio</mat-option>
+                                    <mat-option value="mejora_toma_decisiones">Mejora en la toma de
+                                        decisiones</mat-option>
+                                    <mat-option value="reduccion_desperdicios">Reducción de desperdicios</mat-option>
+                                    <mat-option value="aumento_seguridad">Aumento de la seguridad</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Metodología usada</mat-label>
+                                <textarea matInput formControlName="metodologiaUsada" rows="5" maxlength="500"
+                                    placeholder="Describe brevemente la metodología usada (máx. 500 caracteres)"></textarea>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Duración de la implementación</mat-label>
+                                <mat-select formControlName="duracionImplementacion">
+                                    <mat-option value="menos_3_meses">Menos de 3 meses</mat-option>
+                                    <mat-option value="3_6_meses">3-6 meses</mat-option>
+                                    <mat-option value="6_12_meses">6-12 meses</mat-option>
+                                    <mat-option value="mas_12_meses">Más de 12 meses</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Etapas de la metodología</mat-label>
+                                <mat-select formControlName="etapasMetodologia" multiple>
+                                    <mat-option value="diagnostico_analisis">Diagnóstico y análisis</mat-option>
+                                    <mat-option value="diseno_solucion">Diseño de la solución</mat-option>
+                                    <mat-option value="implementacion">Implementación</mat-option>
+                                    <mat-option value="evaluacion_ajustes">Evaluación y ajustes</mat-option>
+                                    <mat-option value="monitoreo_seguimiento">Monitoreo y seguimiento</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div class="flex flex-col gap-4">
+                                <mat-form-field class="flex-auto">
+                                    <mat-label>Inicio</mat-label>
+                                    <input matInput [matDatepicker]="inicioPicker"
+                                        formControlName="periodoDesarrolloInicio"
+                                        (dateChange)="onDateChange($event, 'step4', 'periodoDesarrolloInicio')" />
+                                    <mat-datepicker-toggle matSuffix [for]="inicioPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #inicioPicker></mat-datepicker>
+                                </mat-form-field>
+
+                                <mat-form-field class="flex-auto">
+                                    <mat-label>Fin</mat-label>
+                                    <input matInput [matDatepicker]="finPicker" formControlName="periodoDesarrolloFin"
+                                        (dateChange)="onDateChange($event, 'step4', 'periodoDesarrolloFin')" />
+                                    <mat-datepicker-toggle matSuffix [for]="finPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #finPicker></mat-datepicker>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                        <div class="mt-8 flex justify-end">
+                            <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
+                                matStepperPrevious>
+                                Back
+                            </button>
+                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                                Next
+                            </button>
+                        </div>
+                    </mat-step>
+
+
+                    <mat-step [formGroupName]="'step5'" [stepControl]="horizontalStepperForm.get('step4')">
+                        <ng-template matStepLabel>Gestión</ng-template>
+                        <p class="my-6 font-medium">
+                            Por favor, complete los datos de la Gestión.
+                        </p>
+                        <div class="gt-sm:flex-row flex flex-col">
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Tipo de material producido</mat-label>
+                                <mat-select formControlName="tipoMaterialProducido" multiple>
+                                    <mat-option value="guias">Guías</mat-option>
+                                    <mat-option value="manuales">Manuales</mat-option>
+                                    <mat-option value="directrices">Directrices</mat-option>
+                                    <mat-option value="fichas_tecnicas">Fichas técnicas</mat-option>
+                                    <mat-option value="carteles">Carteles</mat-option>
+                                    <mat-option value="fotografias">Fotografías</mat-option>
+                                    <mat-option value="videos">Videos</mat-option>
+                                    <mat-option value="audios">Audios</mat-option>
+                                    <mat-option value="otros">Otros</mat-option>
+                                    <mat-option value="no_aplica">No aplica</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Apoyo recibido</mat-label>
+                                <mat-select formControlName="apoyoRecibido" multiple>
+                                    <mat-option value="no_aplica">No aplica (no se recibió apoyo)</mat-option>
+                                    <mat-option value="apoyo_financiero">Apoyo financiero</mat-option>
+                                    <mat-option value="asistencia_tecnica">Asistencia técnica</mat-option>
+                                    <mat-option value="donacion_insumos">Donación de insumos</mat-option>
+                                    <mat-option value="colaboracion_institucional">Colaboración
+                                        institucional</mat-option>
+                                    <mat-option value="otro_apoyo">Otro tipo de apoyo (especificar)</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Reconocimientos nacionales o internacionales</mat-label>
+                                <mat-select formControlName="reconocimientosNacionalesInternacionales">
+                                    <mat-option value="no">No</mat-option>
+                                    <mat-option value="si">Sí</mat-option>
+                                    <mat-option value="no_aplica">No aplica</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Objeto de control (OC)</mat-label>
+                                <mat-select formControlName="objetoControl">
+                                    <mat-option value="gestion_administrativa">Gestión Administrativa y
+                                        Organizacional</mat-option>
+                                    <mat-option value="gestion_financiera">Gestión Financiera</mat-option>
+                                    <mat-option value="gestion_conocimiento">Gestión del Conocimiento e
+                                        Innovación</mat-option>
+                                    <mat-option value="gestion_recursos_humanos">Gestión de Recursos
+                                        Humanos</mat-option>
+                                    <mat-option value="gestion_ambiental">Gestión Ambiental</mat-option>
+                                    <mat-option value="servicios_ciudadano">Servicios al Ciudadano</mat-option>
+                                    <mat-option value="gestion_seguridad_riesgos">Gestión de Seguridad y
+                                        Riesgos</mat-option>
+                                    <mat-option value="gestion_tecnologia">Gestión de Tecnología e Innovación
+                                        Digital</mat-option>
+                                    <mat-option value="participacion_transparencia">Participación y
+                                        Transparencia</mat-option>
+                                    <mat-option value="gestion_resultados">Gestión de Resultados</mat-option>
+                                    <mat-option value="gestion_interinstitucional">Gestión Interinstitucional y
+                                        Alianzas</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Taxonomía del Evento</mat-label>
+                                <mat-select formControlName="taxonomiaEvento" multiple>
+                                    <mat-option value="iso_9001">ISO 9001: Sistemas de gestión de la
+                                        calidad</mat-option>
+                                    <mat-option value="efqm">EFQM: Modelo europeo de excelencia en la
+                                        gestión</mat-option>
+                                    <mat-option value="iso_14001">ISO 14001: Sistemas de gestión ambiental</mat-option>
+                                    <mat-option value="iso_50001">ISO 50001: Gestión de la energía</mat-option>
+                                    <mat-option value="iso_56002">ISO 56002: Sistema de gestión de la
+                                        innovación</mat-option>
+                                    <mat-option value="oecd_guidelines">OECD Guidelines for Innovation in Public
+                                        Sector</mat-option>
+                                    <mat-option value="iso_37001">ISO 37001: Gestión antisoborno</mat-option>
+                                    <mat-option value="iso_37301">ISO 37301: Gestión de cumplimiento
+                                        normativo</mat-option>
+                                    <mat-option value="iso_30401">ISO 30401: Gestión del conocimiento</mat-option>
+                                    <mat-option value="apqc">APQC: Modelos de madurez en gestión del
+                                        conocimiento</mat-option>
+                                    <mat-option value="iso_26000">ISO 26000: Responsabilidad social</mat-option>
+                                    <mat-option value="gri">GRI: Estándares para reportes de sostenibilidad</mat-option>
+                                    <mat-option value="iso_31000">ISO 31000: Gestión de riesgos</mat-option>
+                                    <mat-option value="coso_erm">COSO ERM: Marco integrado para la gestión de
+                                        riesgos</mat-option>
+                                    <mat-option value="pmi_pmbok">PMI PMBOK: Guía de los Fundamentos para la Dirección
+                                        de Proyectos</mat-option>
+                                    <mat-option value="prince2">PRINCE2: Gestión de proyectos basada en
+                                        procesos</mat-option>
+                                    <mat-option value="open_data_charter">Open Data Charter: Principios para datos
+                                        abiertos</mat-option>
+                                    <mat-option value="iso_27001">ISO 27001: Gestión de la seguridad de la
+                                        información</mat-option>
+                                    <mat-option value="wcag">WCAG: Directrices para la accesibilidad de contenido
+                                        web</mat-option>
+                                    <mat-option value="iso_9241_11">ISO 9241-11: Ergonomía de interacción
+                                        humano-sistema</mat-option>
+                                    <mat-option value="damas">DAMAS: Data Management Association Standards</mat-option>
+                                    <mat-option value="togaf">TOGAF: The Open Group Architecture Framework</mat-option>
+                                    <mat-option value="mipg">Modelo Integrado de Planeación y Gestión
+                                        (MIPG)</mat-option>
+                                    <mat-option value="ley_1712">Ley 1712 de 2014 (Ley de Transparencia)</mat-option>
+                                    <mat-option value="estrategias_gobierno_digital">Estrategias de Gobierno
+                                        Digital</mat-option>
+                                    <mat-option value="normas_calidad_gestion_publica">Normas de Calidad en la Gestión
+                                        Pública</mat-option>
+                                    <mat-option value="premio_nacional">Premio Nacional de Alta Gerencia
+                                        (PNAG)</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Tipo de actuación</mat-label>
+                                <mat-select formControlName="tipoActuacion">
+                                    <mat-option value="preventiva">Preventiva</mat-option>
+                                    <mat-option value="correctiva">Correctiva</mat-option>
+                                    <mat-option value="innovadora">Innovadora</mat-option>
+                                    <mat-option value="mantenimiento">De Mantenimiento</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-auto">
+                                <mat-label>Descripción de resultados</mat-label>
+                                <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="mt-8 flex justify-end">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()">
+                                Enviar Formulario
+                            </button>
+                        </div>
+                    </mat-step>
+                    <mat-step [stepControl]="horizontalStepperForm.get('step6')">
+                        <form [formGroup]="horizontalStepperForm.get('step6')">
+                            <div class="file-upload-container">
+                                <!-- Encabezado con título y línea -->
+                                <div class="upload-header">
+                                    <i class="upload-header-icon">☁️</i>
+                                    <div class="upload-header-text">
+                                        <h3>Seleccione archivos</h3>
+                                        <p>Seleccione archivos desde su dispositivo</p>
+                                    </div>
+                                </div>
+                                <hr />
+
+                                <!-- Zona de carga de archivos -->
+                                <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+                                    <i class="upload-icon">☁️</i>
+                                    <button type="button" (click)="fileInput.click()">Escoger archivos</button>
+                                    <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
+                                        accept=".jpeg,.png,.csv,.pdf" multiple />
+                                    <p>Escoja sus archivos o arrastre y suelte aquí</p>
+                                    <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
+                                </div>
+                                <!-- Lista de archivos seleccionados -->
+                                <div *ngIf="selectedFiles.length > 0" class="file-info">
+                                    <p><strong>Archivos seleccionados:</strong></p>
+                                    <ul>
+                                        <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
+                                            number: '1.0-2' }} KB)</li>
+                                    </ul>
+                                </div>
+                                <!-- Botón Enviar Documento -->
+                                <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
+                                    (click)="submitDocumentoActuacion()">
+                                    Enviar Documentos
+                                </button>
+                            </div>
+                        </form>
+                    </mat-step>
+                </mat-horizontal-stepper>
+                <button *ngIf="!isEdit" mat-raised-button color="primary" (click)="toggleModal()">
+                    Carga Automática
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 <div class="modal-backdrop" *ngIf="isModalOpen">
     <div class="modal-container">
@@ -605,45 +509,38 @@
             <div class="upload-header">
                 <i class="upload-header-icon">☁️</i>
                 <div class="upload-header-text">
-                  <h3>Seleccione archivos</h3>
-                  <p>Seleccione archivos para realizar la carga de informacion</p>
+                    <h3>Seleccione archivos</h3>
+                    <p>Seleccione archivos para realizar la carga de informacion</p>
                 </div>
-              </div>
-              <hr />
+            </div>
+            <hr />
 
             <!-- Zona de carga de archivos -->
             <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
                 <i class="upload-icon">☁️</i>
                 <button type="button" (click)="fileInput.click()">Escoger archivos</button>
-                <input
-                  type="file"
-                  #fileInput
-                  hidden
-                  (change)="onFilesSelected($event)"
-                  accept=".jpeg,.png,.csv,.pdf"
-                  multiple
-                />
+                <input type="file" #fileInput hidden (change)="onFilesSelected($event)" accept=".jpeg,.png,.csv,.pdf"
+                    multiple />
                 <p>Escoja sus archivos o arrastre y suelte aquí</p>
                 <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
-              </div>
+            </div>
             <!-- Lista de archivos seleccionados -->
             <div *ngIf="selectedFiles.length > 0" class="file-info">
-               <p><strong>Archivos seleccionados:</strong></p>
-               <ul>
-                 <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 | number: '1.0-2' }} KB)</li>
-               </ul>
-             </div>
+                <p><strong>Archivos seleccionados:</strong></p>
+                <ul>
+                    <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 | number: '1.0-2' }} KB)
+                    </li>
+                </ul>
+            </div>
             <!-- Botón Enviar Documento -->
-            <button
-            type="button"
-            class="submit-button"
-            [disabled]="!formData || !id"
-            (click)="submitDocumentoActuacion()">
-            Enviar Documentos
-        </button>
-          </div>
-          <div class="modal-actions">
-            <button style="background: #f0ba41; color: #fff;" mat-raised-button (click)="toggleModal()">Cancelar</button>
+            <button type="button" class="submit-button" [disabled]="!formData || !id"
+                (click)="submitDocumentoActuacion()">
+                Enviar Documentos
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button style="background: #f0ba41; color: #fff;" mat-raised-button
+                (click)="toggleModal()">Cancelar</button>
             <button mat-raised-button color="primary" (click)="toggleModal()">Aceptar</button>
         </div>
     </div>
