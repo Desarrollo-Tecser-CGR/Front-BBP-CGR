@@ -145,7 +145,8 @@ export class CreateComponent {
         // Build question object
         const questionsObject = this.formEntries.reduce((acc, entry) => {
             acc[entry.question] = entry.subQuestions && entry.subQuestions.length > 0 
-                ? { subQuestions: entry.subQuestions } 
+                ? { type: entry.type, // Incluir el tipo de criterio
+                    subQuestions: entry.subQuestions } 
                 : entry.type;
             return acc;
         }, {} as Record<string, any>);
