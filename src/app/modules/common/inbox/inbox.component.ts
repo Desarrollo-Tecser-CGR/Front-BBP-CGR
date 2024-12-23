@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
 import { InboxService } from './inbox.service';
-import { MatDialog } from '@angular/material/dialog'; 
+import { MatDialog } from '@angular/material/dialog';
 // import { DialogOverviewExampleDialog } from '../general-modal/general-modal.component';
 import { rol } from 'app/mock-api/common/rol/data';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { Router } from '@angular/router';
 export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
   columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
+  cargo: string;
   buttons = [
     {
       // label: 'Edit',
@@ -28,8 +30,8 @@ export class InboxComponent implements OnInit {
     {
       // label: 'Delete',
       icon: 'heroicons_outline:document-check',
-      color: 'warn',
-      action: (row: any) => this.deleteRow(row),
+      color: 'accent',
+      action: (row: any) => this.validateRow(row),
     },
     // {
     //   label: 'Open Modal',
@@ -38,50 +40,91 @@ export class InboxComponent implements OnInit {
     // },
   ]; // Botones dinámicos
 
-  constructor(private inboxService: InboxService, private _router: Router) {} // , private dialog: MatDialog
+  constructor(private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
 
-    ngOnInit(): void {
-        const roles = localStorage.getItem('accessRoles');
-        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
-
-        if (cargo === 'administrador') {
-            const requestBody = { rol: cargo }; // Cuerpo de la solicitud
-            this.inboxService.getDataAsJson(requestBody).subscribe(
-                (response) => {
-                    if (response.length > 0) {
-                        // Extraer las columnas dinámicamente de la primera fila
-                        this.columns = Object.keys(response[0]).map((key) => ({
-                            key: key,
-                            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
-                        }));
-                    }
-                    this.data = response; // Asignar los datos de la API
-                    console.log('API Response:', this.data); // Verificar los datos devueltos
-                    console.log('API columns:', this.columns); // Verificar los datos devueltos
-                },
-                (error) => {
-                    console.error('Error al cargar los datos:', error);
-                    // Manejo del error
-                }
-            );
-        }
-        else {
-
-        }
-
-    }
-
-
-    editRow(row: any): void {
-      console.log('Edit row:', row);
-      this._router.navigateByUrl('/resumen-edit/' + row.id);
-      // Lógica para editar una fila
-    }
+  ngOnInit(): void {
+    const roles = localStorage.getItem('accessRoles');
+    this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+    this.loadData();
     
-    deleteRow(row: any): void {
-        console.log('Delete row:', row);
-        // Lógica para eliminar una fila
+
+  }
+
+  loadData(): void {
+    if (this.cargo === 'validador') {
+      const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
+      this.inboxService.getDataAsJson(requestBody).subscribe(
+        (response) => {
+          if (response.length > 0) {
+            // Extraer las columnas dinámicamente de la primera fila
+            this.columns = Object.keys(response[0]).map((key) => ({
+              key: key,
+              label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+            }));
+          }
+          this.data = response; // Asignar los datos de la API
+        },
+        (error) => {
+          Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+          // Manejo del error
+        }
+      );
     }
+    else {
+
+    }
+  }
+
+
+  editRow(row: any): void {
+    this.router.navigateByUrl('/resumen-edit/' + row.id);
+    // Lógica para editar una fila
+  }
+
+  deleteRow(row: any): void {
+    console.log('Delete row:', row);
+    // Lógica para eliminar una fila
+  }
+
+  validateRow(row: any): void {
+    const requestBody = { rol: this.cargo, id: row.id }; // Cuerpo de la solicitud
+    this.inboxService.setValidateStatus(requestBody).subscribe(
+      (response) => {
+        if (response.length > 0) {
+          this.columns = Object.keys(response[0]).map((key) => ({
+            key: key,
+            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+          }));
+        }
+        this.data = response;
+        Swal.fire({
+          title: '¡Registro Actualizado!',
+          text: 'El registro ha sido actualizado con éxito.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+        }).then(() => {
+          // // Recargar la ruta actual
+          // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          //   this.router.navigate([this.router.url]);
+          // });
+          this.loadData();
+        });
+      },
+      (error) => {
+        Swal.fire({
+          title: 'Error',
+          text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+        });
+      }
+    );
+  }
   // ======================== Logica que muestra el modal en la vista ======================== //
 
   //  openCaracterizationModal(row: any): void {
@@ -89,7 +132,7 @@ export class InboxComponent implements OnInit {
   //      width: '500px',
   //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
   //    });
-  
+
   //    dialogRef.afterClosed().subscribe((result) => {
   //      console.log('Modal cerrado con:', result);
   //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
@@ -98,7 +141,7 @@ export class InboxComponent implements OnInit {
   private formatLabel(key: string): string {
     // Insertar espacios antes de cada mayúscula (excepto la primera letra)
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
-  
+
     // Convertir la primera letra de cada palabra en mayúscula
     return key.replace(/\b\w/g, (char) => char.toUpperCase());
   }
