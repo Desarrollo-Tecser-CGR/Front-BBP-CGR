@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component, Input, ViewEncapsulation, OnInit, ElementRef, Renderer2 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -6,6 +6,7 @@ import { ActivatedRoute, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../optionsDropdown/characterization/characterization.component';
 import { ResumenComponent } from '../resumen/resumen.component';
 import { ResumenService } from '../resumen/resumen.service';
+import { MatDialog } from '@angular/material/dialog';
 
 // Definición de rutas
 const routes: Routes = [
@@ -24,7 +25,7 @@ const routes: Routes = [
         MatTableModule,
         MatMenuModule,
         RouterModule,
-        ResumenComponent
+        ResumenComponent, 
     ]
 })
 export class ResumenEditComponent {
@@ -33,13 +34,12 @@ export class ResumenEditComponent {
     id: string | null = null; 
     isEdit: boolean = true;
     formData: any = {};
-
+    showCaracterizationButton: boolean = false;
     /**
      * Constructor
      */
     constructor(private activatedRoute: ActivatedRoute,
         private resumenService: ResumenService
-
     ) {
 
     }

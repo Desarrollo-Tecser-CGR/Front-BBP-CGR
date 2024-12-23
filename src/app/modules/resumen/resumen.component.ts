@@ -23,6 +23,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import Swal from 'sweetalert2';
 import { RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
+import { DialogOverviewExampleDialog } from '../common/general-modal/general-modal.component';
+import { MatDialog } from '@angular/material/dialog'; 
 
 // Definición de rutas
 const routes: Routes = [
@@ -54,7 +56,8 @@ const routes: Routes = [
         RouterModule,
         MatIconModule,
         MatMenuModule,
-        RouterModule
+        RouterModule, 
+        DialogOverviewExampleDialog
 
     ],
     providers: [MatDatepickerModule],
@@ -69,7 +72,7 @@ export class ResumenComponent implements OnInit {
     @Input() isEdit: boolean = false;
     
     constructor(private _formBuilder: UntypedFormBuilder,
-        private resumenService: ResumenService) { }
+        private resumenService: ResumenService, private dialog: MatDialog,) { }
 
         toggleModal(): void {
           this.isModalOpen = !this.isModalOpen;
@@ -421,4 +424,20 @@ export class ResumenComponent implements OnInit {
         return 'green'; // 63% - 100%: Verde
     }
 }
+
+// ======================== Logica que muestra el modal en la vista ======================== //
+
+openCaracterizationModal(): void {
+    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+      width: '500px',
+    });
+  
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log('Usuario validado:', result);
+      }
+    });
+  }
+  
+
 }
