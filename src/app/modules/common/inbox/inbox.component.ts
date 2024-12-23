@@ -53,7 +53,7 @@ export class InboxComponent implements OnInit {
   }
 
   loadData(): void {
-    if (this.cargo === 'validador') {
+    if (this.cargo === 'administrador') {
       const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (response) => {
