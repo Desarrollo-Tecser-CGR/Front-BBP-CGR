@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador','administrador', 'natural'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'natural', 'caracterizador'], module: '' }
             },
         ]
     },
@@ -99,7 +99,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'caracterization', loadChildren: () =>
                 import('app/modules/caracterization/caracterization.routes'),
-                data: { requiredRoles: ['validador','administrador'], module: '' }
+                data: { requiredRoles: ['caracterizador','administrador'], module: '' }
             },
         ]
     },
@@ -191,7 +191,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador'], module: '' }
             },
         ]
     },
@@ -233,7 +233,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'create', loadChildren: () =>
                 import('app/modules/create/create.routes'),
-                data: { requiredRoles: ['validador','administrador'], module: '' }
+                data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
     },
@@ -249,7 +249,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen-edit', loadChildren: () =>
                 import('app/modules/resumen-edit/resumen-edit.routes'),
-                data: { requiredRoles: ['validador','administrador'], module: '' }
+                data: { requiredRoles: ['validador','administrador' ,'caracterizador'], module: '' }
             },
         ]
     }
