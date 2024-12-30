@@ -165,4 +165,3 @@ export class InboxComponent implements OnInit {
     return key.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 }
-
