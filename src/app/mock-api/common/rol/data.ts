@@ -12,3 +12,7 @@ export const rol = [
 export const roldos = [
     'natural'
 ];
+
+export const roltres = [
+    'caracterizador'
+];

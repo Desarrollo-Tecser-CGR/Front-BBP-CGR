@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'natural']
+        roles: ['administrador', 'validador', 'natural' , 'caracterizador']
     },
     {
         id   : 'resumen',
@@ -24,8 +24,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:newspaper',
         link : '/caracterization',
-        roles: ['administrador']
-
+        roles: ['administrador' , 'caracterizador']
     },
     {
         id   : 'catalog',
@@ -65,7 +64,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador', 'validador']
+        roles: ['administrador', 'validador' , 'caracterizador']
     },
     {
         id   : 'create',

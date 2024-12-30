@@ -69,8 +69,10 @@ export class ResumenComponent implements OnInit {
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
+
     fechaDiligenciamiento = new Date;
     isDisabled : boolean = true;
+
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -127,6 +129,11 @@ export class ResumenComponent implements OnInit {
     
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
+
+                // Verificar y actualizar el estadoFlujo antes de enviar los datos
+                if (flattenedValues.estadoFlujo === 'Candidata') {
+                    flattenedValues.estadoFlujo = 'validación';
+                }
                 // Llamar al servicio de actualización
                 this.resumenService.updateDataAsJson(this.Id, flattenedValues).subscribe(
                     (response) => {
@@ -149,6 +156,11 @@ export class ResumenComponent implements OnInit {
                     }
                 );
             } else {
+
+                // Verificar y actualizar el estadoFlujo antes de crear los datos
+                if (flattenedValues.estadoFlujo === 'Candidata') {
+                    flattenedValues.estadoFlujo = 'validación';
+                }
                 // Llamar al servicio de creación
                 this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
                     (response) => {
@@ -189,11 +201,11 @@ export class ResumenComponent implements OnInit {
     // Validacion de fecha: fecha actual
     ngOnInit(): void {
         console.log('Id Practica ' + this.Id);
-        
+
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
-        
+
         // Configurar el texto del botón basado en el rol
         if (cargo === 'validador') {
             this.buttonText = 'Caracterización';

@@ -451,33 +451,25 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-                        <!-- @if (Id != undefined) {
-                            <div class="mt-8 flex justify-end">
-                                <button
-                                    type="button"
-                                    mat-raised-button
-                                    color="primary"
-                                    (click)="openCaracterizationModal(undefined)">
-                                    Caracterización
-                                </button>
-                            </div>} -->
 
-                            <div *ngIf="Id !== undefined" class="mt-8 flex justify-end">
-                                <button
-                                    type="button"
-                                    mat-raised-button
-                                    color="primary"
-                                    (click)="openCaracterizationModal()">
-                                    {{ buttonText }}
-                                </button>
-                            </div>
+                        <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
+                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
+                                {{ buttonText }}
+                            </button>
                             
-                            
-                        <div class="mt-8 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()">
+                        <div class="mt-0 flex justify-end">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
                         </div>
+
+                        <div class="mt-0 flex justify-end">
+                            <button type="button" mat-raised-button class="warn-color">
+                                Desestimar Practica
+                            </button>
+                        </div>
+                    </div> 
+
                     </mat-step>
                     <mat-step [stepControl]="horizontalStepperForm.get('step6')">
                         <form [formGroup]="horizontalStepperForm.get('step6')">
