@@ -68,6 +68,9 @@ export class ResumenComponent implements OnInit {
     isLoading: boolean = true;
     progress: number = 0;
     isModalOpen: boolean = false;
+    buttonText: string = 'Acción';
+    fechaDiligenciamiento = new Date;
+    isDisabled : boolean = true;
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -172,14 +175,37 @@ export class ResumenComponent implements OnInit {
             console.warn('Formulario no válido');
         }
     }
-    
-    
+    validDate(){
+        const fechaDiligenciamiento = this.fechaDiligenciamiento;
+        const today = new Date();
+        
+        if (fechaDiligenciamiento.getTime() !== today.getTime()) {
+            console.log('Valid date');
+        } else {
+            console.log('Dates are the same');
+        }
+    }
+
+    // Validacion de fecha: fecha actual
     ngOnInit(): void {
         console.log('Id Practica ' + this.Id);
-
+        
+        // Obtener el rol desde localStorage
+        const roles = localStorage.getItem('accessRoles');
+        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+        
+        // Configurar el texto del botón basado en el rol
+        if (cargo === 'validador') {
+            this.buttonText = 'Caracterización';
+        } else if (cargo === 'caracterizador') {
+            this.buttonText = 'Evaluación';
+        } else {
+            this.buttonText = 'Acción'; // Texto por defecto
+        }
+        
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: ['', new Date()],
+                fechaDiligenciamiento: ['', new Date(), this.isDisabled],
                 nombreEntidad: ['', Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
             }),
@@ -221,7 +247,7 @@ export class ResumenComponent implements OnInit {
                 documentoActuacion: [Validators.required],
             }),
         });
-        this.horizontalStepperForm.valueChanges.subscribe(() => {
+        this.horizontalStepperForm.valueChanges.subscribe(() => {        
             this.progress = this.calculateProgress();
             console.log('Progreso actualizado:', this.progress);
         });
@@ -428,16 +454,21 @@ export class ResumenComponent implements OnInit {
 // ======================== Logica que muestra el modal en la vista ======================== //
 
 openCaracterizationModal(): void {
+    const roles = localStorage.getItem('accessRoles');
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'natural'; // Convertir a minúsculas
+  
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',
+      data: { role: currentRole }, // Pasa el rol al modal
     });
   
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Usuario validado:', result);
+        console.log('Usuario seleccionado:', result);
       }
     });
   }
+  
   
 
 }

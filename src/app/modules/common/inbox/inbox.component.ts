@@ -47,13 +47,31 @@ export class InboxComponent implements OnInit {
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+  
+    // Definir botones dinámicamente según el rol
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:pencil-square',
+        color: 'primary',
+        action: (row: any) => this.editRow(row),
+      },
+    ];
+  
+    // Agregar el botón de validación solo para validador y administrador
+    if (['validador', 'administrador'].includes(this.cargo)) {
+      this.buttons.push({
+        icon: 'heroicons_outline:document-check',
+        color: 'accent',
+        action: (row: any) => this.validateRow(row),
+      });
+    }
+  
     this.loadData();
-    
-
   }
+  
 
   loadData(): void {
-    if (this.cargo === 'validador') {
+    if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
       const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (response) => {
@@ -147,4 +165,3 @@ export class InboxComponent implements OnInit {
     return key.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 }
-
