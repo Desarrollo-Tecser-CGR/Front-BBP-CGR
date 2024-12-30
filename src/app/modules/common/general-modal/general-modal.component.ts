@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -24,26 +24,27 @@ import { Usuario } from './user.type';
   ],
 })
 export class DialogOverviewExampleDialog {
-  readonly dialogRef = inject(MatDialogRef<DialogOverviewExampleDialog>);
-  readonly genaralModalService = inject(GenaralModalService);
+  users: Usuario[] = []; // Usuarios cargados
+  selectedUser: any; // Usuario seleccionado
+  currentRole: string; // Rol actual del usuario
 
-
-  users: Usuario[] = []; // Aquí se almacenarán los usuarios del endpoint
-  selectedUser: any; // Usuario seleccionado del desplegable
-
-  constructor(private http: HttpClient) {
+  constructor(
+    public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
+    private genaralModalService: GenaralModalService,
+    @Inject(MAT_DIALOG_DATA) public data: { role: string },
+    private http: HttpClient
+  ) {
+    this.currentRole = data.role; // Obtén el rol desde el componente padre
     this.loadUsers();
   }
 
   loadUsers(): void {
-    
-    this.genaralModalService.getDataAsJson({ rol: 'Administrador' }) 
-    .subscribe(
+    this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
       (response) => {
         if (Array.isArray(response)) {
-          this.users = response;
-        } else if (response.usuarios.length > 0  &&  Array.isArray(response.usuarios)) {
-          this.users = response.usuarios;
+          this.users = this.filterUsersByRole(response);
+        } else if (response.usuarios && Array.isArray(response.usuarios)) {
+          this.users = this.filterUsersByRole(response.usuarios);
         } else {
           console.error('La respuesta no contiene un arreglo válido de usuarios.');
           this.users = [];
@@ -51,14 +52,24 @@ export class DialogOverviewExampleDialog {
         console.log('Usuarios cargados:', this.users);
       },
       (error) => {
-        console.error('Error al cargar los usuarios:', error);
+        console.error('Error al cargar usuarios:', error);
       }
     );
   }
-  
+
+  filterUsersByRole(users: Usuario[]): Usuario[] {
+    if (this.currentRole === 'administrador') {
+      return users; // No se aplica filtro
+    } else if (this.currentRole === 'validador') {
+      return users.filter((user) => user.cargo === 'caracterizador');
+    } else if (this.currentRole === 'caracterizador') {
+      return users.filter((user) => user.cargo === 'evaluador');
+    }
+    return [];
+  }
 
   confirmSelection(): void {
     console.log('Usuario seleccionado:', this.selectedUser);
-    this.dialogRef.close(this.selectedUser); // Cierra el modal y envía el usuario seleccionado
+    this.dialogRef.close(this.selectedUser); // Cerrar el modal con el usuario seleccionado
   }
 }

@@ -68,6 +68,7 @@ export class ResumenComponent implements OnInit {
     isLoading: boolean = true;
     progress: number = 0;
     isModalOpen: boolean = false;
+    buttonText: string = 'Acción';
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -124,6 +125,11 @@ export class ResumenComponent implements OnInit {
     
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
+
+                // Verificar y actualizar el estadoFlujo antes de enviar los datos
+                if (flattenedValues.estadoFlujo === 'Candidata') {
+                    flattenedValues.estadoFlujo = 'validación';
+                }
                 // Llamar al servicio de actualización
                 this.resumenService.updateDataAsJson(this.Id, flattenedValues).subscribe(
                     (response) => {
@@ -146,6 +152,11 @@ export class ResumenComponent implements OnInit {
                     }
                 );
             } else {
+
+                // Verificar y actualizar el estadoFlujo antes de crear los datos
+                if (flattenedValues.estadoFlujo === 'Candidata') {
+                    flattenedValues.estadoFlujo = 'validación';
+                }
                 // Llamar al servicio de creación
                 this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
                     (response) => {
@@ -177,6 +188,19 @@ export class ResumenComponent implements OnInit {
     ngOnInit(): void {
         console.log('Id Practica ' + this.Id);
 
+        // Obtener el rol desde localStorage
+        const roles = localStorage.getItem('accessRoles');
+        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+
+        // Configurar el texto del botón basado en el rol
+        if (cargo === 'validador') {
+            this.buttonText = 'Caracterización';
+        } else if (cargo === 'caracterizador') {
+            this.buttonText = 'Evaluación';
+        } else {
+            this.buttonText = 'Acción'; // Texto por defecto
+        }
+        
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 fechaDiligenciamiento: ['', new Date()],
@@ -428,16 +452,21 @@ export class ResumenComponent implements OnInit {
 // ======================== Logica que muestra el modal en la vista ======================== //
 
 openCaracterizationModal(): void {
+    const roles = localStorage.getItem('accessRoles');
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'natural'; // Convertir a minúsculas
+  
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',
+      data: { role: currentRole }, // Pasa el rol al modal
     });
   
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Usuario validado:', result);
+        console.log('Usuario seleccionado:', result);
       }
     });
   }
+  
   
 
 }
