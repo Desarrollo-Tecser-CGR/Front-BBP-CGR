@@ -69,6 +69,10 @@ export class ResumenComponent implements OnInit {
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
+
+    fechaDiligenciamiento = new Date;
+    isDisabled : boolean = true;
+
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -183,8 +187,18 @@ export class ResumenComponent implements OnInit {
             console.warn('Formulario no válido');
         }
     }
-    
-    
+    validDate(){
+        const fechaDiligenciamiento = this.fechaDiligenciamiento;
+        const today = new Date();
+        
+        if (fechaDiligenciamiento.getTime() !== today.getTime()) {
+            console.log('Valid date');
+        } else {
+            console.log('Dates are the same');
+        }
+    }
+
+    // Validacion de fecha: fecha actual
     ngOnInit(): void {
         console.log('Id Practica ' + this.Id);
 
@@ -203,7 +217,7 @@ export class ResumenComponent implements OnInit {
         
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: ['', new Date()],
+                fechaDiligenciamiento: ['', new Date(), this.isDisabled],
                 nombreEntidad: ['', Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
             }),
@@ -245,7 +259,7 @@ export class ResumenComponent implements OnInit {
                 documentoActuacion: [Validators.required],
             }),
         });
-        this.horizontalStepperForm.valueChanges.subscribe(() => {
+        this.horizontalStepperForm.valueChanges.subscribe(() => {        
             this.progress = this.calculateProgress();
             console.log('Progreso actualizado:', this.progress);
         });

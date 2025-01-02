@@ -58,10 +58,13 @@
                         <ng-template matStepLabel>Fecha de diligenciamiento</ng-template>
                         <div class="flex">
                             <mat-form-field class="flex-auto" appearance="fill">
-                                <input matInput [matDatepicker]="picker1" formControlName="fechaDiligenciamiento"
+                                <input matInput [matDatepicker]="picker1"
+                                    formControlName="fechaDiligenciamiento" readonly disabled
                                     (dateChange)="onDateChange($event, 'step1', 'fechaDiligenciamiento')"
-                                    placeholder="Fecha de Diligenciamiento" />
-                                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                                    [placeholder]="fechaDiligenciamiento | date:'dd/MM/yyyy'"
+                                    [value]="fechaDiligenciamiento | date:'dd/MM/yyyy'"
+                                    />
+                                <mat-datepicker-toggle matSuffix></mat-datepicker-toggle>
                                 <mat-datepicker #picker1></mat-datepicker>
                             </mat-form-field>
  
@@ -466,6 +469,7 @@
                             </button>
                         </div>
                     </div> 
+
                     </mat-step>
                     <mat-step [stepControl]="horizontalStepperForm.get('step6')">
                         <form [formGroup]="horizontalStepperForm.get('step6')">
