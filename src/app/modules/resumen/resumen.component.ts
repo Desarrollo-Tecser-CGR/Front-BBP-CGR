@@ -75,6 +75,8 @@ export class ResumenComponent implements OnInit {
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
+
+    cargo: string = ''; // Almacena el rol del usuario
     
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,) { }
@@ -204,12 +206,12 @@ export class ResumenComponent implements OnInit {
 
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
-        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+        this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
 
         // Configurar el texto del botón basado en el rol
-        if (cargo === 'validador') {
+        if (this.cargo === 'validador') {
             this.buttonText = 'Caracterización';
-        } else if (cargo === 'caracterizador') {
+        } else if (this.cargo === 'caracterizador') {
             this.buttonText = 'Evaluación';
         } else {
             this.buttonText = 'Acción'; // Texto por defecto
@@ -217,48 +219,49 @@ export class ResumenComponent implements OnInit {
         
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: ['', new Date(), this.isDisabled],
-                nombreEntidad: ['', Validators.required],
-                nombreDependenciaArea: ['', Validators.required],
+                fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
+                nombreEntidad: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+                nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
             }),
             step2: this._formBuilder.group({
-                nombre: ['', [Validators.required, Validators.maxLength(50)]],
-                cargo: ['', [Validators.required, Validators.maxLength(50)]],
-                correo: ['', [Validators.required, Validators.email]],
-                contacto: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+                nombre: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                cargo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                correo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.email]],
+                contacto: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.pattern('^[0-9]{10}$')]],
             }),
             step3: this._formBuilder.group({
-                tipoEstrategiaIdentificacion: [''],
-                tipoPractica: [''],
-                codigoPractica: [{ value: '', disabled: true }],
-                tipologia: [{ value: '' }],
-                estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                nivelBuenaPractica: [''],
-                nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
-                propositoPractica: ['', Validators.maxLength(300)],
-                objetivoPrincipalPractica: [''],
+                tipoEstrategiaIdentificacion: [{ value: '', disabled: this.cargo === 'validador' }],
+                tipoPractica: [{ value: '', disabled: this.cargo === 'validador' }],
+                codigoPractica: [{ value: '', disabled: true }], // Siempre deshabilitado
+                tipologia: [{ value: '', disabled: this.cargo === 'validador' }],
+                estadoFlujo: [{ value: 'Candidata', disabled: true }], // Siempre deshabilitado
+                nivelBuenaPractica: [{ value: '', disabled: this.cargo === 'validador' }],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: this.cargo === 'validador' }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: this.cargo === 'validador' }, Validators.maxLength(300)],
+                objetivoPrincipalPractica: [{ value: '', disabled: this.cargo === 'validador' }],
             }),
             step4: this._formBuilder.group({
-                impactoEsperado: [''],
-                metodologiaUsada: ['', [Validators.maxLength(500)]],
-                duracionImplementacion: [''],
-                etapasMetodologia: [''],
-                periodoDesarrolloInicio: [''],
-                periodoDesarrolloFin: [''],
+                impactoEsperado: [{ value: '', disabled: this.cargo === 'validador' }],
+                metodologiaUsada: [{ value: '', disabled: this.cargo === 'validador' }, Validators.maxLength(500)],
+                duracionImplementacion: [{ value: '', disabled: this.cargo === 'validador' }],
+                etapasMetodologia: [{ value: '', disabled: this.cargo === 'validador' }],
+                periodoDesarrolloInicio: [{ value: '', disabled: this.cargo === 'validador' }],
+                periodoDesarrolloFin: [{ value: '', disabled: this.cargo === 'validador' }],
             }),
             step5: this._formBuilder.group({
-                tipoMaterialProducido: [''],
-                apoyoRecibido: [''],
-                reconocimientosNacionalesInternacionales: [''],
-                objetoControl: [''],
-                taxonomiaEvento: [''],
-                tipoActuacion: [''],
-                descripcionResultados: [''],
+                tipoMaterialProducido: [{ value: '', disabled: this.cargo === 'validador' }],
+                apoyoRecibido: [{ value: '', disabled: this.cargo === 'validador' }],
+                reconocimientosNacionalesInternacionales: [{ value: '', disabled: this.cargo === 'validador' }],
+                objetoControl: [{ value: '', disabled: this.cargo === 'validador' }],
+                taxonomiaEvento: [{ value: '', disabled: this.cargo === 'validador' }],
+                tipoActuacion: [{ value: '', disabled: this.cargo === 'validador' }],
+                descripcionResultados: [{ value: '', disabled: this.cargo === 'validador' }],
             }),
             step6: this._formBuilder.group({
-                documentoActuacion: [Validators.required],
+                documentoActuacion: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
             }),
         });
+        
         this.horizontalStepperForm.valueChanges.subscribe(() => {        
             this.progress = this.calculateProgress();
             console.log('Progreso actualizado:', this.progress);

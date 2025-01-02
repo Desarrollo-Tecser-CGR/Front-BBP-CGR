@@ -10,7 +10,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { FilterService } from '../advanced-search-modal/FilterService';
 @Component({
   selector: 'quick-chat',
   templateUrl: './advanced-search-modal.component.html',
@@ -35,6 +35,7 @@ export class AdvancedSearchModalComponent {
 
   constructor(
     private fb: FormBuilder,
+    private filterService: FilterService,
     public dialogRef: MatDialogRef<AdvancedSearchModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -55,7 +56,10 @@ export class AdvancedSearchModalComponent {
 
   applySearch(): void {
     if (this.advancedSearchForm.valid) {
-      this.dialogRef.close(this.advancedSearchForm.value);
+      // Envía los filtros al servicio compartido
+      this.filterService.updateFilters(this.advancedSearchForm.value);
+      this.dialogRef.close();
     }
+  
   }
 }

@@ -1,5 +1,5 @@
 <div class="min-w-0 flex-1">
- 
+
     <!-- Main -->
     <div class="flex-auto p-6 sm:p-10">
         <div class="mt-2">
@@ -11,10 +11,10 @@
         <div class="progress-container">
             <span class="progress-text">{{ progress }}%</span>
             <div class="progress-bar" [style.width.%]="progress" [ngClass]="progressColor"></div>
- 
+
         </div>
- 
- 
+
+
         <!-- <form [formGroup]="horizontalStepperForm.get('newFields')" class="filters-form" style="display: flex; gap: 16px;">
         <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
             <mat-label>Nombre de la práctica</mat-label>
@@ -48,7 +48,7 @@
             </mat-error>
         </mat-form-field>
     </form> -->
- 
+
         <div class="max-w-3x">
             <!-- Horizontal stepper -->
             <form class="bg-transparent overflow-hidden rounded p-4" [formGroup]="horizontalStepperForm">
@@ -58,18 +58,17 @@
                         <ng-template matStepLabel>Fecha de diligenciamiento</ng-template>
                         <div class="flex">
                             <mat-form-field class="flex-auto" appearance="fill">
-                                <input matInput [matDatepicker]="picker1"
-                                    formControlName="fechaDiligenciamiento" readonly disabled
+                                <input matInput [matDatepicker]="picker1" formControlName="fechaDiligenciamiento"
+                                    readonly disabled
                                     (dateChange)="onDateChange($event, 'step1', 'fechaDiligenciamiento')"
                                     [placeholder]="fechaDiligenciamiento | date:'dd/MM/yyyy'"
-                                    [value]="fechaDiligenciamiento | date:'dd/MM/yyyy'"
-                                    />
+                                    [value]="fechaDiligenciamiento | date:'dd/MM/yyyy'" />
                                 <mat-datepicker-toggle matSuffix></mat-datepicker-toggle>
                                 <mat-datepicker #picker1></mat-datepicker>
                             </mat-form-field>
- 
+
                         </div>
- 
+
                         <div class="gt-xs:flex-row flex flex-col">
                             <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
                                 <input matInput placeholder="Nombre de la entidad" formControlName="nombreEntidad"
@@ -90,7 +89,7 @@
                             </button>
                         </div>
                     </mat-step>
- 
+
                     <mat-step [formGroupName]="'step2'" [stepControl]="horizontalStepperForm.get('step2')"
                         #horizontalStepperStep2>
                         <ng-template matStepLabel>Fuente (Proponente)</ng-template>
@@ -136,7 +135,7 @@
                             </button>
                         </div>
                     </mat-step>
- 
+
                     <mat-step [formGroupName]="'step3'" [stepControl]="horizontalStepperForm.get('step3')">
                         <ng-template matStepLabel>Trámite registro</ng-template>
                         <p class="my-6 font-medium">
@@ -170,7 +169,7 @@
                                 <mat-label>Código de la práctica</mat-label>
                                 <input matInput formControlName="codigoPractica" readonly />
                             </mat-form-field>
- 
+
                             <mat-form-field class="flex-auto">
                                 <mat-label>Tipología</mat-label>
                                 <mat-select formControlName="tipologia">
@@ -301,7 +300,7 @@
                                     <mat-datepicker-toggle matSuffix [for]="inicioPicker"></mat-datepicker-toggle>
                                     <mat-datepicker #inicioPicker></mat-datepicker>
                                 </mat-form-field>
- 
+
                                 <mat-form-field class="flex-auto">
                                     <mat-label>Fin</mat-label>
                                     <input matInput [matDatepicker]="finPicker" formControlName="periodoDesarrolloFin"
@@ -309,7 +308,7 @@
                                     <mat-datepicker-toggle matSuffix [for]="finPicker"></mat-datepicker-toggle>
                                     <mat-datepicker #finPicker></mat-datepicker>
                                 </mat-form-field>
- 
+
                             </div>
                         </div>
                         <div class="mt-8 flex justify-end">
@@ -322,8 +321,8 @@
                             </button>
                         </div>
                     </mat-step>
- 
- 
+
+
                     <mat-step [formGroupName]="'step5'" [stepControl]="horizontalStepperForm.get('step4')">
                         <ng-template matStepLabel>Gestión</ng-template>
                         <p class="my-6 font-medium">
@@ -453,22 +452,24 @@
                         </div>
 
                         <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                            <button *ngIf="cargo !== 'validador'" type="button" mat-raised-button color="primary"
+                                (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
                         </div>
 
                         <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
-                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
+                            <button class="space-buttons yellow-color" type="button" mat-raised-button
+                                (click)="openCaracterizationModal()">
                                 {{ buttonText }}
                             </button>
 
-                        <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button class="warn-color">
-                                Desestimar Practica
-                            </button>
+                            <div class="mt-0 flex justify-end">
+                                <button type="button" mat-raised-button class="warn-color">
+                                    Desestimar Practica
+                                </button>
+                            </div>
                         </div>
-                    </div> 
 
                     </mat-step>
                     <mat-step [stepControl]="horizontalStepperForm.get('step6')">
@@ -483,7 +484,7 @@
                                     </div>
                                 </div>
                                 <hr />
- 
+
                                 <!-- Zona de carga de archivos -->
                                 <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
                                     <i class="upload-icon">☁️</i>
@@ -530,7 +531,7 @@
                 </div>
             </div>
             <hr />
- 
+
             <!-- Zona de carga de archivos -->
             <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
                 <i class="upload-icon">☁️</i>
@@ -561,7 +562,7 @@
         </div>
     </div>
 </div>
- 
+
 <mat-menu #menu="matMenu" class="custom-menu">
     <button mat-menu-item>
         <mat-icon class="internos">account_circle</mat-icon>

@@ -1,10 +1,11 @@
 import { AfterViewInit, Component, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { NgFor, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorIntlEs } from './mat-paginator-intl-es.service';
 
 @Component({
   selector: 'app-generic-table',
@@ -17,6 +18,9 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule, // Importa el módulo de botones
     NgFor, NgIf,
     MatIconModule, // Importa directivas comunes
+  ],
+  providers: [
+    { provide: MatPaginatorIntl, useClass: MatPaginatorIntlEs },
   ],
 })
 export class GenericTableComponent<T> implements OnInit, AfterViewInit {

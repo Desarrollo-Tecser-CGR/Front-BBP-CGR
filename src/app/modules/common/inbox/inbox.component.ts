@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { rol } from 'app/mock-api/common/rol/data';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { FilterService } from 'app/layout/common/advanced-search-modal/FilterService';
 
 
 @Component({
@@ -42,7 +43,7 @@ export class InboxComponent implements OnInit {
   ]; // Botones dinámicos
   private _router: any;
 
-  constructor(private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
+  constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
 
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
@@ -65,17 +66,24 @@ export class InboxComponent implements OnInit {
         action: (row: any) => this.validateRow(row),
       });
     }
-  
+    this.filterService.filter$.subscribe((filters) => {
+      if (filters) {
+        this.loadData(filters);
+      }
+    });
     this.loadData();
   }
   
 
-  loadData(): void {
+  loadData(filters?: any): void {
     if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
-      const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
+      const requestBody = {
+        rol: this.cargo,
+        ...filters, // Agrega los filtros si están definidos
+      };
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
-          let response = dataRes.data;
+          let response = dataRes;
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({

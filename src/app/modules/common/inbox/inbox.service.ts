@@ -17,7 +17,7 @@ export class InboxService {
         return this.http.post<any>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     }
 
-    setValidateStatus(requestBody: { rol: string; id: string  }): Observable<any[]> {
+    setValidateStatus(requestBody: { rol: string; id: number  }): Observable<any[]> {
         return this.http.post<any[]>(this.apiUrlSetStatus, requestBody); // Enviar cuerpo de la solicitud
     }
 
