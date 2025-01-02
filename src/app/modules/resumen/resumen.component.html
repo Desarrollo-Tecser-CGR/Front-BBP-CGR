@@ -452,16 +452,16 @@
                             </mat-form-field>
                         </div>
 
-                        <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
-                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
-                                {{ buttonText }}
-                            </button>
-                            
                         <div class="mt-0 flex justify-end">
                             <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
                         </div>
+
+                        <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
+                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
+                                {{ buttonText }}
+                            </button>
 
                         <div class="mt-0 flex justify-end">
                             <button type="button" mat-raised-button class="warn-color">

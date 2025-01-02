@@ -13,8 +13,8 @@ export class InboxService {
 
     constructor(private http: HttpClient) { }
 
-    getDataAsJson(requestBody: { rol: string }): Observable<any[]> {
-        return this.http.post<any[]>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
+    getDataAsJson(requestBody: { rol: string }): Observable<any> {
+        return this.http.post<any>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     }
 
     setValidateStatus(requestBody: { rol: string; id: string  }): Observable<any[]> {
