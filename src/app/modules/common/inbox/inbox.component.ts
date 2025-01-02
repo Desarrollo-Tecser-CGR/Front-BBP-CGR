@@ -74,7 +74,8 @@ export class InboxComponent implements OnInit {
     if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
       const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
       this.inboxService.getDataAsJson(requestBody).subscribe(
-        (response) => {
+        (dataRes) => {
+          let response = dataRes.data;
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({
