@@ -58,16 +58,16 @@
                         <ng-template matStepLabel>Fecha de diligenciamiento</ng-template>
                         <div class="flex">
                             <mat-form-field class="flex-auto" appearance="fill">
-                                <input matInput [matDatepicker]="picker1"
-                                    formControlName="fechaDiligenciamiento" readonly disabled
-                                    (dateChange)="onDateChange($event, 'step1', 'fechaDiligenciamiento')"
-                                    [placeholder]="fechaDiligenciamiento | date:'dd/MM/yyyy'"
-                                    [value]="fechaDiligenciamiento | date:'dd/MM/yyyy'"
-                                    />
-                                <mat-datepicker-toggle matSuffix></mat-datepicker-toggle>
-                                <mat-datepicker #picker1></mat-datepicker>
+                                <input
+                                    matInput
+                                    formControlName="fechaDiligenciamiento"
+                                    [placeholder]="fechaDiligenciamiento"
+                                    [(ngModel)]="fechaDiligenciamiento"
+                                    [value]="fechaDiligenciamiento"
+                                    readonly
+                                />     
+                                <mat-icon svgIcon="heroicons_outline:calendar"></mat-icon>
                             </mat-form-field>
- 
                         </div>
  
                         <div class="gt-xs:flex-row flex flex-col">
@@ -451,17 +451,17 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-
-                        <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
-                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
-                                {{ buttonText }}
-                            </button>
-                            
                         <div class="mt-0 flex justify-end">
                             <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
                         </div>
+                        <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
+                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
+                                {{ buttonText }}
+                            </button>
+                            
+                        
 
                         <div class="mt-0 flex justify-end">
                             <button type="button" mat-raised-button class="warn-color">

@@ -63,16 +63,14 @@ const routes: Routes = [
     providers: [MatDatepickerModule],
 })
 export class ResumenComponent implements OnInit {
+    fechaDiligenciamiento: string = this.formatDate(new Date());
     horizontalStepperForm: UntypedFormGroup;
     selectedFiles: File[] = [];
     isLoading: boolean = true;
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
-
-    fechaDiligenciamiento = new Date;
     isDisabled : boolean = true;
-
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -187,18 +185,17 @@ export class ResumenComponent implements OnInit {
             console.warn('Formulario no válido');
         }
     }
-    validDate(){
-        const fechaDiligenciamiento = this.fechaDiligenciamiento;
-        const today = new Date();
+    // validDate(){
+    //     const fechaDiligenciamiento = this.fechaDiligenciamiento;
+    //     const today = new Date();
         
-        if (fechaDiligenciamiento.getTime() !== today.getTime()) {
-            console.log('Valid date');
-        } else {
-            console.log('Dates are the same');
-        }
-    }
-
-    // Validacion de fecha: fecha actual
+    //     if (fechaDiligenciamiento.getTime() !== today.getTime()) {
+    //         console.log('Valid date');
+    //     } else {
+    //         console.log('Dates are the same');
+    //     }
+    // }
+    
     ngOnInit(): void {
         console.log('Id Practica ' + this.Id);
 
@@ -214,13 +211,12 @@ export class ResumenComponent implements OnInit {
         } else {
             this.buttonText = 'Acción'; // Texto por defecto
         }
-        
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: ['', new Date(), this.isDisabled],
+                fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
                 nombreEntidad: ['', Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
-            }),
+            }),                                         
             step2: this._formBuilder.group({
                 nombre: ['', [Validators.required, Validators.maxLength(50)]],
                 cargo: ['', [Validators.required, Validators.maxLength(50)]],
@@ -259,6 +255,7 @@ export class ResumenComponent implements OnInit {
                 documentoActuacion: [Validators.required],
             }),
         });
+        this.horizontalStepperForm.get(['step1', 'fechaDiligenciamiento'])?.setValue(this.fechaDiligenciamiento);
         this.horizontalStepperForm.valueChanges.subscribe(() => {        
             this.progress = this.calculateProgress();
             console.log('Progreso actualizado:', this.progress);
