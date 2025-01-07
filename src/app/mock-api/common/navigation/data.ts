@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'natural' , 'caracterizador']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador']
     },
     {
         id   : 'resumen',
@@ -16,7 +16,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:clipboard-document-list',
         link : '/resumen',
-        roles: ['administrador', 'natural']
+        roles: ['administrador', 'registro']
     },
     {
         id   : 'caracterization',
@@ -66,15 +66,15 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/inbox',
         roles: ['administrador', 'validador' , 'caracterizador']
     },
-    {
-        id   : 'create',
-        title: 'Creación de Formularios',
-        type : 'basic',
-        icon : 'heroicons_outline:newspaper',
-        link : '/create',
-        roles: ['administrador']
+    // {
+    //     id   : 'create',
+    //     title: 'Creación de Formularios',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:newspaper',
+    //     link : '/create',
+    //     roles: ['administrador']
 
-    }
+    // }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {

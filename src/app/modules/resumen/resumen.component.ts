@@ -63,16 +63,14 @@ const routes: Routes = [
     providers: [MatDatepickerModule],
 })
 export class ResumenComponent implements OnInit {
+    fechaDiligenciamiento: string = this.formatDate(new Date());
     horizontalStepperForm: UntypedFormGroup;
     selectedFiles: File[] = [];
     isLoading: boolean = true;
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
-
-    fechaDiligenciamiento = new Date;
     isDisabled : boolean = true;
-
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -132,7 +130,7 @@ export class ResumenComponent implements OnInit {
 
                 // Verificar y actualizar el estadoFlujo antes de enviar los datos
                 if (flattenedValues.estadoFlujo === 'Candidata') {
-                    flattenedValues.estadoFlujo = 'validación';
+                    flattenedValues.estadoFlujo = 'validacion';
                 }
                 // Llamar al servicio de actualización
                 this.resumenService.updateDataAsJson(this.Id, flattenedValues).subscribe(
@@ -187,16 +185,6 @@ export class ResumenComponent implements OnInit {
             console.warn('Formulario no válido');
         }
     }
-    validDate(){
-        const fechaDiligenciamiento = this.fechaDiligenciamiento;
-        const today = new Date();
-        
-        if (fechaDiligenciamiento.getTime() !== today.getTime()) {
-            console.log('Valid date');
-        } else {
-            console.log('Dates are the same');
-        }
-    }
 
     // Validacion de fecha: fecha actual
     ngOnInit(): void {
@@ -217,10 +205,10 @@ export class ResumenComponent implements OnInit {
         
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: ['', new Date(), this.isDisabled],
+                fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
                 nombreEntidad: ['', Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
-            }),
+            }),  
             step2: this._formBuilder.group({
                 nombre: ['', [Validators.required, Validators.maxLength(50)]],
                 cargo: ['', [Validators.required, Validators.maxLength(50)]],
@@ -231,29 +219,29 @@ export class ResumenComponent implements OnInit {
                 tipoEstrategiaIdentificacion: [''],
                 tipoPractica: [''],
                 codigoPractica: [{ value: '', disabled: true }],
-                tipologia: [{ value: '' }],
+                tipologia: [{ value: '', disabled: true}],
                 estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                nivelBuenaPractica: [''],
-                nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
-                propositoPractica: ['', Validators.maxLength(300)],
-                objetivoPrincipalPractica: [''],
+                nivelBuenaPractica: [{value: '', disabled: true}],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true }, Validators.maxLength(300)],
+                objetivoPrincipalPractica: [{ value: '', disabled: true}],
             }),
             step4: this._formBuilder.group({
-                impactoEsperado: [''],
-                metodologiaUsada: ['', [Validators.maxLength(500)]],
-                duracionImplementacion: [''],
-                etapasMetodologia: [''],
-                periodoDesarrolloInicio: [''],
-                periodoDesarrolloFin: [''],
+                impactoEsperado: [{ value: '', disabled: true}],
+                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
+                duracionImplementacion: [{ value: '', disabled: true}],
+                etapasMetodologia: [{ value: '', disabled: true}],
+                periodoDesarrolloInicio: [{ value: '', disabled: true}],
+                periodoDesarrolloFin: [{ value: '', disabled: true}],
             }),
             step5: this._formBuilder.group({
-                tipoMaterialProducido: [''],
-                apoyoRecibido: [''],
-                reconocimientosNacionalesInternacionales: [''],
-                objetoControl: [''],
-                taxonomiaEvento: [''],
-                tipoActuacion: [''],
-                descripcionResultados: [''],
+                tipoMaterialProducido: [{ value: '', disabled: true}],
+                apoyoRecibido: [{ value: '', disabled: true}],
+                reconocimientosNacionalesInternacionales: [{ value: '', disabled: true}],
+                objetoControl: [{ value: '', disabled: true}],
+                taxonomiaEvento: [{ value: '', disabled: true}],
+                tipoActuacion: [{ value: '', disabled: true}],
+                descripcionResultados: [{ value: '', disabled: true}],
             }),
             step6: this._formBuilder.group({
                 documentoActuacion: [Validators.required],
@@ -332,13 +320,50 @@ export class ResumenComponent implements OnInit {
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
         const step3Form = this.horizontalStepperForm.get('step3');
+        const step4Form = this.horizontalStepperForm.get('step4');
+        const step5Form = this.horizontalStepperForm.get('step5');
 
         if (selectedValue === 'BP') {
             step3Form?.get('tipologia')?.enable();
+            step3Form?.get('nivelBuenaPractica')?.enable();
+            step3Form?.get('nombreDescriptivoBuenaPractica')?.enable();
+            step3Form?.get('propositoPractica')?.enable();
+            step3Form?.get('objetivoPrincipalPractica')?.enable();
+            step4Form?.get('impactoEsperado')?.enable();
+            step4Form?.get('metodologiaUsada')?.enable();
+            step4Form?.get('duracionImplementacion')?.enable();
+            step4Form?.get('etapasMetodologia')?.enable();
+            step4Form?.get('etapasMetodologia')?.enable();
+            step4Form?.get('periodoDesarrolloInicio')?.enable();
+            step4Form?.get('periodoDesarrolloFin')?.enable();
+            step5Form?.get('tipoMaterialProducido')?.enable();
+            step5Form?.get('apoyoRecibido')?.enable();
+            step5Form?.get('reconocimientosNacionalesInternacionales')?.enable();
+            step5Form?.get('objetoControl')?.enable();
+            step5Form?.get('taxonomiaEvento')?.enable();
+            step5Form?.get('tipoActuacion')?.enable();
+            step5Form?.get('descripcionResultados')?.enable();
             step3Form?.get('codigoPractica')?.setValue('BP-' + this.generateConsecutive());
         } else {
             step3Form?.get('tipologia')?.disable();
-            step3Form?.get('codigoPractica')?.setValue('');
+            step3Form?.get('nivelBuenaPractica')?.disable();
+            step3Form?.get('nombreDescriptivoBuenaPractica')?.disable();
+            step3Form?.get('propositoPractica')?.disable();
+            step3Form?.get('objetivoPrincipalPractica')?.disable();
+            step4Form?.get('impactoEsperado')?.disable();
+            step4Form?.get('metodologiaUsada')?.disable();
+            step4Form?.get('duracionImplementacion')?.disable();
+            step4Form?.get('etapasMetodologia')?.disable();
+            step4Form?.get('periodoDesarrolloInicio')?.disable();
+            step4Form?.get('periodoDesarrolloFin')?.disable();
+            step5Form?.get('tipoMaterialProducido')?.disable();
+            step5Form?.get('apoyoRecibido')?.disable();
+            step5Form?.get('reconocimientosNacionalesInternacionales')?.disable();
+            step5Form?.get('objetoControl')?.disable();
+            step5Form?.get('taxonomiaEvento')?.disable();
+            step5Form?.get('tipoActuacion')?.disable();
+            step5Form?.get('descripcionResultados')?.disable();
+            step3Form?.get('objetivoPrincipalPractica')?.setValue('');
         }
     }
 
@@ -463,11 +488,49 @@ export class ResumenComponent implements OnInit {
     }
 }
 
+
+desestimarPractica(): void {
+    if (!this.Id) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No se puede desestimar la práctica porque no se encontró un ID válido.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+        });
+        return;
+    }
+
+    const updatedData = { estadoFlujo: 'Desestimada' };
+
+    this.resumenService.updateDataAsJson(this.Id, updatedData).subscribe(
+        (response) => {
+            Swal.fire({
+                title: 'Práctica Desestimada',
+                text: 'El estado de la práctica ha sido actualizado a "Desestimada".',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                // Redireccionar o actualizar vista
+                window.location.reload();
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo desestimar la práctica. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+}
+
+
 // ======================== Logica que muestra el modal en la vista ======================== //
 
 openCaracterizationModal(): void {
     const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'natural'; // Convertir a minúsculas
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro'; // Convertir a minúsculas
   
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',
