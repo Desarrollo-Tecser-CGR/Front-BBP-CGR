@@ -17,7 +17,7 @@ export class GenaralModalService {
     //     return this.http.post<Users>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     // }
 
-    getDataAsJson(requestBody: { rol: string }): Observable<Users> {
+    getDataAsJson(requestBody: { rol: string }): Observable<any> {
         return this.http.get<Users>(this.apiUrl); // Enviar cuerpo de la solicitud
     }
 

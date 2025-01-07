@@ -40,7 +40,8 @@ export class DialogOverviewExampleDialog {
 
   loadUsers(): void {
     this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
-      (response) => {
+      (dataRes) => {
+        let response = dataRes.data;
         if (Array.isArray(response)) {
           this.users = this.filterUsersByRole(response);
         } else if (response.usuarios && Array.isArray(response.usuarios)) {

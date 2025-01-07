@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'natural', 'caracterizador'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador'], module: '' }
             },
         ]
     },
@@ -176,7 +176,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen', loadChildren: () =>
                 import('app/modules/resumen/resumen.routes'),
-                data: { requiredRoles: ['administrador', 'natural'], module: '' }
+                data: { requiredRoles: ['administrador', 'registro'], module: '' }
             },
         ]
     },

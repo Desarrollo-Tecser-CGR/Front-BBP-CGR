@@ -65,7 +65,7 @@
                                     [(ngModel)]="fechaDiligenciamiento"
                                     [value]="fechaDiligenciamiento"
                                     readonly
-                                />     
+                                />    
                                 <mat-icon svgIcon="heroicons_outline:calendar"></mat-icon>
                             </mat-form-field>
                         </div>
@@ -199,7 +199,7 @@
                                 <mat-label>Estado Flujo</mat-label>
                                 <mat-select formControlName="estadoFlujo">
                                     <mat-option value="Candidata">Buena Practica Candidata</mat-option>
-                                    <mat-option value="validación">“Buena práctica en validación</mat-option>
+                                    <mat-option value="validacion">“Buena práctica en validación</mat-option>
                                     <mat-option value="Caracterización">Buena práctica en caracterización</mat-option>
                                     <mat-option value="Evaluación">Buena Práctica en Evaluación</mat-option>
                                     <mat-option value="Establecida">Buena práctica establecida</mat-option>
@@ -451,23 +451,41 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-                        <div class="mt-0 flex justify-end">
+
+
+                        <div class="mt-8 flex justify-end">
+                            <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
+                                matStepperPrevious>
+                                Back
+                            </button>
+                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                                Next
+                            </button>
+                        </div>
+                
+
+                        <!-- <div class="mt-0 flex justify-end">
                             <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
-                        </div>
+                        </div> -->
+
                         <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
                             <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
                                 {{ buttonText }}
                             </button>
-                            
-                        
 
-                        <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button class="warn-color">
-                                Desestimar Practica
-                            </button>
-                        </div>
+                            <div class="mt-0 flex justify-end">
+                                <button 
+                                    type="button" 
+                                    mat-raised-button 
+                                    class="warn-color"
+                                    (click)="desestimarPractica()"
+                                >
+                                    Desestimar Práctica
+                                </button>
+                            </div>
+                            
                     </div> 
 
                     </mat-step>
@@ -508,11 +526,16 @@
                                 </button>
                             </div>
                         </form>
+                        <div class="mt-0 flex justify-end">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                                Enviar Formulario
+                            </button>
+                        </div>
                     </mat-step>
                 </mat-horizontal-stepper>
-                <button *ngIf="!isEdit" mat-raised-button color="primary" (click)="toggleModal()">
+                <!-- <button *ngIf="!isEdit" mat-raised-button color="primary" (click)="toggleModal()">
                     Carga Automática
-                </button>
+                </button> -->
             </form>
         </div>
     </div>
