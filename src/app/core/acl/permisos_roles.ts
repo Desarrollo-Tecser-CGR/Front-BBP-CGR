@@ -1,6 +1,6 @@
 export const PERMISOSROLES = {
     roles: {
-        Natural  :  'natural',
+        Natural  :  'registro',
         Validador:  'validador',
         Caracterizador:  'caracterizador'
     }

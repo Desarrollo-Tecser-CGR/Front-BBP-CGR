@@ -4,7 +4,7 @@ import { CatalogComponent } from './catalog.component';
 
 export default [
     {
-        path     : '',
+        path: '',
         component: CatalogComponent,
     },
 ] as Routes;

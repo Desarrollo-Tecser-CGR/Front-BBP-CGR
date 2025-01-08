@@ -3,161 +3,101 @@
     <div class="table-container">
         <h5>Criterios</h5>
         <div class="mt-2 flex justify-init margin-button">
-            <button class="px-8 shadow-button" mat-flat-button [color]="'primary'" type="button" (click)="showModal = true">
+            <button class="px-8 shadow-button" mat-flat-button [color]="'primary'" type="button"
+                (click)="showModal = true">
                 Crear Criterios
             </button>
         </div>
         <div class="table-view">
-        <table>
-            <thead>
-                <tr>
-                    <th class="space">ID</th>
-                    <th class="space">Criterios</th>
-                    <th class="space">Tipo de Criterio</th>
-                    <th class="space">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let entry of formEntries">
-                    <td class="space">{{ entry.id }}</td>
-                    <td class="space">{{ entry.question }}</td>
-                    <td class="space">{{ entry.type }}</td>
-                    <td class="space">
-                        <!-- Icono "+" -->
-                        <mat-icon 
-                            class="icon-plus clickable"
-                            svgIcon="heroicons_outline:plus-small" 
-                            *ngIf="shouldShowPlusIcon(entry.type)"
-                            (click)="openSubModal(entry.id)">
-                        </mat-icon>
-                        <!-- Icon "eye" -->
-                        <mat-icon 
-                            class="icon-eye clickable"
-                            svgIcon="heroicons_outline:eye"
-                            *ngIf="hasSubQuestions(entry.id)"
-                            [matTooltip]="getSubQuestionsTooltip(entry.id)"
-                            matTooltipClass="custom-tooltip">
-                        </mat-icon>
-                        <!-- Icon "X" -->
-                        <mat-icon 
-                            svgIcon="heroicons_outline:x-mark" 
-                            (click)="deleteFormEntry(entry.id)" 
-                            class="clickable">
-                        </mat-icon>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="space">ID</th>
+                        <th class="space">Criterios</th>
+                        <th class="space">Tipo de Criterio</th>
+                        <th class="space">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let entry of formEntries">
+                        <td class="space">{{ entry.id }}</td>
+                        <td class="space">{{ entry.question }}</td>
+                        <td class="space">{{ entry.type }}</td>
+                        <td class="space">
+                            <!-- Icono "+" -->
+                            <mat-icon class="icon-plus clickable" svgIcon="heroicons_outline:plus-small"
+                                *ngIf="shouldShowPlusIcon(entry.type)" (click)="openSubModal(entry.id)">
+                            </mat-icon>
+                            <!-- Icon "eye" -->
+                            <mat-icon class="icon-eye clickable" svgIcon="heroicons_outline:eye"
+                                *ngIf="hasSubQuestions(entry.id)" [matTooltip]="getSubQuestionsTooltip(entry.id)"
+                                matTooltipClass="custom-tooltip">
+                            </mat-icon>
+                            <!-- Icon "X" -->
+                            <mat-icon svgIcon="heroicons_outline:x-mark" (click)="deleteFormEntry(entry.id)"
+                                class="clickable">
+                            </mat-icon>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-end margin-button-send">
+            <button class="px-8 shadow-button" mat-flat-button [color]="'primary'" type="button" (click)="submitForm()">
+                Guardar
+            </button>
+        </div>
     </div>
-    <div class="flex justify-end margin-button-send">
-        <button class="px-8 shadow-button" mat-flat-button [color]="'primary'" type="button" (click)="submitForm()">
-            Guardar
-        </button>
-    </div>    
-</div>
 
-<!-- Modal create question -->
-<div *ngIf="showModal" class="modal-overlay">
-    <div class="modal-container">
-        <h2>Campos iniciales</h2>
-        <form>
-            <div class="form-group">
-                <label for="question">Criterios</label>
-                <textarea 
-                    id="question" 
-                    [(ngModel)]="question" 
-                    name="question" 
-                    rows="4" 
-                    placeholder="Ingrese los criterios" 
-                    class="form-control"></textarea>
+    <!-- Modal create question -->
+    <div *ngIf="showModal" class="modal-overlay">
+        <div class="modal-container">
+            <h2>Campos iniciales</h2>
+            <form>
+                <div class="form-group">
+                    <label for="question">Criterios</label>
+                    <textarea id="question" [(ngModel)]="question" name="question" rows="4"
+                        placeholder="Ingrese los criterios" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="type">Tipo de Pregunta</label>
+                    <select id="type" [(ngModel)]="questionType" name="questionType" class="form-control">
+                        <option value="" disabled selected>Seleccione un tipo</option>
+                        <option value="texto">Texto</option>
+                        <option value="opcion-unica">Opción Única</option>
+                        <option value="opcion-multiple">Opción Múltiple</option>
+                    </select>
+                </div>
+            </form>
+            <div class="modal-actions">
+                <button mat-button (click)="closeModal()" class="shadow-button">Cancelar</button>
+                <button mat-button color="primary" (click)="saveFormEntry()" class="shadow-button">Guardar</button>
             </div>
-            <div class="form-group">
-                <label for="type">Tipo de Pregunta</label>
-                <select 
-                    id="type" 
-                    [(ngModel)]="questionType" 
-                    name="questionType" 
-                    class="form-control">
-                    <option value="" disabled selected>Seleccione un tipo</option>
-                    <option value="texto">Texto</option>
-                    <option value="opcion-unica">Opción Única</option>
-                    <option value="opcion-multiple">Opción Múltiple</option>
-                </select>
+        </div>
+    </div>
+
+
+    <!-- Modal create list -->
+    <div *ngIf="showSubModal" class="second-modal-overlay">
+        <div class="second-modal-container">
+            <h2>Agregar Subcriterios</h2>
+            <div *ngFor="let subQuestion of subQuestions; let i = index; trackBy: trackByFn" class="second-form-group">
+                <label for="sub-question-{{i}}">Subcriterio {{i + 1}}</label>
+                <textarea id="sub-question-{{i}}" [(ngModel)]="subQuestions[i]" name="subQuestion{{i}}" rows="2"
+                    placeholder="Ingrese el subcriterio {{i + 1}}" class="second-form-control">
+        </textarea>
+                <button mat-button (click)="removeSubQuestion(i)" class="remove-field-button shadow-button">
+                    Eliminar
+                </button>
             </div>
-        </form>
-        <div class="modal-actions">
-            <button mat-button (click)="closeModal()" class="shadow-button">Cancelar</button>
-            <button mat-button color="primary" (click)="saveFormEntry()" class="shadow-button">Guardar</button>
+            <button mat-button (click)="addSubQuestion()" class="add-field-button">
+                Agregar Subcriterio
+            </button>
+
+            <div class="second-modal-actions">
+                <button mat-button (click)="closeSubModal()" class="shadow-button">Cancelar</button>
+                <button mat-button color="primary" (click)="saveSubEntry()" class="shadow-button">Guardar</button>
+            </div>
         </div>
     </div>
 </div>
-
-
-<!-- Modal create list -->
-<div *ngIf="showSubModal" class="second-modal-overlay">
-    <div class="second-modal-container">
-      <h2>Agregar Subcriterios</h2>
-      <div *ngFor="let subQuestion of subQuestions; let i = index; trackBy: trackByFn" class="second-form-group">
-        <label for="sub-question-{{i}}">Subcriterio {{i + 1}}</label>
-        <textarea
-            id="sub-question-{{i}}"
-            [(ngModel)]="subQuestions[i]"
-            name="subQuestion{{i}}"
-            rows="2"
-            placeholder="Ingrese el subcriterio {{i + 1}}"
-            class="second-form-control">
-        </textarea>
-        <button mat-button (click)="removeSubQuestion(i)" class="remove-field-button shadow-button">
-            Eliminar
-        </button>
-    </div>
-      <button mat-button (click)="addSubQuestion()" class="add-field-button">
-        Agregar Subcriterio
-      </button>
-  
-      <div class="second-modal-actions">
-        <button mat-button (click)="closeSubModal()" class="shadow-button">Cancelar</button>
-        <button mat-button color="primary" (click)="saveSubEntry()" class="shadow-button">Guardar</button>
-      </div>
-    </div>
-  </div>
-  
-<!-- Float Buttom -->
-<button class="floating-button" mat-icon-button [matMenuTriggerFor]="menu">
-    <mat-icon svgIcon="heroicons_outline:clipboard-document-list" class="large-icon"></mat-icon>
-</button>
-
-<mat-menu #menu="matMenu" class="custom-menu">
-    <button mat-menu-item>
-        <mat-icon class="internos">account_circle</mat-icon>
-        <span class="internos">Usuarios</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">supervisor_account</mat-icon>
-        <span class="internos">Roles y permisos</span>
-    </button>
-    <button mat-menu-item [routerLink]="'/options/characterization'">
-        <mat-icon class="internos">settings</mat-icon>
-        <span class="internos">Criterios de caracterización</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">list</mat-icon>
-        <span class="internos">Criterios por catalogar</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">check_circle</mat-icon>
-        <span class="internos">Criterios de evaluación</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">visibility</mat-icon>
-        <span class="internos">Criterios de seguimiento</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon svgIcon="heroicons_outline:arrows-up-down" class="internos"></mat-icon>
-        <span class="internos">Criterios de publicación</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon svgIcon="heroicons_outline:arrow-trending-up" class="internos"></mat-icon>
-        <span class="internos">Workflow</span>
-    </button>
-</mat-menu>

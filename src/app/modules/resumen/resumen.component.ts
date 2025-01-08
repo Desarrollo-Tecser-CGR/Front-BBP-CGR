@@ -22,15 +22,8 @@ import { ResumenService } from './resumen.service';
 import { MatMenuModule } from '@angular/material/menu';
 import Swal from 'sweetalert2';
 import { RouterModule, Routes } from '@angular/router';
-import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 import { DialogOverviewExampleDialog } from '../common/general-modal/general-modal.component';
 import { MatDialog } from '@angular/material/dialog'; 
-
-// Definición de rutas
-const routes: Routes = [
-    { path: 'characterization', component: CharacterizationComponent },
-    { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
-];
 
 @Component({
     selector: 'resumen',
@@ -470,7 +463,7 @@ export class ResumenComponent implements OnInit {
 
 openCaracterizationModal(): void {
     const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'natural'; // Convertir a minúsculas
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro'; // Convertir a minúsculas
   
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',

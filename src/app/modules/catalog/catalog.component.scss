@@ -18,10 +18,113 @@ body {
 }
 
 h1 {
-    font-size: 24px;
+    font-size: 35px;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+
+.table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.7);
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.table-container2 {
+    overflow-x: auto;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.7);
+    border: 1px solid #ccc;
+    background-color: #fff;
+    margin-top: 20px;
+}
+
+
+h5 {
+    font-size: 20px;
+    margin-left: 35px;
     margin-bottom: 10px;
-    text-align: center;
-    color: #24197A;
+    font-weight: bold;
+}
+
+p {
+    font-size: 15px;
+    margin-left: 35px;
+    margin-bottom: 10px;
+}
+
+
+.crear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 24px;
+    background-color: #3f51b5;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, transform 0.2s;
+
+    position: absolute;
+    top: 100px;
+    right: 37px;
+}
+
+
+table {
+    width: 95%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+td {
+    color: #000;
+    text-decoration: none;
+
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.acceptable {
+    color: green;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.not-acceptable {
+    color: red;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.acceptable-conditions {
+    color: orange;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+td {
+    text-decoration: underline;
 }
 
 .fuse-vertical-navigation-item {
@@ -34,38 +137,4 @@ h1 {
 .fuse-vertical-navigation-item:hover {
     background-color: white !important;
     color: #2D3480 !important;
-}
-
-.floating-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #2D3580;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 15%;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    transition: border-radius 0.3s ease;
-}
-
-.large-icon{
-    font-size: 46px;
-    width: 45px;
-    height: 45px;
-    color: white;
-}
-
-.internos{
-    color: #2D3580 !important;
-}
-
-.custom-menu{
-    border-radius: 20px 20px 0px 20px !important;
-    overflow: hidden;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }

@@ -10,7 +10,7 @@ export const rol = [
 ];
 
 export const roldos = [
-    'natural'
+    'registro'
 ];
 
 export const roltres = [
