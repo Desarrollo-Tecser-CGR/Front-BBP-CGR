@@ -202,7 +202,6 @@ export class ResumenComponent implements OnInit {
         } else {
             this.buttonText = 'Acción'; // Texto por defecto
         }
-        
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
@@ -247,6 +246,7 @@ export class ResumenComponent implements OnInit {
                 documentoActuacion: [Validators.required],
             }),
         });
+        this.horizontalStepperForm.get(['step1', 'fechaDiligenciamiento'])?.setValue(this.fechaDiligenciamiento);
         this.horizontalStepperForm.valueChanges.subscribe(() => {        
             this.progress = this.calculateProgress();
             console.log('Progreso actualizado:', this.progress);

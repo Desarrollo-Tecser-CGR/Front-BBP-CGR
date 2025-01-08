@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation  } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -10,6 +10,7 @@ import { PublicationComponent } from '../../optionsDropdown/publication/publicat
 import { RolesServicesComponent } from '../../optionsDropdown/rolesServices/rolesServices.component';
 import { TrackingComponent } from '../../optionsDropdown/tracking/tracking.component';
 import { WorkflowComponent } from '../../optionsDropdown/workflow/workflow.component';
+import { CommonModule } from '@angular/common';
 
 // Definición de rutas
 const routes: Routes = [
@@ -33,12 +34,16 @@ const routes: Routes = [
         MatIconModule,
         MatTableModule,
         MatMenuModule,
-        RouterModule
+        RouterModule,
+        CommonModule
     ]
 })
-export class ExampleComponent {
-    /**
-     * Constructor
-     */
-    constructor() {}
-}
+export class ExampleComponent implements OnInit  {
+    roles: string[] = [];
+    rol: string = '';
+    ngOnInit(): void {
+         this.roles = JSON.parse(localStorage.getItem('accessRoles'));
+         this.rol = this.roles[0]
+        console.log("Rol en sesion: ", this.rol)  
+    }
+}  
