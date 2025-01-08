@@ -106,8 +106,8 @@ export class AuthRegisterUsersComponent implements OnInit {
                 },
                 error =>{
                         Swal.fire({
-                            title: 'Error',
-                            text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                            title: 'Error al crear el usuario',
+                            text: 'No se pudo registrar el usuario. Intenta nuevamente.',
                             icon: 'error',
                             confirmButtonText: 'Aceptar',
                         });
