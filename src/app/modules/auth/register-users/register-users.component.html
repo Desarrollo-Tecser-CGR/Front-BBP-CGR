@@ -14,11 +14,9 @@
             <div
                 class="mt-8 text-4xl font-extrabold leading-tight tracking-tight"
             >
-                Forgot password?
+                Registro
             </div>
-            <div class="mt-0.5 font-medium">
-                Fill the form to reset your password
-            </div>
+
 
             <!-- Alert -->
             @if (showAlert) {
@@ -36,21 +34,85 @@
             <!-- Forgot password form -->
             <form
                 class="mt-8"
-                [formGroup]="forgotPasswordForm"
+                [formGroup]="registerUsersForm"
                 #forgotPasswordNgForm="ngForm"
             >
+            <!-- Full Name field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Nombre completo</mat-label>
+                    <input id="full_name" matInput [formControlName]="'full_name'" />
+                    <mat-error *ngIf="registerUsersForm.get('full_name')?.hasError('required')">
+                        Nombre completo es requerido.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('full_name')?.hasError('full_name')">
+                        Por favor ingresa un nombre válido.
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Cargo field -->
+                <mat-form-field class="w-full hidden"  >
+                    <input id="rol" matInput
+                    [formControlName]="'rol'"
+                    [(ngModel)]="rol"
+                    [value]="rol"
+                    />
+                    <mat-error *ngIf="registerUsersForm.get('rol')?.hasError('required')">
+                        Cargo es requerido.
+                    </mat-error>
+                </mat-form-field>
+                <!-- Enabled field -->
+                <mat-form-field class="w-full hidden">
+                    <input id="enabled" matInput type="number"
+                    [formControlName]="'enabled'"
+                    [(ngModel)]="enabled"
+                    [value]="enabled"
+                    />
+                </mat-form-field>
+
                 <!-- Email field -->
                 <mat-form-field class="w-full">
-                    <mat-label>Email address</mat-label>
-                    <input id="email" matInput [formControlName]="'email'" />
-                    @if (forgotPasswordForm.get('email').hasError('required')) {
-                        <mat-error> Email address is required </mat-error>
-                    }
-                    @if (forgotPasswordForm.get('email').hasError('email')) {
-                        <mat-error>
-                            Please enter a valid email address
-                        </mat-error>
-                    }
+                    <mat-label>Correo electrónico</mat-label>
+                    <input id="email" matInput type="email" [formControlName]="'email'" />
+                    <mat-error *ngIf="registerUsersForm.get('email')?.hasError('required')">
+                        Dirección de email es requerida.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('email')?.hasError('email')">
+                        Por favor ingresa una dirección de correo electrónico válida.
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Password field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Contraseña</mat-label>
+                    <input id="password" matInput type="password" [formControlName]="'password'" />
+                    <mat-error *ngIf="registerUsersForm.get('password')?.hasError('required')">
+                        Contraseña es requerida.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('password')?.hasError('password')">
+                        Por favor ingresa una contraseña válida.
+                    </mat-error>
+                </mat-form-field>
+                <!-- phone field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Número de telefono</mat-label>
+                    <input id="samaccount_name" matInput type="number"  [formControlName]="'samaccount_name'" />
+                    <mat-error *ngIf="registerUsersForm.get('samaccount_name')?.hasError('required')">
+                        Nombre de usuario requerido.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('samaccount_name')?.hasError('samaccount_name')">
+                        Por favor ingresa un nombre de usuario válido.
+                    </mat-error>
+                </mat-form-field>
+                <!-- username field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Nombre de usuario</mat-label>
+                    <input id="phone" matInput  [formControlName]="'phone'" [placeholder]="'.cgr'" />
+                    <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('required')">
+                        Número de telefono requerido.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('phone')">
+                        Por favor ingresa un número de telefono válido.
+                    </mat-error>
                 </mat-form-field>
 
                 <!-- Submit button -->
@@ -58,13 +120,13 @@
                     class="fuse-mat-button-large mt-3 w-full"
                     mat-flat-button
                     [color]="'primary'"
-                    [disabled]="forgotPasswordForm.disabled"
-                    (click)="sendResetLink()"
-                >
-                    @if (!forgotPasswordForm.disabled) {
-                        <span> Send reset link </span>
+                    [disabled]="registerUsersForm.disabled"
+                    (click)="sendRegisterUsersForm()"
+                >  
+                    @if (!registerUsersForm.disabled) {
+                        <span> Registrar </span>
                     }
-                    @if (forgotPasswordForm.disabled) {
+                    @if (registerUsersForm.disabled) {
                         <mat-progress-spinner
                             [diameter]="24"
                             [mode]="'indeterminate'"
@@ -74,11 +136,10 @@
 
                 <!-- Form footer -->
                 <div class="text-secondary mt-8 text-md font-medium">
-                    <span>Return to</span>
                     <a
                         class="ml-1 text-primary-500 hover:underline"
                         [routerLink]="['/sign-in']"
-                        >sign in
+                        > Iniciar sesión
                     </a>
                 </div>
             </form>
@@ -111,13 +172,11 @@
         <!-- Content -->
         <div class="relative z-10 w-full max-w-2xl">
             <div class="text-7xl font-bold leading-none text-gray-100">
-                <div>Welcome to</div>
-                <div>our community</div>
+                <div>Bienvenido a</div>
+                <div>nuestra comunidad</div>
             </div>
             <div class="mt-6 text-lg leading-6 tracking-tight text-gray-400">
-                Fuse helps developers to build organized and well coded
-                dashboards full of beautiful and rich modules. Join us and start
-                building your application today.
+                
             </div>
             <div class="mt-8 flex items-center">
                 <div class="flex flex-0 items-center -space-x-1.5">
@@ -139,7 +198,6 @@
                     />
                 </div>
                 <div class="ml-4 font-medium tracking-tight text-gray-400">
-                    More than 17k people joined us, it's your turn
                 </div>
             </div>
         </div>

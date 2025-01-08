@@ -35,7 +35,7 @@ export class AuthMockApi {
         // @ Forgot password - POST
         // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService
-            .onPost('api/auth/forgot-password', 1000)
+            .onPost('api/auth/register-users', 1000)
             .reply(() => [200, true]);
 
         // -----------------------------------------------------------------------------------------------------
