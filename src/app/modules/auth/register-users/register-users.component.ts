@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import {
     FormsModule,
+    MaxValidator,
     NgForm,
     ReactiveFormsModule,
     UntypedFormBuilder,
@@ -17,6 +18,9 @@ import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/auth.service';
 import { valid } from 'chroma-js';
 import { finalize } from 'rxjs';
+import { UserService } from './register-users.service';
+import Swal from 'sweetalert2';
+
 
 @Component({
     selector: 'auth-register-users',
@@ -38,7 +42,6 @@ import { finalize } from 'rxjs';
 export class AuthRegisterUsersComponent implements OnInit {
 
     @ViewChild('registerUsersNgForm') registerUsersNgForm: NgForm;
-
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',
         message: '',
@@ -46,16 +49,22 @@ export class AuthRegisterUsersComponent implements OnInit {
     registerUsersForm: UntypedFormGroup;
     showAlert: boolean = false;
 
-    rol: string = 'registro';
-    enabled: number = 1;
+    userData: any = {
+        fullName:'',
+        email:'',
+        password:'',
+        phone:'',
+        sAMAccountName:''
+    }
     /**
      * Constructor
      */
     constructor(
-        private _authService: AuthService,
-        private _formBuilder: UntypedFormBuilder
+        private _formBuilder: UntypedFormBuilder,
+        private userService : UserService
     ) {}
 
+   
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------
@@ -66,13 +75,11 @@ export class AuthRegisterUsersComponent implements OnInit {
     ngOnInit(): void {
         // Create the form
         this.registerUsersForm = this._formBuilder.group({
-            full_name:['', [Validators.required, Validators.maxLength(255)]],
+            fullName:['', [Validators.required, Validators.maxLength(255)]],
             email: ['', [Validators.required, Validators.email]],
-            rol: [this.rol, Validators.required],
-            enabled: [this.enabled, Validators.required],
-            password:['',[Validators.required, Validators.maxLength(255)]],
+            password: ['',[Validators.required, Validators.maxLength(255)]],
             phone:['', [Validators.required, Validators.maxLength(225)]],
-            samaccount_name:['', [Validators.required, Validators.maxLength(255)]]
+            sAMAccountName:['', [Validators.required, Validators.maxLength(255)]]
         });
     }
 
@@ -83,8 +90,38 @@ export class AuthRegisterUsersComponent implements OnInit {
     /**
      * Send the form 
      */
-    sendRegisterUsersForm() {
-        throw new Error('Method not.');
+    sendRegisterUsersForm(): void{
+        if(this.registerUsersForm.valid){
+            this.userData = this.registerUsersForm.value;
+            this.userService.sendUsersForm(this.userData).subscribe(
+                response =>{
+                    Swal.fire({
+                        title:'¡Usuario registrado!',
+                        text: 'Se ha gardado exitasamente',
+                        icon: 'success',
+                        confirmButtonText:'Aceptar',
+                    })
+                    console.log('Usuario creado', response);
+                    this.showAlert = true;
+                },
+                error =>{
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                        });
+                    console.error('Error al crear el usuario', error);
+                    this.showAlert = true;
+                }
+            )
+        } else {
+            this.alert = {
+                type: 'error',
+                message: 'Formulario inválido. Por favor, revisa los campos.'
+              };
+            this.showAlert = true;
+        }
     }
    
     }

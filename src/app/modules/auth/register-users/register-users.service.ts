@@ -7,10 +7,10 @@ import { CONFIG } from 'app/config/config';
 @Injectable({
     providedIn: 'root'
 })
-export class ResumenService {
+export class UserService {
 
-  private apiUrl =  `${CONFIG.apiHost}/api/v1/hojadevida/guardar`;
-  private apiUrlGet = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
+  private apiUrl =  `${CONFIG.apiHost}/api/v1/user/createUser`;
+  private apiUrlGet = `${CONFIG.apiHost}/api/v1/user`;
   private apiUrlUpdate = `${CONFIG.apiHost}/api/v1/hojadevida/cargar-archivo`;
   private apiUrlDelete = `${CONFIG.apiHost}/api/v1/updateIdentity`;
   

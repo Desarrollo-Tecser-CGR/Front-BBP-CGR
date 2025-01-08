@@ -40,35 +40,26 @@
             <!-- Full Name field -->
                 <mat-form-field class="w-full">
                     <mat-label>Nombre completo</mat-label>
-                    <input id="full_name" matInput [formControlName]="'full_name'" />
-                    <mat-error *ngIf="registerUsersForm.get('full_name')?.hasError('required')">
+                    <input id="fullName" matInput [formControlName]="'fullName'" />
+                    <mat-error *ngIf="registerUsersForm.get('fullName')?.hasError('required')">
                         Nombre completo es requerido.
                     </mat-error>
-                    <mat-error *ngIf="registerUsersForm.get('full_name')?.hasError('full_name')">
+                    <mat-error *ngIf="registerUsersForm.get('fullName')?.hasError('fullName')">
                         Por favor ingresa un nombre válido.
                     </mat-error>
                 </mat-form-field>
 
-                <!-- Cargo field -->
-                <mat-form-field class="w-full hidden"  >
-                    <input id="rol" matInput
-                    [formControlName]="'rol'"
-                    [(ngModel)]="rol"
-                    [value]="rol"
-                    />
-                    <mat-error *ngIf="registerUsersForm.get('rol')?.hasError('required')">
-                        Cargo es requerido.
+                <!-- phone field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Número de telefono</mat-label>
+                    <input id="phone" matInput type="number"  [formControlName]="'phone'" />
+                    <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('required')">
+                        Nombre de usuario requerido.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('phone')">
+                        Por favor ingresa un nombre de usuario válido.
                     </mat-error>
                 </mat-form-field>
-                <!-- Enabled field -->
-                <mat-form-field class="w-full hidden">
-                    <input id="enabled" matInput type="number"
-                    [formControlName]="'enabled'"
-                    [(ngModel)]="enabled"
-                    [value]="enabled"
-                    />
-                </mat-form-field>
-
                 <!-- Email field -->
                 <mat-form-field class="w-full">
                     <mat-label>Correo electrónico</mat-label>
@@ -80,7 +71,17 @@
                         Por favor ingresa una dirección de correo electrónico válida.
                     </mat-error>
                 </mat-form-field>
-
+                <!-- username field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Usuario</mat-label>
+                    <input id="sAMAccountName" matInput  [formControlName]="'sAMAccountName'" [placeholder]="'.cgr'" />
+                    <mat-error *ngIf="registerUsersForm.get('sAMAccountName')?.hasError('required')">
+                        Número de telefono requerido.
+                    </mat-error>
+                    <mat-error *ngIf="registerUsersForm.get('sAMAccountName')?.hasError('sAMAccountName')">
+                        Por favor ingresa un número de telefono válido.
+                    </mat-error>
+                </mat-form-field>
                 <!-- Password field -->
                 <mat-form-field class="w-full">
                     <mat-label>Contraseña</mat-label>
@@ -90,28 +91,6 @@
                     </mat-error>
                     <mat-error *ngIf="registerUsersForm.get('password')?.hasError('password')">
                         Por favor ingresa una contraseña válida.
-                    </mat-error>
-                </mat-form-field>
-                <!-- phone field -->
-                <mat-form-field class="w-full">
-                    <mat-label>Número de telefono</mat-label>
-                    <input id="samaccount_name" matInput type="number"  [formControlName]="'samaccount_name'" />
-                    <mat-error *ngIf="registerUsersForm.get('samaccount_name')?.hasError('required')">
-                        Nombre de usuario requerido.
-                    </mat-error>
-                    <mat-error *ngIf="registerUsersForm.get('samaccount_name')?.hasError('samaccount_name')">
-                        Por favor ingresa un nombre de usuario válido.
-                    </mat-error>
-                </mat-form-field>
-                <!-- username field -->
-                <mat-form-field class="w-full">
-                    <mat-label>Nombre de usuario</mat-label>
-                    <input id="phone" matInput  [formControlName]="'phone'" [placeholder]="'.cgr'" />
-                    <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('required')">
-                        Número de telefono requerido.
-                    </mat-error>
-                    <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('phone')">
-                        Por favor ingresa un número de telefono válido.
                     </mat-error>
                 </mat-form-field>
 
