@@ -97,7 +97,7 @@ export class AuthRegisterUsersComponent implements OnInit {
                 response =>{
                     Swal.fire({
                         title:'¡Usuario registrado!',
-                        text: 'Se ha gardado exitasamente',
+                        text: 'Se ha guardado exitasamente',
                         icon: 'success',
                         confirmButtonText:'Aceptar',
                     })
