@@ -67,7 +67,7 @@
 
                         <div class="gt-xs:flex-row flex flex-col">
                             <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
-                                <input matInput placeholder="Nombre de la entidad" formControlName="nombreEntidad"
+                                <input matInput placeholder="Nombre de la entidad" formControlName="entityCgr"
                                     type="text" />
                                 <mat-icon class="icon-size-5" matPrefix
                                     [svgIcon]="'heroicons_solid:map-pin'"></mat-icon>
@@ -227,7 +227,10 @@
                         <div class="gt-sm:flex-row flex flex-col">
                             <mat-form-field class="flex-auto">
                                 <mat-label>Impacto esperado</mat-label>
-                                <mat-select formControlName="expectedImpact">
+                                <mat-select
+                                    formControlName="expectedImpact"
+                                    multiple
+                                    (selectionChange)="onExpectedImpactChange()">
                                     <mat-option *ngFor="let option of expectedImpactOptions" [value]="option.id">
                                         {{ option.name }}
                                     </mat-option>
@@ -250,7 +253,7 @@
                             </mat-form-field>
                             <mat-form-field class="flex-auto">
                                 <mat-label>Etapas de metodología</mat-label>
-                                <mat-select formControlName="stagesMethodology">
+                                <mat-select formControlName="stagesMethodology" multiple>
                                     <mat-option *ngFor="let stage of stagesMethodologyOptions" [value]="stage.id">
                                         {{ stage.name }}
                                     </mat-option>
@@ -296,7 +299,7 @@
                         <div class="gt-sm:flex-row flex flex-col">
                             <mat-form-field class="flex-auto">
                                 <mat-label>Tipo de material producido</mat-label>
-                                <mat-select formControlName="typeMaterialProduced">
+                                <mat-select formControlName="typeMaterialProduced" multiple>
                                     <mat-option *ngFor="let option of typeMaterialProducedOptions" [value]="option.id">
                                         {{ option.name }}
                                     </mat-option>
@@ -304,7 +307,7 @@
                             </mat-form-field>
                             <mat-form-field class="flex-auto">
                                 <mat-label>Apoyo recibido</mat-label>
-                                <mat-select formControlName="supportReceived" >
+                                <mat-select formControlName="supportReceived" multiple>
                                     <mat-option *ngFor="let option of supportReceivedOptions" [value]="option.id">
                                         {{ option.name }}
                                     </mat-option>
@@ -330,7 +333,7 @@
                             </mat-form-field>
                             <mat-form-field class="flex-auto">
                                 <mat-label>Taxonomía del Evento</mat-label>
-                                <mat-select formControlName="taxonomyEvent" >
+                                <mat-select formControlName="taxonomyEvent" multiple>
                                     <mat-option *ngFor="let option of taxonomyEventOptions" [value]="option.id">
                                         {{ option.name }}
                                     </mat-option>

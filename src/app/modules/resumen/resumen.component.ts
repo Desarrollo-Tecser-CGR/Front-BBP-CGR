@@ -150,8 +150,9 @@ export class ResumenComponent implements OnInit {
             });
 
             // Aplanar los datos
+            console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
-
+            console.log(flattenedValues.expectedImpact);
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar y actualizar el estadoFlujo antes de enviar los datos
@@ -251,7 +252,7 @@ export class ResumenComponent implements OnInit {
                     this.fechaDiligenciamiento,
                     Validators.required,
                 ],
-                nombreEntidad: ['', Validators.required],
+                entityCgr: [1, Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
             }),
             step2: this._formBuilder.group({
@@ -264,12 +265,12 @@ export class ResumenComponent implements OnInit {
                 ],
             }),
             step3: this._formBuilder.group({
-                typeStrategyIdentification: [],
-                typePractice: [],
+                typeStrategyIdentification: [[]],
+                typePractice: [[]],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [],
+                typology: [[]],
                 estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                levelGoodPractice: [],
+                levelGoodPractice: [[]],
                 nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
                 propositoPractica: ['', Validators.maxLength(300)],
                 objectiveMainPractice: [''],
@@ -351,7 +352,7 @@ export class ResumenComponent implements OnInit {
                 this.horizontalStepperForm.patchValue({
                     step1: {
                         fechaDiligenciamiento: response.fechaDiligenciamiento || '',
-                        nombreEntidad: response.nombreEntidad || '',
+                        entityCgr: response.entityCgr || '',
                         nombreDependenciaArea: response.nombreDependenciaArea || '',
                     },
                     step2: {
@@ -372,7 +373,7 @@ export class ResumenComponent implements OnInit {
                         objectiveMainPractice: response.objectiveMainPractice?.id || '',
                     },
                     step4: {
-                        expectedImpact: 1 || '',
+                        expectedImpact: response.expectedImpact || '',
                         metodologiaUsada: response.metodologiaUsada || '',
                         durationImplementation: response.durationImplementation?.id || '',
                         stagesMethodology: response.stagesMethodology?.id || '',
@@ -434,32 +435,57 @@ export class ResumenComponent implements OnInit {
         const day = ('0' + date.getDate()).slice(-2);
         return `${year}-${month}-${day}`;
     }
-
-    flattenObject(obj: any): any {
-        let result: any = {};
-
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
-                    const temp = this.flattenObject(obj[key]);
-                    for (const subKey in temp) {
-                        if (temp.hasOwnProperty(subKey)) {
-                            if (subKey.startsWith('step')) {
-                                result[
-                                    subKey.substring(subKey.indexOf('.') + 1)
-                                ] = temp[subKey];
-                            } else {
-                                result[subKey] = temp[subKey];
-                            }
-                        }
-                    }
+    
+    // nuevo
+    flattenObject(input: any): any {
+        const output = {};
+    
+        for (const step in input) {
+            const stepData = input[step];
+            for (const key in stepData) {
+                if (typeof stepData[key] === "string" && stepData[key].includes(",")) {
+                    // Transformar propiedades multiselect (e.g., "1,2,3") en arrays [1,2,3]
+                    output[key] = stepData[key].split(",").map(Number);
                 } else {
-                    result[key] = obj[key];
+                    // Mantener el resto de propiedades tal como están
+                    output[key] = stepData[key];
                 }
             }
         }
-        return result;
+    
+        return output;
     }
+
+
+
+    // flattenObject(obj: any): any {
+    //     let result: any = {};
+    
+    //     for (const key in obj) {
+    //         if (obj.hasOwnProperty(key)) {
+    //             if (Array.isArray(obj[key])) {
+    //                 // No transformar arrays
+    //                 result[key] = obj[key];
+    //             } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+    //                 const temp = this.flattenObject(obj[key]);
+    //                 for (const subKey in temp) {
+    //                     if (temp.hasOwnProperty(subKey)) {
+    //                         result[subKey] = temp[subKey];
+    //                     }
+    //                 }
+    //             } else {
+    //                 result[key] = obj[key];
+    //             }
+    //         }
+    //     }
+    //     return result;
+    // }
+            
+    
+    onExpectedImpactChange(): void {
+        console.log(this.horizontalStepperForm.get('step4.expectedImpact').value);
+    }
+
     submitDocumentoActuacion(): void {
         console.log('Intentando enviar los documentos...');
 
