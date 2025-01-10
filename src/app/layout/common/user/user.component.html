@@ -1,30 +1,17 @@
-<!-- Button -->
-<button mat-icon-button [matMenuTriggerFor]="userActions" style="margin-right: 70px;">
-    <span class="relative">
-        <div style="display: flex; align-items: center; padding-left: 100px;">
-            @if (showAvatar && user.avatar) {
-                <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 5px;"></mat-icon>
-            }
-            <p style="font-size: 12px; margin-left: auto;">{{ user?.fullName || 'Usuario' }}<br><p style="font-size: 10px; margin-right: 25px; font-weight: bold;">{{ user?.cargo || 'Cargo' }}</p></p>
-
-            @if (!showAvatar || !user.avatar) {
-                <!-- <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-left: auto;"></mat-icon> -->
-            }
+<!-- Botón de usuario -->
+<button mat-icon-button [matMenuTriggerFor]="userActions" style="display: flex; align-items: center;">
+    <div style="display: flex; align-items: center;">
+        @if (showAvatar && user.avatar) {
+            <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 5px;"></mat-icon>
+        }
+        <div>
+            <p style="font-size: 12px; margin: 0;">{{ user?.fullName || 'Usuario' }}</p>
+            <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ user?.cargo || 'Cargo' }}</p>
         </div>
-
-        <!-- <span
-            class="absolute bottom-0 right-0 h-2 w-2 rounded-full"
-            [ngClass]="{
-                'mb-px mr-px': !showAvatar || !user.avatar,
-                'bg-green-500': user.status === 'online',
-                'bg-amber-500': user.status === 'away',
-                'bg-red-500': user.status === 'busy',
-                'bg-gray-400': user.status === 'not-visible',
-            }"
-        ></span> -->
-    </span>
+    </div>
 </button>
 
+<!-- Menú desplegable -->
 <mat-menu [xPosition]="'before'" #userActions="matMenu">
     <button mat-menu-item>
         <span class="flex flex-col leading-none">
@@ -56,6 +43,7 @@
     </button>
 </mat-menu>
 
+<!-- Menú de estado -->
 <mat-menu class="user-status-menu" #userStatus="matMenu">
     <button mat-menu-item (click)="updateUserStatus('online')">
         <span class="mr-3 inline-flex h-4 w-4 rounded-full bg-green-500"></span>

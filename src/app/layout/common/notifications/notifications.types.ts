@@ -1,4 +1,5 @@
 export interface Notification {
+    expanded: boolean;
     id: string;
     icon?: string;
     image?: string;

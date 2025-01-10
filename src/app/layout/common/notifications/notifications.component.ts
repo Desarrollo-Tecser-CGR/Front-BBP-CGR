@@ -19,10 +19,11 @@ import { RouterLink } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 import { Subject, takeUntil } from 'rxjs';
-
+ 
 @Component({
     selector: 'notifications',
     templateUrl: './notifications.component.html',
+    styleUrls: ['./notifications.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'notifications',
@@ -41,12 +42,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
     @ViewChild('notificationsPanel')
     private _notificationsPanel: TemplateRef<any>;
-
+ 
     notifications: Notification[];
     unreadCount: number = 0;
     private _overlayRef: OverlayRef;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-
+ 
     /**
      * Constructor
      */
@@ -56,11 +57,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef
     ) {}
-
+ 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------
-
+ 
     /**
      * On init
      */
@@ -71,15 +72,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             .subscribe((notifications: Notification[]) => {
                 // Load the notifications
                 this.notifications = notifications;
-
+ 
                 // Calculate the unread count
                 this._calculateUnreadCount();
-
+ 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
     }
-
+ 
     /**
      * On destroy
      */
@@ -87,17 +88,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         // Unsubscribe from all subscriptions
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
-
+ 
         // Dispose the overlay
         if (this._overlayRef) {
             this._overlayRef.dispose();
         }
     }
-
+ 
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
-
+ 
     /**
      * Open the notifications panel
      */
@@ -106,25 +107,25 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         if (!this._notificationsPanel || !this._notificationsOrigin) {
             return;
         }
-
+ 
         // Create the overlay if it doesn't exist
         if (!this._overlayRef) {
             this._createOverlay();
         }
-
+ 
         // Attach the portal to the overlay
         this._overlayRef.attach(
             new TemplatePortal(this._notificationsPanel, this._viewContainerRef)
         );
     }
-
+ 
     /**
      * Close the notifications panel
      */
     closePanel(): void {
         this._overlayRef.detach();
     }
-
+ 
     /**
      * Mark all notifications as read
      */
@@ -132,20 +133,25 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         // Mark all as read
         this._notificationsService.markAllAsRead().subscribe();
     }
-
+ 
     /**
      * Toggle read status of the given notification
      */
     toggleRead(notification: Notification): void {
         // Toggle the read status
         notification.read = !notification.read;
-
+ 
         // Update the notification
         this._notificationsService
             .update(notification.id, notification)
             .subscribe();
     }
-
+ 
+    toggleExpand(notification: Notification): void {
+        notification.expanded = !notification.expanded;
+        this._notificationsService.update(notification.id, notification).subscribe();
+    }
+   
     /**
      * Delete the given notification
      */
@@ -153,7 +159,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         // Delete the notification
         this._notificationsService.delete(notification.id).subscribe();
     }
-
+ 
     /**
      * Track by function for ngFor loops
      *
@@ -163,11 +169,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
-
+ 
     // -----------------------------------------------------------------------------------------------------
     // @ Private methods
     // -----------------------------------------------------------------------------------------------------
-
+ 
     /**
      * Create the overlay
      */
@@ -211,13 +217,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                     },
                 ]),
         });
-
+ 
         // Detach the overlay from the portal on backdrop click
         this._overlayRef.backdropClick().subscribe(() => {
             this._overlayRef.detach();
         });
     }
-
+ 
     /**
      * Calculate the unread count
      *
@@ -225,13 +231,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      */
     private _calculateUnreadCount(): void {
         let count = 0;
-
+ 
         if (this.notifications && this.notifications.length) {
             count = this.notifications.filter(
                 (notification) => !notification.read
             ).length;
         }
-
+ 
         this.unreadCount = count;
     }
 }
+ 
