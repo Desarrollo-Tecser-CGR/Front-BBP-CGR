@@ -454,15 +454,19 @@
 
 
                         <div class="mt-8 flex justify-end">
-                            <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
-                                matStepperPrevious>
+                            <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button" matStepperPrevious>
                                 Back
                             </button>
-                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                            <button 
+                                class="px-8" 
+                                mat-flat-button 
+                                [color]="'primary'" 
+                                type="button" 
+                                matStepperNext 
+                                [disabled]="!canProceed()">
                                 Next
                             </button>
                         </div>
-                
 
                         <!-- <div class="mt-0 flex justify-end">
                             <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">

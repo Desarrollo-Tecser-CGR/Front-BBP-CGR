@@ -71,6 +71,10 @@ export class ResumenComponent implements OnInit {
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
     isDisabled : boolean = true;
+    cargo: string; 
+    isCaracterizationComplete: boolean = false;
+    selectedUserFromModal: any = null; 
+    additionalInfoFromModal: string = ''; 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
@@ -125,13 +129,17 @@ export class ResumenComponent implements OnInit {
             // Aplanar los datos
             const flattenedValues = this.flattenObject(formValues);
     
+            // Verificar el rol
+            const roles = localStorage.getItem('accessRoles');
+            const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro'; // Obtener el rol actual
+    
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
-
-                // Verificar y actualizar el estadoFlujo antes de enviar los datos
-                if (flattenedValues.estadoFlujo === 'Candidata') {
-                    flattenedValues.estadoFlujo = 'validacion';
+                // Verificar si el flujo está en "validación" y el rol es "validador"
+                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar el estado de flujo
                 }
+    
                 // Llamar al servicio de actualización
                 this.resumenService.updateDataAsJson(this.Id, flattenedValues).subscribe(
                     (response) => {
@@ -154,11 +162,11 @@ export class ResumenComponent implements OnInit {
                     }
                 );
             } else {
-
                 // Verificar y actualizar el estadoFlujo antes de crear los datos
                 if (flattenedValues.estadoFlujo === 'Candidata') {
-                    flattenedValues.estadoFlujo = 'validación';
+                    flattenedValues.estadoFlujo = 'validación'; 
                 }
+    
                 // Llamar al servicio de creación
                 this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
                     (response) => {
@@ -185,6 +193,7 @@ export class ResumenComponent implements OnInit {
             console.warn('Formulario no válido');
         }
     }
+    
 
     // Validacion de fecha: fecha actual
     ngOnInit(): void {
@@ -488,36 +497,34 @@ export class ResumenComponent implements OnInit {
     }
 }
 
-
 desestimarPractica(): void {
     if (!this.Id) {
         Swal.fire({
             title: 'Error',
-            text: 'No se puede desestimar la práctica porque no se encontró un ID válido.',
+            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
             icon: 'error',
             confirmButtonText: 'Aceptar',
         });
         return;
     }
 
-    const updatedData = { estadoFlujo: 'Desestimada' };
+    const updatedData = { estadoFlujo: 'desestimada' };
 
-    this.resumenService.updateDataAsJson(this.Id, updatedData).subscribe(
+    this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
         (response) => {
             Swal.fire({
-                title: 'Práctica Desestimada',
-                text: 'El estado de la práctica ha sido actualizado a "Desestimada".',
+                title: '¡Práctica Desestimada!',
+                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
                 icon: 'success',
                 confirmButtonText: 'Aceptar',
             }).then(() => {
-                // Redireccionar o actualizar vista
-                window.location.reload();
+                window.location.reload(); 
             });
         },
         (error) => {
             Swal.fire({
                 title: 'Error',
-                text: 'No se pudo desestimar la práctica. Intenta nuevamente.',
+                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
@@ -525,25 +532,43 @@ desestimarPractica(): void {
     );
 }
 
-
 // ======================== Logica que muestra el modal en la vista ======================== //
 
 openCaracterizationModal(): void {
     const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro'; // Convertir a minúsculas
-  
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-      width: '500px',
-      data: { role: currentRole }, // Pasa el rol al modal
+        width: '500px',
+        data: { 
+            role: currentRole,
+            selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado
+            additionalInfo: this.additionalInfoFromModal // Pasar información adicional
+        },
     });
-  
+
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        console.log('Usuario seleccionado:', result);
-      }
+        if (result) {
+            // Guardar los datos seleccionados al cerrar el modal
+            this.selectedUserFromModal = result.selectedUser;
+            this.additionalInfoFromModal = result.additionalInfo || '';
+        } else {
+            console.log('Caracterización cancelada');
+        }
     });
-  }
-  
-  
+}
+
+canProceed(): boolean {
+    const roles = localStorage.getItem('accessRoles');
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+
+    // Si el rol es "validador", verificar si hay un usuario seleccionado
+    if (currentRole === 'validador') {
+        return this.selectedUserFromModal !== null; // Permite avanzar solo si hay un usuario seleccionado
+    }
+
+    // Para otros roles, permite avanzar
+    return true;
+}
 
 }

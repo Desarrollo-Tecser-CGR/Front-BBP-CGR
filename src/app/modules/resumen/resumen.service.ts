@@ -13,6 +13,7 @@ export class ResumenService {
   private uploadUrl = `${CONFIG.apiHost}/api/v1/hojadevida/cargar-archivo`;
   private apiUrlGet = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
   private apiUrlUpdate = `${CONFIG.apiHost}/api/v1/updateIdentity`;
+  private apiUrlSetValidateStatus = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity`;
   
     constructor(private http: HttpClient) { }
 
@@ -34,5 +35,12 @@ export class ResumenService {
         const url = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity/${id}`;
         return this.http.put(url, formData, { headers });
     }    
+
+    updateStateWithPatch(id: number, updatedData: any): Observable<any> {
+        const url = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity/${id}`;
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        return this.http.patch(url, updatedData, { headers });
+    }
+    
        
 }
