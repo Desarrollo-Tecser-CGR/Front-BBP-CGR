@@ -103,9 +103,24 @@ export class InboxComponent implements OnInit {
 
 
   editRow(row: any): void {
+    console.log('Estado del flujo:', row.estadoFlujo);
+    console.log('Rol actual:', this.cargo);
+
+    // Condición de prueba
+    if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
+        Swal.fire({
+            title: 'Acción no permitida',
+            text: 'No puedes editar este registro porque no está en estado de validación.',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar',
+        });
+        return;
+    }
+
+    // Si cumple, permite la edición
     this.router.navigateByUrl('/resumen-edit/' + row.id);
-    // Lógica para editar una fila
-  }
+}
+
 
   deleteRow(row: any): void {
     console.log('Delete row:', row);
