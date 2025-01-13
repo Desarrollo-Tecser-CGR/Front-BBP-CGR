@@ -164,7 +164,7 @@ export class ResumenComponent implements OnInit {
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
-                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
+                if (flattenedValues.estadoFlujo === 'candidata' && currentRole === 'validador') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar el estado de flujo
                 }
                 delete flattenedValues.fechaDiligenciamiento;
@@ -193,8 +193,8 @@ export class ResumenComponent implements OnInit {
                     );
             } else {
                 // Verificar y actualizar el estadoFlujo antes de crear los datos
-                if (flattenedValues.estadoFlujo === 'Candidata') {
-                    flattenedValues.estadoFlujo = 'validación'; 
+                if (flattenedValues.estadoFlujo === 'candidata') {
+                    flattenedValues.estadoFlujo = 'candidata'; 
                 }
     
                 // Llamar al servicio de creación
@@ -247,10 +247,7 @@ export class ResumenComponent implements OnInit {
 
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: [
-                    this.fechaDiligenciamiento,
-                    Validators.required,
-                ],
+                fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
                 entityCgr: [1, Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
             }),  
@@ -267,29 +264,29 @@ export class ResumenComponent implements OnInit {
                 typeStrategyIdentification: [],
                 typePractice: [],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [],
-                estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                levelGoodPractice: [],
-                nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
-                propositoPractica: ['', Validators.maxLength(300)],
-                objectiveMainPractice: [''],
+                typology: [{ value: '', disabled: true}],
+                estadoFlujo: [{ value: 'candidata', disabled: true }],
+                levelGoodPractice: [{ value: '', disabled: true}],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true }, Validators.maxLength(300)],
+                objectiveMainPractice: [{ value: '', disabled: true}]
             }),
             step4: this._formBuilder.group({
-                expectedImpact: [[]],
-                metodologiaUsada: ['', [Validators.maxLength(500)]],
-                durationImplementation: [''],
-                stagesMethodology: [[]],
-                periodoDesarrolloInicio: [''],
-                periodoDesarrolloFin: [''],
+                expectedImpact: [{ value: '', disabled: true}],
+                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true}],
+                stagesMethodology: [{ value: '', disabled: true}],
+                periodoDesarrolloInicio: [{ value: '', disabled: true}],
+                periodoDesarrolloFin: [{ value: '', disabled: true}],
             }),
             step5: this._formBuilder.group({
-                typeMaterialProduced: [[]],
-                supportReceived: [[]],
-                recognitionsNationalInternational: [''],
-                controlObject: [''],
-                taxonomyEvent: [[]],
-                typePerformance: [''],
-                descripcionResultados: [''],
+                typeMaterialProduced: [{ value: '', disabled: true}],
+                supportReceived: [{ value: '', disabled: true}],
+                recognitionsNationalInternational: [{ value: '', disabled: true}],
+                controlObject: [{ value: '', disabled: true}],
+                taxonomyEvent: [{ value: '', disabled: true}],
+                typePerformance: [{ value: '', disabled: true}],
+                descripcionResultados: [{ value: '', disabled: true}],
             }),
             step6: this._formBuilder.group({
                 documentoActuacion: [Validators.required],
@@ -335,7 +332,10 @@ export class ResumenComponent implements OnInit {
                 this.resumenService.getTypeByKey('taxonomyEvents');
             this.typePerformanceOptions =
                 this.resumenService.getTypeByKey('typePerformances');
-
+            this.horizontalStepperForm.get('step4.periodoDesarrolloInicio')?.valueChanges.subscribe(() => {
+                this.validateFechas();});
+            this.horizontalStepperForm.get('step4.periodoDesarrolloFin')?.valueChanges.subscribe(() => {
+                this.validateFechas();});
             console.log(
                 'Opciones para typeStrategyIdentification:',
                 this.typeStrategyOptions
@@ -403,52 +403,61 @@ export class ResumenComponent implements OnInit {
     }
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
+        console.log('Valor seleccionado:', selectedValue);
         const step3Form = this.horizontalStepperForm.get('step3');
         const step4Form = this.horizontalStepperForm.get('step4');
         const step5Form = this.horizontalStepperForm.get('step5');
+        const propositoPracticaControl = step3Form?.get('propositoPractica');
 
-        if (selectedValue === 'BP') {
-            step3Form?.get('tipologia')?.enable();
-            step3Form?.get('nivelBuenaPractica')?.enable();
+        if (selectedValue.toString() === '4') {
+            step3Form?.get('typology')?.enable();
+            step3Form?.get('levelGoodPractice')?.enable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.enable();
-            step3Form?.get('propositoPractica')?.enable();
-            step3Form?.get('objetivoPrincipalPractica')?.enable();
-            step4Form?.get('impactoEsperado')?.enable();
+            propositoPracticaControl?.enable();
+            step3Form?.get('objectiveMainPractice')?.enable();
+            step4Form?.get('expectedImpact')?.enable();
             step4Form?.get('metodologiaUsada')?.enable();
-            step4Form?.get('duracionImplementacion')?.enable();
-            step4Form?.get('etapasMetodologia')?.enable();
-            step4Form?.get('etapasMetodologia')?.enable();
+            step4Form?.get('durationImplementation')?.enable();
+            step4Form?.get('stagesMethodology')?.enable();
             step4Form?.get('periodoDesarrolloInicio')?.enable();
             step4Form?.get('periodoDesarrolloFin')?.enable();
-            step5Form?.get('tipoMaterialProducido')?.enable();
-            step5Form?.get('apoyoRecibido')?.enable();
-            step5Form?.get('reconocimientosNacionalesInternacionales')?.enable();
-            step5Form?.get('objetoControl')?.enable();
-            step5Form?.get('taxonomiaEvento')?.enable();
-            step5Form?.get('tipoActuacion')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
             step5Form?.get('descripcionResultados')?.enable();
             step3Form?.get('codigoPractica')?.setValue('BP-' + this.generateConsecutive());
+
+            propositoPracticaControl?.setValidators([
+                Validators.required,
+                Validators.maxLength(300),
+            ]);
         } else {
-            step3Form?.get('tipologia')?.disable();
-            step3Form?.get('nivelBuenaPractica')?.disable();
+            step3Form?.get('typology')?.disable();
+            step3Form?.get('levelGoodPractice')?.disable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.disable();
-            step3Form?.get('propositoPractica')?.disable();
-            step3Form?.get('objetivoPrincipalPractica')?.disable();
-            step4Form?.get('impactoEsperado')?.disable();
+            propositoPracticaControl?.disable();
+            step3Form?.get('objectiveMainPractice')?.disable();
+            step4Form?.get('expectedImpact')?.disable();
             step4Form?.get('metodologiaUsada')?.disable();
-            step4Form?.get('duracionImplementacion')?.disable();
-            step4Form?.get('etapasMetodologia')?.disable();
+            step4Form?.get('durationImplementation')?.disable();
+            step4Form?.get('stagesMethodology')?.disable();
             step4Form?.get('periodoDesarrolloInicio')?.disable();
             step4Form?.get('periodoDesarrolloFin')?.disable();
-            step5Form?.get('tipoMaterialProducido')?.disable();
-            step5Form?.get('apoyoRecibido')?.disable();
-            step5Form?.get('reconocimientosNacionalesInternacionales')?.disable();
-            step5Form?.get('objetoControl')?.disable();
-            step5Form?.get('taxonomiaEvento')?.disable();
-            step5Form?.get('tipoActuacion')?.disable();
+            step5Form?.get('typeMaterialProduced')?.disable();
+            step5Form?.get('supportReceived')?.disable();
+            step5Form?.get('recognitionsNationalInternational')?.disable();
+            step5Form?.get('controlObject')?.disable();
+            step5Form?.get('taxonomyEvent')?.disable();
+            step5Form?.get('typePerformance')?.disable();
             step5Form?.get('descripcionResultados')?.disable();
             step3Form?.get('objetivoPrincipalPractica')?.setValue('');
+
+            propositoPracticaControl?.clearValidators();
         }
+        propositoPracticaControl?.updateValueAndValidity();
     }
 
     private generateConsecutive(): string {
@@ -458,10 +467,16 @@ export class ResumenComponent implements OnInit {
     onDateChange(event: any, stepName: string, controlName: string): void {
         const date = event.value;
         const formattedDate = this.formatDate(date);
-        this.horizontalStepperForm
-            .get(`${stepName}.${controlName}`)
-            ?.setValue(formattedDate);
+    
+        const control = this.horizontalStepperForm.get(`${stepName}.${controlName}`);
+        control?.setValue(formattedDate);
+    
+        // Validación específica para las fechas de inicio y fin
+        if (controlName === 'periodoDesarrolloInicio' || controlName === 'periodoDesarrolloFin') {
+            this.validateFechas();
+        }
     }
+    
 
     formatDate(date: Date): string {
         const year = date.getFullYear();
@@ -621,41 +636,61 @@ export class ResumenComponent implements OnInit {
             return 'green'; // 63% - 100%: Verde
         }
     }
+    // ======================== Logica que valida las fechas ======================== //
+    validateFechas(): void {
+        const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
+        const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
 
-desestimarPractica(): void {
-    if (!this.Id) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar',
-        });
-        return;
+        if (!fechaInicioControl || !fechaFinControl) {
+            return;
+        }
+
+        const fechaInicio = new Date(fechaInicioControl.value);
+        const fechaFin = new Date(fechaFinControl.value);
+
+        // Validar que fecha de fin no sea anterior a la de inicio
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            fechaFinControl.setErrors({ fechaFinAnterior: true });
+        } else {
+            fechaFinControl.setErrors(null);
+        }
     }
-
-    const updatedData = { estadoFlujo: 'desestimada' };
-
-    this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
-        (response) => {
-            Swal.fire({
-                title: '¡Práctica Desestimada!',
-                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-            }).then(() => {
-                window.location.reload(); 
-            });
-        },
-        (error) => {
+    
+    // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
+    desestimarPractica(): void {
+        if (!this.Id) {
             Swal.fire({
                 title: 'Error',
-                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
+            return;
         }
-    );
-}
+
+        const updatedData = { estadoFlujo: 'desestimada' };
+
+        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
+            (response) => {
+                Swal.fire({
+                    title: '¡Práctica Desestimada!',
+                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            },
+            (error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                });
+            }
+        );
+    }
 
     // ======================== Logica que muestra el modal en la vista ======================== //
 
