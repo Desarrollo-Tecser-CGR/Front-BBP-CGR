@@ -1,10 +1,5 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import {
-    FormsModule,
-    ReactiveFormsModule,
-    UntypedFormBuilder,
-    UntypedFormGroup,
-    Validators
+import {FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -25,6 +20,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 import { DialogOverviewExampleDialog } from '../common/general-modal/general-modal.component';
 import { MatDialog } from '@angular/material/dialog'; 
+import { GenericTableComponent } from '../common/generic-table/generic-table.component';
+import { DataServices } from '../resumen-edit/resumen-edit.service';
+import { Router } from '@angular/router';
+
 
 // Definición de rutas
 const routes: Routes = [
@@ -57,12 +56,15 @@ const routes: Routes = [
         MatIconModule,
         MatMenuModule,
         RouterModule, 
-        DialogOverviewExampleDialog
-
+        DialogOverviewExampleDialog,
+        GenericTableComponent
     ],
     providers: [MatDatepickerModule],
 })
 export class ResumenComponent implements OnInit {
+    roles: string[] = [];
+    rol: string = '';
+
     fechaDiligenciamiento: string = this.formatDate(new Date());
     horizontalStepperForm: UntypedFormGroup;
     selectedFiles: File[] = [];
@@ -74,8 +76,25 @@ export class ResumenComponent implements OnInit {
     @Input() Id: number;
     @Input() isEdit: boolean = false;
     
+    data: any[] = [];
+    columns: { key: string; label: string }[] = [];
+    buttons = [
+        {
+            icon: 'heroicons_outline:arrow-down-tray',
+            color:'accent',
+            action: (row: any) => this.downloadFile(row),
+
+        },
+        {
+            icon: 'heroicons_outline:magnifying-glass-circle',
+            color:'primary'
+        }
+    ]
+    
     constructor(private _formBuilder: UntypedFormBuilder,
-        private resumenService: ResumenService, private dialog: MatDialog,) { }
+        private resumenService: ResumenService, private dialog: MatDialog,
+        private dataService: DataServices, private router: Router
+    ) { }
 
         toggleModal(): void {
           this.isModalOpen = !this.isModalOpen;
@@ -94,6 +113,16 @@ export class ResumenComponent implements OnInit {
         } else {
             console.log('No se seleccionó ningún archivo.');
         }
+    }
+
+    downloadFile(file:any):void{
+        this.router.navigateByUrl('',file.id)
+        //Método para descargar un archivo
+    }
+
+    visualizeFile(file:any):void{
+        this.router.navigateByUrl('',file.id)
+        //Método para visualizar en el navegador un archivo
     }
 
     submitForm(): void {
@@ -141,6 +170,7 @@ export class ResumenComponent implements OnInit {
                             icon: 'success',
                             confirmButtonText: 'Aceptar',
                         }).then(() => {
+                            this.isDisabled = false;
                             window.location.href = './example';
                         });
                     },
@@ -186,10 +216,14 @@ export class ResumenComponent implements OnInit {
         }
     }
 
-    // Validacion de fecha: fecha actual
     ngOnInit(): void {
-        console.log('Id Practica ' + this.Id);
+        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
+        this.rol = this.roles[0]
+        console.log("Rol en sesion: ", this.rol)  
 
+        this.data = this.dataService.getDataFiles();
+        this.columns = this.dataService.getColumns();
+        console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
@@ -414,7 +448,8 @@ export class ResumenComponent implements OnInit {
           const formData = new FormData();
 
           this.selectedFiles.forEach((file) => {
-            formData.append('file', file, file.name);
+            // formData.append('files', file, file.name);
+            formData.append('files', file);
           });
 
           console.log('FormData construido:', formData);

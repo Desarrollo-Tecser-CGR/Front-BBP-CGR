@@ -19,7 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule, // Importa directivas comunes
   ],
 })
-export class GenericTableComponent<T> implements OnInit, AfterViewInit {
+export class  GenericTableComponent<T> implements OnInit, AfterViewInit {
   @Input() data: T[] = [];
   @Input() columns: { key: string; label: string }[] = [];
   @Input() buttons: { label?: string; icon?: string; color?: string; action: (row: T) => void }[] = [];

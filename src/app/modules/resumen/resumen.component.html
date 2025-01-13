@@ -1,4 +1,4 @@
-<div class="min-w-0 flex-1">
+<div class="min-w-0 flex-1 overflow-x-hidden">
  
     <!-- Main -->
     <div class="flex-auto p-6 sm:p-10">
@@ -451,24 +451,21 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-
+                        <div class="mt-0 flex justify-end">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                                Enviar Formulario
+                            </button>
+                        </div>
 
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
                                 Back
                             </button>
-                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+                            <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext [disabled]="!isEdit">
                                 Next
                             </button>
                         </div>
-                
-
-                        <!-- <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
-                                Enviar Formulario
-                            </button>
-                        </div> -->
 
                         <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
                             <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
@@ -484,58 +481,65 @@
                                 >
                                     Desestimar Práctica
                                 </button>
-                            </div>
-                            
-                    </div> 
-
+                            </div> 
+                        </div> 
                     </mat-step>
                     <mat-step [stepControl]="horizontalStepperForm.get('step6')">
                         <form [formGroup]="horizontalStepperForm.get('step6')">
                             <div class="file-upload-container">
-                                <!-- Encabezado con título y línea -->
-                                <div class="upload-header">
-                                    <i class="upload-header-icon">☁️</i>
-                                    <div class="upload-header-text">
-                                        <h3>Seleccione archivos</h3>
-                                        <p>Seleccione archivos desde su dispositivo</p>
+                                <!-- Zona de visualizacion de archivos -->
+                                 @if (isEdit === true) {
+                                    <!-- Encabezado con título y línea -->
+                                        <div class="upload-header">
+                                            <i class="upload-header-icon">☁️</i>
+                                            <div class="upload-header-text">
+                                                <h3>Archivos relacionados</h3>
+                                            </div>
+                                        </div> 
+                                        <div class="max-w-3x">
+                                            <app-generic-table [data]="data" [columns]="columns" [buttons]="buttons"></app-generic-table>
+                                        </div>
+                                 }
+                                 @if (isEdit === false) {
+                                    <!-- Encabezado con título y línea -->
+                                    <div class="upload-header">
+                                        <i class="upload-header-icon">☁️</i>
+                                        <div class="upload-header-text">
+                                            <h3>Seleccione archivos</h3>
+                                            <p>Seleccione archivos desde su dispositivo</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <hr />
- 
-                                <!-- Zona de carga de archivos -->
-                                <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
-                                    <i class="upload-icon">☁️</i>
-                                    <button type="button" (click)="fileInput.click()">Escoger archivos</button>
-                                    <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
-                                        accept=".jpeg,.png,.csv,.pdf" multiple />
-                                    <p>Escoja sus archivos o arrastre y suelte aquí</p>
-                                    <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
-                                </div>
-                                <!-- Lista de archivos seleccionados -->
-                                <div *ngIf="selectedFiles.length > 0" class="file-info">
-                                    <p><strong>Archivos seleccionados:</strong></p>
-                                    <ul>
-                                        <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
-                                            number: '1.0-2' }} KB)</li>
-                                    </ul>
-                                </div>
-                                <!-- Botón Enviar Documento -->
+                                    <hr />
+                                    <!-- Zona de carga de archivos -->
+                                    <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+                                        <i class="upload-icon">☁️</i>
+                                        <button type="button" (click)="fileInput.click()">Escoger archivos</button>
+                                        <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
+                                            accept=".jpeg,.png,.csv,.pdf" multiple />
+                                        <p>Escoja sus archivos o arrastre y suelte aquí</p>
+                                        <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
+                                    </div>
+                                    <!-- Lista de archivos seleccionados -->
+                                    <div *ngIf="selectedFiles.length > 0" class="file-info">
+                                        <p><strong>Archivos seleccionados:</strong></p>
+                                        <ul>
+                                            <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
+                                                number: '1.0-2' }} KB)</li>
+                                        </ul>
+                                    </div>
+                                    <!-- Botón Enviar Documento -->
                                 <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
                                     (click)="submitDocumentoActuacion()">
                                     Enviar Documentos
                                 </button>
+                                 }
                             </div>
                         </form>
-                        <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
-                                Enviar Formulario
-                            </button>
-                        </div>
                     </mat-step>
                 </mat-horizontal-stepper>
-                <!-- <button *ngIf="!isEdit" mat-raised-button color="primary" (click)="toggleModal()">
+                <button *ngIf="isEdit && rol === 'caracterizador' " mat-raised-button color="primary" (click)="toggleModal()">
                     Carga Automática
-                </button> -->
+                </button>
             </form>
         </div>
     </div>
