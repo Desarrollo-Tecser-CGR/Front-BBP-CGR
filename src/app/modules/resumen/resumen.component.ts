@@ -264,12 +264,12 @@ export class ResumenComponent implements OnInit {
                 ],
             }),
             step3: this._formBuilder.group({
-                typeStrategyIdentification: [[]],
-                typePractice: [[]],
+                typeStrategyIdentification: [],
+                typePractice: [],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [[]],
+                typology: [],
                 estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                levelGoodPractice: [[]],
+                levelGoodPractice: [],
                 nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
                 propositoPractica: ['', Validators.maxLength(300)],
                 objectiveMainPractice: [''],
@@ -473,25 +473,38 @@ export class ResumenComponent implements OnInit {
     // nuevo
     flattenObject(input: any): any {
         const output = {};
+        const multiselectFields = [
+            'expectedImpact',
+            'typeMaterialProduced',
+            'supportReceived',
+            'taxonomyEvent',
+            'stagesMethodology',
+        ];
     
         for (const step in input) {
             const stepData = input[step];
             for (const key in stepData) {
-                if (typeof stepData[key] === "string" && stepData[key].includes(",")) {
-                    // Transformar propiedades multiselect (e.g., "1,2,3") en arrays [1,2,3]
-                    output[key] = stepData[key].split(",").map(Number);
+                if (multiselectFields.includes(key)) {
+                    if (typeof stepData[key] === 'string' && stepData[key].includes(',')) {
+                        // Convertir cadenas con comas a listas de números
+                        output[key] = stepData[key].split(',').map(Number);
+                    } else if (typeof stepData[key] === 'string' && stepData[key] !== '') {
+                        // Convertir cadenas individuales a una lista con un solo número
+                        output[key] = [Number(stepData[key])];
+                    } else {
+                        // Si está vacío, enviar una lista vacía
+                        output[key] = [];
+                    }
                 } else {
-                    // Mantener el resto de propiedades tal como están
+                    // Mantener el resto de las propiedades sin cambios
                     output[key] = stepData[key];
                 }
             }
         }
     
         return output;
-    }
-
-
-
+    }    
+    
     // flattenObject(obj: any): any {
     //     let result: any = {};
     
