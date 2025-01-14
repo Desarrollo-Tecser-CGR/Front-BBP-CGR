@@ -71,7 +71,7 @@ export class ResumenComponent implements OnInit {
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
-    cargo: string; 
+    cargo: string = ''; 
     isCaracterizationComplete: boolean = false;
     selectedUserFromModal: any = null; 
     isDisabled: boolean = true;
@@ -192,7 +192,7 @@ export class ResumenComponent implements OnInit {
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
-                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
+                if (flattenedValues.estadoFlujo === 'candidata' && currentRole === 'validador') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar el estado de flujo
                 }
                 delete flattenedValues.fechaDiligenciamiento;
@@ -262,17 +262,24 @@ export class ResumenComponent implements OnInit {
         this.rol = this.roles[0]
         console.log("Rol en sesion: ", this.rol)  
 
+        // Logica de agregar campos seleccionables
+        this.entityOptions = [
+            { id: 1, name: 'Contraloría General de la República' },
+            { id: 2, name: 'Registraduría Nacional del Estado Civil' },
+            { id: 3, name: 'Ministerio de Hacienda' },
+        ];
+
         this.data = this.dataService.getDataFiles();
         this.columns = this.dataService.getColumns();
         console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
-        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+        this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
 
         // Configurar el texto del botón basado en el rol
-        if (cargo === 'validador') {
+        if (this.cargo === 'validador') {
             this.buttonText = 'Caracterización';
-        } else if (cargo === 'caracterizador') {
+        } else if (this.cargo === 'caracterizador') {
             this.buttonText = 'Evaluación';
         } else {
             this.buttonText = 'Acción';
@@ -280,62 +287,46 @@ export class ResumenComponent implements OnInit {
 
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
-                entityCgr: [1, Validators.required],
-                nombreDependenciaArea: ['', Validators.required],
+                fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
+                entityCgr: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+                nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
             }),  
             step2: this._formBuilder.group({
-                nombre: ['', [Validators.required, Validators.maxLength(50)]],
-                cargo: ['', [Validators.required, Validators.maxLength(50)]],
-                correo: ['', [Validators.required, Validators.email]],
-                contacto: [
-                    '',
-                    [Validators.required, Validators.pattern('^[0-9]{10}$')],
-                ],
+                nombre: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                cargo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                correo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.email]],
+                contacto: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.pattern('^[0-9]{10}$')],],
             }),
             step3: this._formBuilder.group({
-                typeStrategyIdentification: [],
-                typePractice: [],
+                typeStrategyIdentification: [{ value: '', disabled: this.cargo === 'validador' }],
+                typePractice: [{ value: '', disabled: this.cargo === 'validador' }],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [{ value: '', disabled: true}],
-                estadoFlujo: [{ value: 'candidata', disabled: true }],
-                levelGoodPractice: [{ value: '', disabled: true}],
-                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true }, Validators.maxLength(100)],
-                propositoPractica: [{ value: '', disabled: true }, Validators.maxLength(300)],
-                objectiveMainPractice: [{ value: '', disabled: true}]
+                typology: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                estadoFlujo: [{ value: 'candidata', disabled: true || this.cargo === 'validador' }],
+                levelGoodPractice: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(300)],
+                objectiveMainPractice: [{ value: '', disabled: true || this.cargo === 'validador' }]
             }),
             step4: this._formBuilder.group({
-                expectedImpact: [{ value: '', disabled: true}],
-                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
-                durationImplementation: [{ value: '', disabled: true}],
-                stagesMethodology: [{ value: '', disabled: true}],
-                periodoDesarrolloInicio: [{ value: '', disabled: true}],
-                periodoDesarrolloFin: [{ value: '', disabled: true}],
-                expectedImpact: [{ value: '', disabled: true}],
-                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
-                durationImplementation: [{ value: '', disabled: true}],
-                stagesMethodology: [{ value: '', disabled: true}],
-                periodoDesarrolloInicio: [{ value: '', disabled: true}],
-                periodoDesarrolloFin: [{ value: '', disabled: true}],
+                expectedImpact: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                metodologiaUsada: [{ value: '', disabled: true || this.cargo === 'validador' }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                stagesMethodology: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                periodoDesarrolloInicio: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                periodoDesarrolloFin: [{ value: '', disabled: true || this.cargo === 'validador' }],
             }),
             step5: this._formBuilder.group({
-                typeMaterialProduced: [{ value: '', disabled: true}],
-                supportReceived: [{ value: '', disabled: true}],
-                recognitionsNationalInternational: [{ value: '', disabled: true}],
-                controlObject: [{ value: '', disabled: true}],
-                taxonomyEvent: [{ value: '', disabled: true}],
-                typePerformance: [{ value: '', disabled: true}],
-                descripcionResultados: [{ value: '', disabled: true}],
-                typeMaterialProduced: [{ value: '', disabled: true}],
-                supportReceived: [{ value: '', disabled: true}],
-                recognitionsNationalInternational: [{ value: '', disabled: true}],
-                controlObject: [{ value: '', disabled: true}],
-                taxonomyEvent: [{ value: '', disabled: true}],
-                typePerformance: [{ value: '', disabled: true}],
-                descripcionResultados: [{ value: '', disabled: true}],
+                typeMaterialProduced: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                supportReceived: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                recognitionsNationalInternational: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                controlObject: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                taxonomyEvent: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                typePerformance: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                descripcionResultados: [{ value: '', disabled: true || this.cargo === 'validador' }],
             }),
             step6: this._formBuilder.group({
-                documentoActuacion: [Validators.required],
+                documentoActuacion: [{ value: '', disabled: true || this.cargo === 'validador'  },Validators.required],
             }),
         });
         this.horizontalStepperForm.valueChanges.subscribe(() => {
@@ -540,7 +531,6 @@ export class ResumenComponent implements OnInit {
             this.validateFechas();
         }
     }
-    
 
     formatDate(date: Date): string {
         const year = date.getFullYear();
@@ -713,61 +703,68 @@ export class ResumenComponent implements OnInit {
             return 'green'; // 63% - 100%: Verde
         }
     }
-    // ======================== Logica que valida las fechas ======================== //
-    validateFechas(): void {
-        const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
-        const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
+// ======================== Logica multiselect entidad momentaneo ======================== //
+    entityOptions = [
+        { id: 1, name: 'Contraloría General de la República' },
+        { id: 2, name: 'Registraduría Nacional del Estado Civil' },
+    ];
 
-        if (!fechaInicioControl || !fechaFinControl) {
-            return;
-        }
+// ======================== Logica que valida las fechas ======================== //
+validateFechas(): void {
+    const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
+    const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
 
-        const fechaInicio = new Date(fechaInicioControl.value);
-        const fechaFin = new Date(fechaFinControl.value);
-
-        // Validar que fecha de fin no sea anterior a la de inicio
-        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
-            fechaFinControl.setErrors({ fechaFinAnterior: true });
-        } else {
-            fechaFinControl.setErrors(null);
-        }
+    if (!fechaInicioControl || !fechaFinControl) {
+        return;
     }
-    
-    // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
-    desestimarPractica(): void {
-        if (!this.Id) {
+
+    const fechaInicio = new Date(fechaInicioControl.value);
+    const fechaFin = new Date(fechaFinControl.value);
+
+    // Validar que fecha de fin no sea anterior a la de inicio
+    if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+        fechaFinControl.setErrors({ fechaFinAnterior: true });
+    } else {
+        fechaFinControl.setErrors(null);
+    }
+}
+
+// ======================== Logica que cambia el estado de la practica a desestimar ======================== //
+
+desestimarPractica(): void {
+    if (!this.Id) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+        });
+        return;
+    }
+
+    const updatedData = { estadoFlujo: 'desestimada' };
+
+    this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
+        (response) => {
+            Swal.fire({
+                title: '¡Práctica Desestimada!',
+                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                window.location.reload(); 
+            });
+        },
+        (error) => {
             Swal.fire({
                 title: 'Error',
-                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
+                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
-            return;
         }
-
-        const updatedData = { estadoFlujo: 'desestimada' };
-
-        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
-            (response) => {
-                Swal.fire({
-                    title: '¡Práctica Desestimada!',
-                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                }).then(() => {
-                    window.location.reload(); 
-                });
-            },
-            (error) => {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                });
-            }
-        );
-    }
+    );
+}
 
     // ======================== Logica que muestra el modal en la vista ======================== //
 

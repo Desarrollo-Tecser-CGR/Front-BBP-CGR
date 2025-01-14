@@ -66,12 +66,17 @@
                         </div>
 
                         <div class="gt-xs:flex-row flex flex-col">
+                           
+
                             <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
-                                <input matInput placeholder="Nombre de la entidad" formControlName="entityCgr"
-                                    type="text" />
-                                <mat-icon class="icon-size-5" matPrefix
-                                    [svgIcon]="'heroicons_solid:map-pin'"></mat-icon>
+                                <mat-select formControlName="entityCgr" placeholder="Nombre de la entidad">
+                                    <mat-option *ngFor="let entity of entityOptions" [value]="entity.id">
+                                        {{ entity.name }}
+                                    </mat-option>
+                                </mat-select>
                             </mat-form-field>
+                            
+
                             <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
                                 <input matInput placeholder="Nombre de la dependencia"
                                     formControlName="nombreDependenciaArea" type="text" />
@@ -354,7 +359,7 @@
                             </mat-form-field>
                         </div>
                         <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons" matStepperNext [disabled]="!canProceed()">
                                 Enviar Formulario
                             </button>
                         </div>
@@ -368,9 +373,7 @@
                                 class="px-8" 
                                 mat-flat-button 
                                 [color]="'primary'" 
-                                type="button" 
-                                matStepperNext 
-                                [disabled]="!canProceed()">
+                                type="button">
                                 Next
                             </button>
                             } @else{
