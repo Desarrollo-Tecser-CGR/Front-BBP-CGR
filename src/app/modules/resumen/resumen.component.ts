@@ -75,6 +75,7 @@ export class ResumenComponent implements OnInit {
     isCaracterizationComplete: boolean = false;
     selectedUserFromModal: any = null; 
     isDisabled: boolean = true;
+    identityId: null=null;
     typeStrategyOptions: any[] = [];
     typePracticeOptions: any[] = [];
     typologyOptions: any[] = [];
@@ -206,7 +207,6 @@ export class ResumenComponent implements OnInit {
                                 icon: 'success',
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
-                                this.isDisabled = false;
                             window.location.href = './example';
                             });
                         },
@@ -236,8 +236,10 @@ export class ResumenComponent implements OnInit {
                                 icon: 'success',
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
-                                window.location.href = './example';
+                                this.isDisabled = false;
                             });
+                            this.identityId =  response.data.id;
+                            console.log('Id de la hv en creacion:', response.data.id);
                             this.enviarNotificacion();
                         },
                         (error) => {
@@ -278,10 +280,7 @@ export class ResumenComponent implements OnInit {
 
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: [
-                    this.fechaDiligenciamiento,
-                    Validators.required,
-                ],
+                fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
                 entityCgr: [1, Validators.required],
                 nombreDependenciaArea: ['', Validators.required],
             }),  
@@ -298,29 +297,29 @@ export class ResumenComponent implements OnInit {
                 typeStrategyIdentification: [],
                 typePractice: [],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [],
+                typology: [{ value: '', disabled: true}],
                 estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                levelGoodPractice: [],
-                nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
-                propositoPractica: ['', Validators.maxLength(300)],
-                objectiveMainPractice: [''],
+                levelGoodPractice: [{ value: '', disabled: true}],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true }, Validators.maxLength(300)],
+                objectiveMainPractice: [{ value: '', disabled: true}]
             }),
             step4: this._formBuilder.group({
-                expectedImpact: [[]],
-                metodologiaUsada: ['', [Validators.maxLength(500)]],
-                durationImplementation: [''],
-                stagesMethodology: [[]],
-                periodoDesarrolloInicio: [''],
-                periodoDesarrolloFin: [''],
+                expectedImpact: [{ value: '', disabled: true}],
+                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true}],
+                stagesMethodology: [{ value: '', disabled: true}],
+                periodoDesarrolloInicio: [{ value: '', disabled: true}],
+                periodoDesarrolloFin: [{ value: '', disabled: true}],
             }),
             step5: this._formBuilder.group({
-                typeMaterialProduced: [[]],
-                supportReceived: [[]],
-                recognitionsNationalInternational: [''],
-                controlObject: [''],
-                taxonomyEvent: [[]],
-                typePerformance: [''],
-                descripcionResultados: [''],
+                typeMaterialProduced: [{ value: '', disabled: true}],
+                supportReceived: [{ value: '', disabled: true}],
+                recognitionsNationalInternational: [{ value: '', disabled: true}],
+                controlObject: [{ value: '', disabled: true}],
+                taxonomyEvent: [{ value: '', disabled: true}],
+                typePerformance: [{ value: '', disabled: true}],
+                descripcionResultados: [{ value: '', disabled: true}],
             }),
             step6: this._formBuilder.group({
                 documentoActuacion: [Validators.required],
@@ -434,49 +433,49 @@ export class ResumenComponent implements OnInit {
     }
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
+        console.log('Valor seleccionado:', selectedValue);
         const step3Form = this.horizontalStepperForm.get('step3');
         const step4Form = this.horizontalStepperForm.get('step4');
         const step5Form = this.horizontalStepperForm.get('step5');
-
-        if (selectedValue === 'BP') {
-            step3Form?.get('tipologia')?.enable();
-            step3Form?.get('nivelBuenaPractica')?.enable();
+ 
+        if (selectedValue.toString() === '4') {
+            step3Form?.get('typology')?.enable();
+            step3Form?.get('levelGoodPractice')?.enable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.enable();
             step3Form?.get('propositoPractica')?.enable();
-            step3Form?.get('objetivoPrincipalPractica')?.enable();
-            step4Form?.get('impactoEsperado')?.enable();
+            step3Form?.get('objectiveMainPractice')?.enable();
+            step4Form?.get('expectedImpact')?.enable();
             step4Form?.get('metodologiaUsada')?.enable();
-            step4Form?.get('duracionImplementacion')?.enable();
-            step4Form?.get('etapasMetodologia')?.enable();
-            step4Form?.get('etapasMetodologia')?.enable();
+            step4Form?.get('durationImplementation')?.enable();
+            step4Form?.get('stagesMethodology')?.enable();
             step4Form?.get('periodoDesarrolloInicio')?.enable();
             step4Form?.get('periodoDesarrolloFin')?.enable();
-            step5Form?.get('tipoMaterialProducido')?.enable();
-            step5Form?.get('apoyoRecibido')?.enable();
-            step5Form?.get('reconocimientosNacionalesInternacionales')?.enable();
-            step5Form?.get('objetoControl')?.enable();
-            step5Form?.get('taxonomiaEvento')?.enable();
-            step5Form?.get('tipoActuacion')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
             step5Form?.get('descripcionResultados')?.enable();
             step3Form?.get('codigoPractica')?.setValue('BP-' + this.generateConsecutive());
         } else {
-            step3Form?.get('tipologia')?.disable();
-            step3Form?.get('nivelBuenaPractica')?.disable();
+            step3Form?.get('typology')?.disable();
+            step3Form?.get('levelGoodPractice')?.disable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.disable();
             step3Form?.get('propositoPractica')?.disable();
-            step3Form?.get('objetivoPrincipalPractica')?.disable();
-            step4Form?.get('impactoEsperado')?.disable();
+            step3Form?.get('objectiveMainPractice')?.disable();
+            step4Form?.get('expectedImpact')?.disable();
             step4Form?.get('metodologiaUsada')?.disable();
-            step4Form?.get('duracionImplementacion')?.disable();
-            step4Form?.get('etapasMetodologia')?.disable();
+            step4Form?.get('durationImplementation')?.disable();
+            step4Form?.get('stagesMethodology')?.disable();
             step4Form?.get('periodoDesarrolloInicio')?.disable();
             step4Form?.get('periodoDesarrolloFin')?.disable();
-            step5Form?.get('tipoMaterialProducido')?.disable();
-            step5Form?.get('apoyoRecibido')?.disable();
-            step5Form?.get('reconocimientosNacionalesInternacionales')?.disable();
-            step5Form?.get('objetoControl')?.disable();
-            step5Form?.get('taxonomiaEvento')?.disable();
-            step5Form?.get('tipoActuacion')?.disable();
+            step5Form?.get('typeMaterialProduced')?.disable();
+            step5Form?.get('supportReceived')?.disable();
+            step5Form?.get('recognitionsNationalInternational')?.disable();
+            step5Form?.get('controlObject')?.disable();
+            step5Form?.get('taxonomyEvent')?.disable();
+            step5Form?.get('typePerformance')?.disable();
             step5Form?.get('descripcionResultados')?.disable();
             step3Form?.get('objetivoPrincipalPractica')?.setValue('');
         }
@@ -564,8 +563,8 @@ export class ResumenComponent implements OnInit {
         console.log(this.horizontalStepperForm.get('step4.expectedImpact').value);
     }
 
-    submitDocumentoActuacion(): void {
-        console.log('Intentando enviar los documentos...');
+    submitDocumentoActuacion(identityId:number): void {
+        console.log('Intentando enviar los documentos con el ID:', identityId);
 
         if (this.selectedFiles.length > 0) {
             const formData = new FormData();
@@ -578,13 +577,25 @@ export class ResumenComponent implements OnInit {
             console.log('FormData construido:', formData);
 
             // Enviamos los archivos al servicio
-            this.resumenService.uploadFile(formData).subscribe(
+            this.resumenService.uploadFile(identityId,formData).subscribe(
                 (response) => {
+                    Swal.fire({
+                        title: '¡Actualización Exitosa!',
+                        text: 'Documentos cargados correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                    })
                     console.log('Documentos enviados con éxito:', response);
                     // Limpiamos la selección tras el envío exitoso
                     this.selectedFiles = [];
                 },
                 (error) => {
+                    Swal.fire({
+                        title:  'Error',
+                        text: 'Error al cargar los documentos.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                    })
                     console.error('Error al enviar los documentos:', error);
                 }
             );

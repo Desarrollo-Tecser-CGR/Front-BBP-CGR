@@ -151,7 +151,8 @@
                             <div class="flex">
                                 <mat-form-field class="flex-auto">
                                     <mat-label>Tipo de práctica</mat-label>
-                                    <mat-select formControlName="typePractice">
+                                    <mat-select formControlName="typePractice"
+                                    (selectionChange)="onPracticaChange($event)">
                                         <mat-option *ngFor="let option of typePracticeOptions" [value]="option.id">
                                             {{ option.name }}
                                         </mat-option>
@@ -362,7 +363,8 @@
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button" matStepperPrevious>
                                 Back
                             </button>
-                            <button 
+                            @if (isEdit) {
+                                <button 
                                 class="px-8" 
                                 mat-flat-button 
                                 [color]="'primary'" 
@@ -371,6 +373,17 @@
                                 [disabled]="!canProceed()">
                                 Next
                             </button>
+                            } @else{
+                                <button 
+                                class="px-8" 
+                                mat-flat-button 
+                                [color]="'primary'" 
+                                type="button" 
+                                matStepperNext 
+                                [disabled]="isDisabled">
+                                Next
+                            </button>
+                            }                           
                         </div>
 
                         <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
@@ -435,7 +448,7 @@
                                     </div>
                                     <!-- Botón Enviar Documento -->
                                 <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
-                                    (click)="submitDocumentoActuacion()">
+                                    (click)="submitDocumentoActuacion(identityId)">
                                     Enviar Documentos
                                 </button>
                                  }
@@ -483,8 +496,8 @@
             </div>
             <!-- Botón Enviar Documento -->
             <button type="button" class="submit-button" [disabled]="!formData || !id"
-                (click)="submitDocumentoActuacion()">
-                Enviar Documentos
+            (click)="submitDocumentoActuacion()">
+            Enviar Documentos
             </button>
         </div>
         <div class="modal-actions">
