@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CONFIG } from 'app/config/config';
 import Swal from 'sweetalert2';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 
 @Injectable({
@@ -9,9 +10,24 @@ import Swal from 'sweetalert2';
 })
 export class DataServices{
 
-    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/guardar`;
+    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity/`;
 
     constructor(private http: HttpClient){}
+
+    public getFileByIdResumen(getIdentity:number) : Observable<any[]>{
+      return this.http.get(this.url + getIdentity).pipe(
+        map((response:any)=>{
+          console.log('Data:', response);
+          const files :any[] = response.files;
+          console.log('Files:', files);
+          return files;
+        }),
+        catchError((e)=>{
+          console.error('Error al obtener los archivos:', e);
+          return throwError(e);
+        })
+      )
+    }
 
     public downloadFile(filename : string):void{
      this.http.get(this.url, {responseType:'blob'}).subscribe({
@@ -25,8 +41,8 @@ export class DataServices{
       },
       error:(err)=>{
         Swal.fire({
-            title: 'Error al crear el usuario',
-            text: 'No se pudo registrar el usuario. Intenta nuevamente.',
+            title: 'Error al descargar el archivo',
+            text: 'No se pudo descargar el archivo. Intenta nuevamente.',
             icon: 'error',
             confirmButtonText: 'Aceptar',
         });
@@ -42,23 +58,13 @@ export class DataServices{
         window.open(fileURL);
       })
     }
-    private data: any[] = [
-        { id: '1', name: 'file1' },
-        { id: '2', name: 'file2' },
-        { id: '3', name: 'file3' },
-        { id: '4', name: 'file4' },
-        { id: '5', name: 'file5' },
-      ];
-
     private columns: any[]=[
         {key:'id', label:'Id'},
+        {key:'path', label:'Path'},
         {key:'name', label:'File name'}
     ];
     
     
-      public getDataFiles(){
-        return this.data;
-      }
       public getColumns(){
         return this.columns;
       }

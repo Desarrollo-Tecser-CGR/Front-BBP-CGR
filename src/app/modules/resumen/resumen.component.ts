@@ -135,13 +135,15 @@ export class ResumenComponent implements OnInit {
         }
     }
 
-    downloadFile(file:any):void{
-        this.router.navigateByUrl('',file.id)
+    downloadFile(url:string):void{
+        this.dataService.downloadFile(url)
+        // this.router.navigateByUrl('',file.id)
         //Método para descargar un archivo
     }
 
-    visualizeFile(file:any):void{
-        this.router.navigateByUrl('',file.id)
+    visualizeFile(url:string):void{
+        this.dataService.viewFile(url)
+        // this.router.navigateByUrl('',file.id)
         //Método para visualizar en el navegador un archivo
     }
 
@@ -262,7 +264,16 @@ export class ResumenComponent implements OnInit {
         this.rol = this.roles[0]
         console.log("Rol en sesion: ", this.rol)  
 
-        this.data = this.dataService.getDataFiles();
+        console.log('Id hv para editar y archivos:', this.Id);
+        this.dataService.getFileByIdResumen(this.Id).subscribe(
+            (response)=>{
+                this.data = response;
+                console.log('Files guardados en data:', this.data);
+            },
+            (e) =>{
+                console.error('Error al guardar files en data:', e);
+            }
+        )
         this.columns = this.dataService.getColumns();
         console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage

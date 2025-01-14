@@ -12,7 +12,7 @@ export class ResumenService {
     private uploadUrl = `${CONFIG.apiHost}/api/v1/hojadevida/cargar-archivo`;
     private apiUrlGet = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
     private apiUrlUpdate = `${CONFIG.apiHost}/api/v1/updateIdentity`;
-  private apiUrlSetValidateStatus = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity`;
+    private apiUrlSetValidateStatus = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity`;
     private apiUrlgetdates = `${CONFIG.apiHost}/api/v1/hojadevida/getAllTypes`;
 
     // Propiedades para almacenar datos compartidos
