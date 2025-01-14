@@ -1,7 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { CONFIG } from '../../config/config';
+import registerUsersRoutes from '../auth/register-users/register-users.routes';
 
 @Injectable({
     providedIn: 'root',
@@ -24,11 +25,25 @@ export class ResumenService {
 
     sendFormDataAsJson(formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        return this.http.post(this.apiUrl, formData, { headers });
+        return this.http.post(this.apiUrl, formData, { headers }).pipe(
+            map((response: any)=>{
+                console.log('Data:', response);
+                const id = response.data.id;
+                console.log('Id hv:', id);
+                return response;
+            }),
+            catchError((e)=>{
+                console.error('Error al obtener los datos:', e);
+                return throwError(e);
+            }),
+            );
     }
 
-    uploadFile(fileData: FormData): Observable<any> {
-        return this.http.post(this.uploadUrl, fileData);
+    
+
+    uploadFile(identityId: number, fileData: FormData): Observable<any> {
+        console.log('Id pasando al servicio de carga', identityId)
+        return this.http.post(this.uploadUrl+`?identityId=${identityId}` , fileData);
     }
 
     getDataAsJson(id: string): Observable<any> {

@@ -1,22 +1,14 @@
 <div
-    class="flex min-w-0 flex-auto flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start"
+    class="flex min-w-0 flex-auto flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start  h-screen overflow-y-hidden"
 >
     <div
-        class="w-full px-4 py-8 sm:bg-card sm:w-auto sm:rounded-2xl sm:p-12 sm:shadow md:flex md:h-full md:w-1/2 md:items-center md:justify-end md:rounded-none md:p-16 md:shadow-none"
+        class="w-full  sm:bg-card sm:w-auto sm:rounded-2xl sm:p-12 sm:shadow md:flex md:h-full md:w-1/2 md:items-center md:justify-center md:rounded-none md:p-10 md:shadow-none"
     >
-        <div class="mx-auto w-full max-w-80 sm:mx-0 sm:w-80">
+        <div class="mx-auto py-0 w-full h-full max-w-80 sm:mx-0 sm:w-80 md:p-0 ">
             <!-- Logo -->
-            <div class="w-12">
-                <img src="images/logo/logo.svg" />
+            <div>
+                <img src="images/register/logo-text.png" />
             </div>
-
-            <!-- Title -->
-            <div
-                class="mt-8 text-4xl font-extrabold leading-tight tracking-tight"
-            >
-                Registro
-            </div>
-
 
             <!-- Alert -->
             @if (showAlert) {
@@ -33,12 +25,12 @@
 
             <!-- Forgot password form -->
             <form
-                class="mt-8"
+                class="mt-3 h-full-screen"
                 [formGroup]="registerUsersForm"
                 #forgotPasswordNgForm="ngForm"
             >
             <!-- Full Name field -->
-                <mat-form-field class="w-full">
+                <mat-form-field class="w-full text-sm h-2 py-1 ">
                     <mat-label>Nombre completo</mat-label>
                     <input id="fullName" matInput [formControlName]="'fullName'" />
                     <mat-error *ngIf="registerUsersForm.get('fullName')?.hasError('required')">
@@ -50,7 +42,7 @@
                 </mat-form-field>
 
                 <!-- phone field -->
-                <mat-form-field class="w-full">
+                <mat-form-field class="w-full text-sm h-2 py-2 mt-2">
                     <mat-label>Número de telefono</mat-label>
                     <input id="phone" matInput type="number"  [formControlName]="'phone'" />
                     <mat-error *ngIf="registerUsersForm.get('phone')?.hasError('required')">
@@ -61,7 +53,7 @@
                     </mat-error>
                 </mat-form-field>
                 <!-- Email field -->
-                <mat-form-field class="w-full">
+                <mat-form-field class="w-full text-sm h-2 py-2 mt-2">
                     <mat-label>Correo electrónico</mat-label>
                     <input id="email" matInput type="email" [formControlName]="'email'" />
                     <mat-error *ngIf="registerUsersForm.get('email')?.hasError('required')">
@@ -72,7 +64,7 @@
                     </mat-error>
                 </mat-form-field>
                 <!-- username field -->
-                <mat-form-field class="w-full">
+                <mat-form-field class="w-full text-sm h-2 py-2 mt-2">
                     <mat-label>Usuario</mat-label>
                     <input id="sAMAccountName" matInput  [formControlName]="'sAMAccountName'" [placeholder]="'.cgr'" />
                     <mat-error *ngIf="registerUsersForm.get('sAMAccountName')?.hasError('required')">
@@ -83,7 +75,7 @@
                     </mat-error>
                 </mat-form-field>
                 <!-- Password field -->
-                <mat-form-field class="w-full">
+                <mat-form-field class="w-full text-sm h-2 py-2 mt-2">
                     <mat-label>Contraseña</mat-label>
                     <input id="password" matInput type="password" [formControlName]="'password'" />
                     <mat-error *ngIf="registerUsersForm.get('password')?.hasError('required')">
@@ -96,7 +88,7 @@
 
                 <!-- Submit button -->
                 <button
-                    class="fuse-mat-button-large mt-3 w-full"
+                    class="button-large mt-6 w-full h-2 bg-indigo-800"
                     mat-flat-button
                     [color]="'primary'"
                     [disabled]="registerUsersForm.disabled"
@@ -114,7 +106,7 @@
                 </button>
 
                 <!-- Form footer -->
-                <div class="text-secondary mt-8 text-md font-medium">
+                <div class="text-secondary mt-3 text-md font-medium">
                     <a
                         class="ml-1 text-primary-500 hover:underline"
                         [routerLink]="['/sign-in']"
@@ -125,60 +117,8 @@
         </div>
     </div>
     <div
-        class="relative hidden h-full w-1/2 flex-auto items-center justify-center overflow-hidden bg-gray-800 p-16 dark:border-l md:flex lg:px-28"
+        class="relative hidden h-full w-1/2 flex-auto items-center justify-center overflow-hidden bg-gray-0 p-16 dark:border-r md:flex lg:px-28"
     >
-        <!-- Background -->
-        <!-- Rings -->
-        <!-- prettier-ignore -->
-        <svg class="absolute inset-0 pointer-events-none"
-             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
-            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
-                <circle r="234" cx="196" cy="23"></circle>
-                <circle r="234" cx="790" cy="491"></circle>
-            </g>
-        </svg>
-        <!-- Dots -->
-        <!-- prettier-ignore -->
-        <svg class="absolute -top-16 -right-16 text-gray-700"
-             viewBox="0 0 220 192" width="220" height="192" fill="none">
-            <defs>
-                <pattern id="837c3e70-6c3a-44e6-8854-cc48c737b659" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
-                </pattern>
-            </defs>
-            <rect width="220" height="192" fill="url(#837c3e70-6c3a-44e6-8854-cc48c737b659)"></rect>
-        </svg>
-        <!-- Content -->
-        <div class="relative z-10 w-full max-w-2xl">
-            <div class="text-7xl font-bold leading-none text-gray-100">
-                <div>Bienvenido a</div>
-                <div>nuestra comunidad</div>
-            </div>
-            <div class="mt-6 text-lg leading-6 tracking-tight text-gray-400">
-                
-            </div>
-            <div class="mt-8 flex items-center">
-                <div class="flex flex-0 items-center -space-x-1.5">
-                    <img
-                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
-                        src="images/avatars/female-18.jpg"
-                    />
-                    <img
-                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
-                        src="images/avatars/female-11.jpg"
-                    />
-                    <img
-                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
-                        src="images/avatars/male-09.jpg"
-                    />
-                    <img
-                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
-                        src="images/avatars/male-16.jpg"
-                    />
-                </div>
-                <div class="ml-4 font-medium tracking-tight text-gray-400">
-                </div>
-            </div>
-        </div>
+        <img src="images/register/register-bbp.svg" alt="Fondo BBP register" class="absolute inset-0 w-full h-full object-cover">
     </div>
 </div>

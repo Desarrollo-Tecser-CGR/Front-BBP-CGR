@@ -1,11 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import {
-    FormsModule,
-    ReactiveFormsModule,
-    UntypedFormBuilder,
-    UntypedFormGroup,
-    Validators,
+import {FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -24,6 +19,10 @@ import Swal from 'sweetalert2';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 import { DialogOverviewExampleDialog } from '../common/general-modal/general-modal.component';
 import { ResumenService } from './resumen.service';
+import { GenericTableComponent } from '../common/generic-table/generic-table.component';
+import { DataServices } from '../resumen-edit/resumen-edit.service';
+import { Router } from '@angular/router';
+
 
 // Definición de rutas
 const routes: Routes = [
@@ -55,12 +54,16 @@ const routes: Routes = [
         RouterModule,
         MatIconModule,
         MatMenuModule,
-        RouterModule,
+        RouterModule, 
         DialogOverviewExampleDialog,
+        GenericTableComponent
     ],
     providers: [MatDatepickerModule],
 })
 export class ResumenComponent implements OnInit {
+    roles: string[] = [];
+    rol: string = '';
+
     fechaDiligenciamiento: string = this.formatDate(new Date());
     horizontalStepperForm: UntypedFormGroup;
     selectedFiles: File[] = [];
@@ -72,6 +75,7 @@ export class ResumenComponent implements OnInit {
     isCaracterizationComplete: boolean = false;
     selectedUserFromModal: any = null; 
     isDisabled: boolean = true;
+    identityId: null=null;
     typeStrategyOptions: any[] = [];
     typePracticeOptions: any[] = [];
     typologyOptions: any[] = [];
@@ -90,12 +94,26 @@ export class ResumenComponent implements OnInit {
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
+    
+    data: any[] = [];
+    columns: { key: string; label: string }[] = [];
+    buttons = [
+        {
+            icon: 'heroicons_outline:arrow-down-tray',
+            color:'accent',
+            action: (row: any) => this.downloadFile(row),
 
-    constructor(
-        private _formBuilder: UntypedFormBuilder,
-        private resumenService: ResumenService,
-        private dialog: MatDialog
-    ) {}
+        },
+        {
+            icon: 'heroicons_outline:magnifying-glass-circle',
+            color:'primary'
+        }
+    ]
+    
+    constructor(private _formBuilder: UntypedFormBuilder,
+        private resumenService: ResumenService, private dialog: MatDialog,
+        private dataService: DataServices, private router: Router
+    ) { }
 
     toggleModal(): void {
         this.isModalOpen = !this.isModalOpen;
@@ -115,6 +133,16 @@ export class ResumenComponent implements OnInit {
         } else {
             console.log('No se seleccionó ningún archivo.');
         }
+    }
+
+    downloadFile(file:any):void{
+        this.router.navigateByUrl('',file.id)
+        //Método para descargar un archivo
+    }
+
+    visualizeFile(file:any):void{
+        this.router.navigateByUrl('',file.id)
+        //Método para visualizar en el navegador un archivo
     }
 
     enviarNotificacion(): void {
@@ -164,7 +192,7 @@ export class ResumenComponent implements OnInit {
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
-                if (flattenedValues.estadoFlujo === 'candidata' && currentRole === 'validador') {
+                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar el estado de flujo
                 }
                 delete flattenedValues.fechaDiligenciamiento;
@@ -179,7 +207,7 @@ export class ResumenComponent implements OnInit {
                                 icon: 'success',
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
-                                window.location.href = './example';
+                            window.location.href = './example';
                             });
                         },
                         (error) => {
@@ -208,8 +236,10 @@ export class ResumenComponent implements OnInit {
                                 icon: 'success',
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
-                                window.location.href = './example';
+                                this.isDisabled = false;
                             });
+                            this.identityId =  response.data.id;
+                            console.log('Id de la hv en creacion:', response.data.id);
                             this.enviarNotificacion();
                         },
                         (error) => {
@@ -226,12 +256,15 @@ export class ResumenComponent implements OnInit {
             console.warn('Formulario no válido');
         }
     }
-    
 
-    // Validacion de fecha: fecha actual
     ngOnInit(): void {
-        console.log('Id Practica ' + this.Id);
+        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
+        this.rol = this.roles[0]
+        console.log("Rol en sesion: ", this.rol)  
 
+        this.data = this.dataService.getDataFiles();
+        this.columns = this.dataService.getColumns();
+        console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
@@ -278,8 +311,21 @@ export class ResumenComponent implements OnInit {
                 stagesMethodology: [{ value: '', disabled: true}],
                 periodoDesarrolloInicio: [{ value: '', disabled: true}],
                 periodoDesarrolloFin: [{ value: '', disabled: true}],
+                expectedImpact: [{ value: '', disabled: true}],
+                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true}],
+                stagesMethodology: [{ value: '', disabled: true}],
+                periodoDesarrolloInicio: [{ value: '', disabled: true}],
+                periodoDesarrolloFin: [{ value: '', disabled: true}],
             }),
             step5: this._formBuilder.group({
+                typeMaterialProduced: [{ value: '', disabled: true}],
+                supportReceived: [{ value: '', disabled: true}],
+                recognitionsNationalInternational: [{ value: '', disabled: true}],
+                controlObject: [{ value: '', disabled: true}],
+                taxonomyEvent: [{ value: '', disabled: true}],
+                typePerformance: [{ value: '', disabled: true}],
+                descripcionResultados: [{ value: '', disabled: true}],
                 typeMaterialProduced: [{ value: '', disabled: true}],
                 supportReceived: [{ value: '', disabled: true}],
                 recognitionsNationalInternational: [{ value: '', disabled: true}],
@@ -419,8 +465,16 @@ export class ResumenComponent implements OnInit {
             step4Form?.get('metodologiaUsada')?.enable();
             step4Form?.get('durationImplementation')?.enable();
             step4Form?.get('stagesMethodology')?.enable();
+            step4Form?.get('durationImplementation')?.enable();
+            step4Form?.get('stagesMethodology')?.enable();
             step4Form?.get('periodoDesarrolloInicio')?.enable();
             step4Form?.get('periodoDesarrolloFin')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
             step5Form?.get('typeMaterialProduced')?.enable();
             step5Form?.get('supportReceived')?.enable();
             step5Form?.get('recognitionsNationalInternational')?.enable();
@@ -437,6 +491,8 @@ export class ResumenComponent implements OnInit {
         } else {
             step3Form?.get('typology')?.disable();
             step3Form?.get('levelGoodPractice')?.disable();
+            step3Form?.get('typology')?.disable();
+            step3Form?.get('levelGoodPractice')?.disable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.disable();
             propositoPracticaControl?.disable();
             step3Form?.get('objectiveMainPractice')?.disable();
@@ -444,8 +500,16 @@ export class ResumenComponent implements OnInit {
             step4Form?.get('metodologiaUsada')?.disable();
             step4Form?.get('durationImplementation')?.disable();
             step4Form?.get('stagesMethodology')?.disable();
+            step4Form?.get('durationImplementation')?.disable();
+            step4Form?.get('stagesMethodology')?.disable();
             step4Form?.get('periodoDesarrolloInicio')?.disable();
             step4Form?.get('periodoDesarrolloFin')?.disable();
+            step5Form?.get('typeMaterialProduced')?.disable();
+            step5Form?.get('supportReceived')?.disable();
+            step5Form?.get('recognitionsNationalInternational')?.disable();
+            step5Form?.get('controlObject')?.disable();
+            step5Form?.get('taxonomyEvent')?.disable();
+            step5Form?.get('typePerformance')?.disable();
             step5Form?.get('typeMaterialProduced')?.disable();
             step5Form?.get('supportReceived')?.disable();
             step5Form?.get('recognitionsNationalInternational')?.disable();
@@ -548,26 +612,39 @@ export class ResumenComponent implements OnInit {
         console.log(this.horizontalStepperForm.get('step4.expectedImpact').value);
     }
 
-    submitDocumentoActuacion(): void {
-        console.log('Intentando enviar los documentos...');
+    submitDocumentoActuacion(identityId:number): void {
+        console.log('Intentando enviar los documentos con el ID:', identityId);
 
         if (this.selectedFiles.length > 0) {
             const formData = new FormData();
 
-            this.selectedFiles.forEach((file) => {
-                formData.append('file', file, file.name);
-            });
+          this.selectedFiles.forEach((file) => {
+            // formData.append('files', file, file.name);
+            formData.append('files', file);
+          });
 
             console.log('FormData construido:', formData);
 
             // Enviamos los archivos al servicio
-            this.resumenService.uploadFile(formData).subscribe(
+            this.resumenService.uploadFile(identityId,formData).subscribe(
                 (response) => {
+                    Swal.fire({
+                        title: '¡Actualización Exitosa!',
+                        text: 'Documentos cargados correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                    })
                     console.log('Documentos enviados con éxito:', response);
                     // Limpiamos la selección tras el envío exitoso
                     this.selectedFiles = [];
                 },
                 (error) => {
+                    Swal.fire({
+                        title:  'Error',
+                        text: 'Error al cargar los documentos.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                    })
                     console.error('Error al enviar los documentos:', error);
                 }
             );
