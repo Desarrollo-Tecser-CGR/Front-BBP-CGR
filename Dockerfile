@@ -34,7 +34,7 @@ COPY --from=node-builder /app/dist/fuse/browser/ /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto 80 para servir la aplicación
-EXPOSE 80
+EXPOSE 81
 
 # Comando por defecto para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]
