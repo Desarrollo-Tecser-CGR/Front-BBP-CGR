@@ -118,9 +118,11 @@ export class NotificationsService {
      * METODO PARA UTILIZAR LAS NOTIFICACIONES EN UN SISTEMA
      */
     add(notification: Notification): Observable<void> {
+        console.log('Notificación creada:', notification); // Verifica la notificación antes de agregarla
         notification.expanded = false;
         const currentNotifications = this._notifications.getValue();
         this._notifications.next([...currentNotifications, notification]);
+        console.log('Estado actual de notificaciones:', this._notifications.getValue()); // Revisa el estado actualizado
         return new Observable((observer) => {
             observer.next();
             observer.complete();

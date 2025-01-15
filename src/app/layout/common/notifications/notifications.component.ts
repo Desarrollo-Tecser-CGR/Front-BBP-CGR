@@ -66,10 +66,24 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
+        this.notifications = [
+            {
+                id: '1',
+                title: 'Nueva notificación',
+                description: 'Tienes una nueva tarea asignada.',
+                read: true,
+                time: new Date().toISOString(), // Fecha en formato string
+                icon: 'heroicons_outline:check-circle',
+                link: '/tareas',
+                expanded: false
+            }
+        ];
         // Subscribe to notification changes
         this._notificationsService.notifications$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((notifications: Notification[]) => {
+                console.log('Notificaciones recibidas en el componente:', notifications); // Verifica si llegan datos
+
                 // Load the notifications
                 this.notifications = notifications;
  
