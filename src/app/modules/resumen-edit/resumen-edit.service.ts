@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CONFIG } from 'app/config/config';
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
 
 
@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 })
 export class DataServices{
 
-    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/guardar`;
+    private url =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/guardar`;
 
     constructor(private http: HttpClient){}
 

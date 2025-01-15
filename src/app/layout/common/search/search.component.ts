@@ -1,7 +1,7 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { CONFIG } from '../../../config/config';
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import {
     Component,
     ElementRef,
@@ -174,7 +174,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
                 filter((value) => value && value.length >= this.minLength)
             )
             .subscribe((value) => {
-                const endpoint = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
+                const endpoint = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity`;
     
                 // Llamada GET con parámetros en la URL
                 this._httpClient

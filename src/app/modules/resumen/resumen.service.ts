@@ -1,19 +1,19 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
-import { CONFIG } from '../../config/config';
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import registerUsersRoutes from '../auth/register-users/register-users.routes';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ResumenService {
-    private apiUrl = `${CONFIG.apiHost}/api/v1/hojadevida/guardar`;
-    private uploadUrl = `${CONFIG.apiHost}/api/v1/hojadevida/cargar-archivo`;
-    private apiUrlGet = `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity`;
-    private apiUrlUpdate = `${CONFIG.apiHost}/api/v1/updateIdentity`;
-  private apiUrlSetValidateStatus = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity`;
-    private apiUrlgetdates = `${CONFIG.apiHost}/api/v1/hojadevida/getAllTypes`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/guardar`;
+    private uploadUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/cargar-archivo`;
+    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity`;
+    private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
+  private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity`;
+    private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getAllTypes`;
 
     // Propiedades para almacenar datos compartidos
     private typesData: { [key: string]: any[] } = {};
@@ -52,12 +52,12 @@ export class ResumenService {
 
     updateDataAsJson(id: number, formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        const url = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity/${id}`;
+        const url = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity/${id}`;
         return this.http.patch(url, formData, { headers }); 
     }    
 
     updateStateWithPatch(id: number, updatedData: any): Observable<any> {
-        const url = `${CONFIG.apiHost}/api/v1/hojadevida/updateIdentity/${id}`;
+        const url = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity/${id}`;
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         return this.http.patch(url, updatedData, { headers });
     }
