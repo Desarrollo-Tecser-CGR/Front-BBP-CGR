@@ -10,7 +10,7 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 })
 export class DataServices{
 
-    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity/`;
+    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/file/`;
 
     constructor(private http: HttpClient){}
 
@@ -29,13 +29,13 @@ export class DataServices{
       )
     }
 
-    public downloadFile(filename : string):void{
-     this.http.get(this.url, {responseType:'blob'}).subscribe({
+    public downloadFile(id : string):void{
+     this.http.get(this.url + id, {responseType:'blob'}).subscribe({
       next: (blob) =>{
         const link = document.createElement('a');
         const objectUrl = URL.createObjectURL(blob);
         link.href = objectUrl;
-        link.download = filename;
+        link.download = id;
         link.click();
         URL.revokeObjectURL(objectUrl);
       },
