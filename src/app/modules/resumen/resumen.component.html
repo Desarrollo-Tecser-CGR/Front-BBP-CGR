@@ -66,11 +66,24 @@
                         </div>
 
                         <div class="gt-xs:flex-row flex flex-col">
-                            <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
-                                <input matInput placeholder="Nombre de la entidad" formControlName="entityCgr"
-                                    type="text" />
-                                <mat-icon class="icon-size-5" matPrefix
-                                    [svgIcon]="'heroicons_solid:map-pin'"></mat-icon>
+                            <mat-form-field class="example-full-width" appearance="fill">
+                                <input
+                                    matInput
+                                    placeholder="Nombre de la entidad"
+                                    formControlName="entityCgr"
+                                    [matAutocomplete]="auto"
+                                />
+                                <mat-autocomplete
+                                    #auto="matAutocomplete"
+                                    (optionSelected)="onEntitySelected($event.option.value)"
+                                >
+                                    <mat-option
+                                        *ngFor="let entity of filteredEntities$ | async"
+                                        [value]="entity"
+                                    >
+                                        {{ entity.name }}
+                                    </mat-option>
+                                </mat-autocomplete>
                             </mat-form-field>
                             <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
                                 <input matInput placeholder="Nombre de la dependencia"
