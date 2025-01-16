@@ -102,11 +102,11 @@ export class ResumenComponent implements OnInit {
             icon: 'heroicons_outline:arrow-down-tray',
             color:'accent',
             action: (row: any) => this.downloadFile(row),
-
         },
         {
             icon: 'heroicons_outline:magnifying-glass-circle',
-            color:'primary'
+            color:'primary',
+            action: (row: any) => this.visualizeFile(row),
         }
     ]
     
@@ -135,15 +135,13 @@ export class ResumenComponent implements OnInit {
         }
     }
 
-    downloadFile(url:string):void{
-        this.dataService.downloadFile(url)
-        // this.router.navigateByUrl('',file.id)
+    downloadFile(row: any):void{
+        this.dataService.downloadFile(row.id)
         //Método para descargar un archivo
     }
 
-    visualizeFile(url:string):void{
-        this.dataService.viewFile(url)
-        // this.router.navigateByUrl('',file.id)
+    visualizeFile(row: any):void{
+        this.dataService.viewFile(row.path)
         //Método para visualizar en el navegador un archivo
     }
 
@@ -272,7 +270,7 @@ export class ResumenComponent implements OnInit {
             },
             (e) =>{
                 console.error('Error al guardar files en data:', e);
-            }
+            } 
         )
         this.columns = this.dataService.getColumns();
         console.log('Id Practica ' + this.Id);

@@ -1,3 +1,4 @@
+import { initialDataResolver } from './../../app.resolvers';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CONFIG } from 'app/config/config';
@@ -9,8 +10,9 @@ import { catchError, map, Observable, throwError } from 'rxjs';
     providedIn: 'root',
 })
 export class DataServices{
-
-    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/file/`;
+ 
+    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity/`;
+    private downloadUrl =  `${CONFIG.apiHost}/api/v1/hojadevida/file/`;
 
     constructor(private http: HttpClient){}
 
@@ -29,15 +31,35 @@ export class DataServices{
       )
     }
 
-    public downloadFile(id : string):void{
-     this.http.get(this.url + id, {responseType:'blob'}).subscribe({
-      next: (blob) =>{
+    public downloadFile(id : number):void{
+      console.log('Descargando archivo con ID:', id); 
+      this.http.get(this.downloadUrl + id , {responseType: 'blob', observe: 'response'}).subscribe({
+      next: (response) =>{
+        const constentDisposition = response.headers.get('Content-Disposition');
+        let fileName = `archivo_${id}`;
+
+        if(constentDisposition){
+          const matches = /filename="([^"]+)"/.exec(constentDisposition);
+          if(matches && matches[1]){
+            fileName = matches[1]
+          }
+        }
+
+        const url = window.URL.createObjectURL(response.body);
         const link = document.createElement('a');
-        const objectUrl = URL.createObjectURL(blob);
-        link.href = objectUrl;
-        link.download = id;
+        link.href = url;
+        link.download = fileName;
+        //forzar descarga en el navegador
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(objectUrl);
+        document.body.removeChild(link);
+        
+        Swal.fire({
+          title: 'Archivo descargado',
+          text: 'Archivo descargado exitosamente',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+      });
       },
       error:(err)=>{
         Swal.fire({
@@ -46,7 +68,7 @@ export class DataServices{
             icon: 'error',
             confirmButtonText: 'Aceptar',
         });
-        console.error("Error al descargar el archivo")
+        console.error("Error al descargar el archivo", err)
 
       }
      })
