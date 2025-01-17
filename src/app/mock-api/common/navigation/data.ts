@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'registro' , 'caracterizador']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad']
     },
     {
         id   : 'resumen',
@@ -44,7 +44,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
     },
     {
         id   : 'follow',
-        title: 'Seguimiento',
+        title: 'Gestión de usuarios',
         type : 'basic',
         icon : 'heroicons_outline:presentation-chart-line',
         link : '/follow',
@@ -66,15 +66,15 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/inbox',
         roles: ['administrador', 'validador' , 'caracterizador']
     },
-    // {
-    //     id   : 'create',
-    //     title: 'Creación de Formularios',
-    //     type : 'basic',
-    //     icon : 'heroicons_outline:newspaper',
-    //     link : '/create',
-    //     roles: ['administrador']
+    {
+        id   : 'create',
+        title: 'Creación de Formularios',
+        type : 'basic',
+        icon : 'heroicons_outline:newspaper',
+        link : '/create',
+        roles: ['administrador']
 
-    // }
+    }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {

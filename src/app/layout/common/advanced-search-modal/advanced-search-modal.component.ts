@@ -10,7 +10,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { FilterService } from '../advanced-search-modal/FilterService';
 @Component({
   selector: 'quick-chat',
   templateUrl: './advanced-search-modal.component.html',
@@ -19,15 +19,15 @@ import { ReactiveFormsModule } from '@angular/forms';
   exportAs: 'quickChat',
   standalone: true,
   imports: [
-      MatIconModule,
-      MatButtonModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatDialogModule,      
-      MatDatepickerModule,    
-      MatNativeDateModule,
-      TextFieldModule,
-      ReactiveFormsModule
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    TextFieldModule,
+    ReactiveFormsModule
   ],
 })
 export class AdvancedSearchModalComponent {
@@ -35,6 +35,7 @@ export class AdvancedSearchModalComponent {
 
   constructor(
     private fb: FormBuilder,
+    private filterService: FilterService,
     public dialogRef: MatDialogRef<AdvancedSearchModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -49,13 +50,43 @@ export class AdvancedSearchModalComponent {
     });
   }
 
+  formatDateToYYYYMMDD(date: Date | string): string {
+    const d = new Date(date); // Asegurarse de que sea un objeto Date
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0'); // Mes (0-11), +1 y rellenar con 0 si es necesario
+    const day = String(d.getDate()).padStart(2, '0'); // Día rellenado con 0 si es necesario
+
+    return `${year}-${month}-${day}`; // Formato YYYY-MM-DD
+  }
+
+
   closeDialog(): void {
     this.dialogRef.close();
   }
 
   applySearch(): void {
     if (this.advancedSearchForm.valid) {
-      this.dialogRef.close(this.advancedSearchForm.value);
+      // Envía los filtros al servicio compartido
+
+      let fechaDiligenciamiento = this.advancedSearchForm.get('fechaDiligenciamiento')?.value;
+
+      if (fechaDiligenciamiento) {
+        fechaDiligenciamiento = this.formatDateToYYYYMMDD(fechaDiligenciamiento);
+        this.advancedSearchForm.patchValue({ fechaDiligenciamiento });
+        console.log('Fecha formateada:', fechaDiligenciamiento);
+      }
+
+      if (this.advancedSearchForm.valid) {
+        // Envía los filtros al servicio compartido
+        this.filterService.updateFilters(this.advancedSearchForm.value);
+        console.log('Formulario válido con fecha formateada:', this.advancedSearchForm.value);
+        this.dialogRef.close();
+      }
+
+      this.filterService.updateFilters(this.advancedSearchForm.value);
+
+      this.dialogRef.close();
     }
+
   }
 }

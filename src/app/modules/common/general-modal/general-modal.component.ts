@@ -8,7 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 import { GenaralModalService } from './general-modal.service';
 import { Usuario } from './user.type';
-import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'general-modal.component',
@@ -21,27 +20,23 @@ import { MatInputModule } from '@angular/material/input';
     FormsModule,
     MatButtonModule,
     MatDialogModule,
-    CommonModule,
-    MatInputModule
+    CommonModule
   ],
 })
 export class DialogOverviewExampleDialog {
   users: Usuario[] = []; // Usuarios cargados
   selectedUser: any; // Usuario seleccionado
   currentRole: string; // Rol actual del usuario
-  additionalInfo: string = ''; // Información adicional
 
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { role: string, selectedUser: any, additionalInfo: string },
     private genaralModalService: GenaralModalService,
-) {
-    this.currentRole = data.role;
-    this.selectedUser = data.selectedUser || null; 
-    this.additionalInfo = data.additionalInfo || ''; 
+    @Inject(MAT_DIALOG_DATA) public data: { role: string },
+    private http: HttpClient
+  ) {
+    this.currentRole = data.role; // Obtén el rol desde el componente padre
     this.loadUsers();
-}
-
+  }
 
   loadUsers(): void {
     this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
@@ -76,15 +71,6 @@ export class DialogOverviewExampleDialog {
 
   confirmSelection(): void {
     console.log('Usuario seleccionado:', this.selectedUser);
-    console.log('Información adicional:', this.additionalInfo);
-    this.dialogRef.close({
-      selectedUser: this.selectedUser,
-      additionalInfo: this.additionalInfo,
-    }); 
+    this.dialogRef.close(this.selectedUser); // Cerrar el modal con el usuario seleccionado
   }
-  
-  compareUsers(user1: Usuario, user2: Usuario): boolean {
-    return user1 && user2 ? user1.fullName === user2.fullName : user1 === user2;
-}
-
 }

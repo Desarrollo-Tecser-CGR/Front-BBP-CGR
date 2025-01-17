@@ -82,7 +82,24 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad'], module: '' }
+            },
+        ]
+    },
+
+    // Caracterization routes
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'assignRole', loadChildren: () =>
+                import('app/modules/assignRole/assignRole.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
     },
@@ -103,6 +120,7 @@ export const appRoutes: Route[] = [
             },
         ]
     },
+
     // Catalog  routes
     {
         path: '',

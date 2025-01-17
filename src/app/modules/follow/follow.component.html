@@ -1,105 +1,49 @@
 <div class="container">
-    <h1>Gestión de usuarios</h1>
-    <p class="titulo1">Creación de usuarios</p>
-    <div class="max-w-3x">
-        <form class="bg-transparent overflow-hidden rounded p-4"
-            [formGroup]="horizontalStepperForm">
-            <mat-horizontal-stepper [linear]="true" #horizontalStepper>
-                <!-- Paso 1: Selección de usuario -->
-                <mat-step [formGroupName]="'step1'"
-                    [stepControl]="horizontalStepperForm.get('step1')"
-                    #horizontalStepperStep1>
-                    <ng-template matStepLabel>Selección usuario</ng-template>
-                    <div class="flex" style="width: 40%; margin-top: 30px;">
-                        <mat-form-field class="flex-auto" appearance="fill">
-                            <mat-label>Seleccionar Usuario</mat-label>
-                            <mat-select [(value)]="selectedUserId">
-                                <mat-option *ngFor="let user of users"
-                                    [value]="user.id">{{ user.name
-                                    }}</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                    <div class="flex justify-end" style="margin-top: 15px;">
-                        <button class="mr-2 px-8" mat-flat-button
-                            [color]="'accent'" type="button" matStepperPrevious>
-                            Cancelar Seleccion
-                        </button>
-                        <button class="px-8" mat-flat-button [color]="'primary'"
-                            type="button" matStepperNext [disabled]="!selectedUserId">
-                            Seleccionar Usuario
-                        </button>
-                    </div>
-                </mat-step>
+    <h1>Gestor de accesos</h1>
+    <div class="table-container">
+        <h5>Usuarios</h5>
+        <p>Total: {{ dataSource.data.length }}</p>
 
-                <!-- Paso 2: Confirmación usuario seleccionado -->
-                <mat-step [formGroupName]="'step3'"
-                    [stepControl]="horizontalStepperForm.get('step3')"
-                    #horizontalStepperStep2>
-                    <ng-template matStepLabel>Confirmación Asignación de
-                        Rol</ng-template>
-                    <p class="my-6 font-medium">Datos del usuario.</p>
-                    <div class="gt-xs:flex-row flex flex-col">
-                        <div class="info-container">
-                            <div class="info-box">
-                                <div *ngIf="selectedUser"
-                                    class="info-item">
-                                    <span class="dot"></span>
-                                    <div class="info-details">
-                                        <p class="info-name"><b>Nombre:</b> {{ selectedUser.name }}</p>
-                                        <p class="info-name"><b>Correo:</b> {{ selectedUser.email }}</p>
-                                        <p class="info-name"><b>Cargo:</b> {{ selectedUser.cargo }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-end" style="margin-top: 15px;">
-                        <button class="mr-2 px-8" mat-flat-button
-                            [color]="'accent'" type="button" matStepperPrevious>
-                            Volver a la Seleccion de Rol
-                        </button>
-                        <button class="px-8" mat-flat-button [color]="'primary'"
-                            type="button" matStepperNext>
-                            Asignar Rol a Usuario
-                        </button>
-                    </div>
-                </mat-step>
+        <button class="crear">
+            <mat-icon svgIcon="feather:plus-circle"></mat-icon>
+            <span><a (click)="navegar()">Activar Usuario</a></span>
+        </button>
+        <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource" class="mat-table">
+                <!-- Columnas -->
+                <!-- <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef> Id </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.id }} </td>
+                </ng-container> -->
 
-                <!-- Paso 3: Asignación de roles -->
-                <mat-step [formGroupName]="'step2'"
-                    [stepControl]="horizontalStepperForm.get('step2')">
-                    <ng-template matStepLabel>Asignación de rol</ng-template>
-                    <p class="my-6 font-medium">Haz la asignación del rol que
-                        requieras.</p>
-                    <div class="gt-sm:mt-0 gt-sm:ml-16 mt-8 flex flex-col">
-                        <span class="mb-2 font-medium">Roles</span>
-                        <div class="roles-container">
-                            <mat-checkbox
-                                *ngFor="let role of roles"
-                                [value]="role.id"
-                                (change)="onRoleSelectionChange($event, role.id)">
-                                {{ role.name }}
-                            </mat-checkbox>
-                        </div>
-                    </div>
-                    <div class="flex justify-end" style="margin-top: 15px;">
-                        <button class="mr-2 px-8" mat-flat-button
-                            [color]="'accent'" type="button" matStepperPrevious>
-                            Volver a la Confirmación de Usuario
-                        </button>
-                        <button (click)="assignRoles()"
-                            class="px-8"
-                            mat-flat-button
-                            [color]="'primary'"
-                            type="button"
-                            matStepperNext>
-                            Crear
-                        </button>
-                    </div>
-                </mat-step>
+                <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.nombre }} </td>
+                </ng-container>
 
-            </mat-horizontal-stepper>
-        </form>
+                <ng-container matColumnDef="sesion">
+                    <th mat-header-cell *matHeaderCellDef> Último inicio de sesión </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.sesion }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="rol">
+                    <th mat-header-cell *matHeaderCellDef> Rol </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.rol }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef> Estado </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.estado }} </td>
+                </ng-container>
+
+                <!-- Fila de encabezado -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <!-- Filas de datos -->
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            <!-- Paginador -->
+            <mat-paginator [pageSize]="3" [pageSizeOptions]="[3, 5, 10]" showFirstLastButtons></mat-paginator>
+        </div>
     </div>
 </div>

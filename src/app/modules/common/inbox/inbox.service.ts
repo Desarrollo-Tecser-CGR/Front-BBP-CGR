@@ -14,10 +14,11 @@ export class InboxService {
     constructor(private http: HttpClient) { }
 
     getDataAsJson(requestBody: { rol: string }): Observable<any> {
+        console.log(this.apiUrl);
         return this.http.post<any>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     }
 
-    setValidateStatus(requestBody: { rol: string; id: string  }): Observable<any[]> {
+    setValidateStatus(requestBody: { rol: string; id: number  }): Observable<any[]> {
         return this.http.post<any[]>(this.apiUrlSetStatus, requestBody); // Enviar cuerpo de la solicitud
     }
 

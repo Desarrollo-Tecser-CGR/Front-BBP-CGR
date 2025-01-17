@@ -13,3 +13,9 @@
 .action-cell {
   position: relative; /* Esto asegura que la mini pestaña se posicione con relación al botón */
 }
+
+mat-paginator {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}

@@ -4,7 +4,7 @@ import { FollowComponent } from './follow.component';
 
 export default [
     {
-        path     : '',
+        path: '',
         component: FollowComponent,
     },
 ] as Routes;
