@@ -117,12 +117,20 @@ export class NotificationsService {
     /**
      * METODO PARA UTILIZAR LAS NOTIFICACIONES EN UN SISTEMA
      */
+    private _saveNotifications(notifications: Notification[]): void {
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+    }
+
     add(notification: Notification): Observable<void> {
         console.log('Notificación creada:', notification); // Verifica la notificación antes de agregarla
         notification.expanded = false;
+        const id = notification.id
         const currentNotifications = this._notifications.getValue();
-        this._notifications.next([...currentNotifications, notification]);
+        const updatedNotifications = [...currentNotifications, notification];
+        this._notifications.next(updatedNotifications);
         console.log('Estado actual de notificaciones:', this._notifications.getValue()); // Revisa el estado actualizado
+        this._saveNotifications(updatedNotifications);
+
         return new Observable((observer) => {
             observer.next();
             observer.complete();

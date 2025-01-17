@@ -16,7 +16,7 @@ export class AuthService {
     private _authenticated: boolean = false;
     private _httpClient = inject(HttpClient);
     private _userService = inject(UserService);
-    private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}auth/login`;
 
     private _user: any = userData;
     private _roles: ReplaySubject<Rol[]> = new ReplaySubject<Rol[]>(1);
@@ -129,12 +129,12 @@ export class AuthService {
         };
 
 
-        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
+        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/login`, auth).pipe(
 
 
-        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
+        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/login`, auth).pipe(
 
-        return this._httpClient.post(`${CONFIG.apiHost}/api/v1/auth/loginActiveDirectory`, auth).pipe(
+        return this._httpClient.post(`${CONFIG.apiHost}/api/v1/auth/login`, auth).pipe(
 
 
             switchMap((response: any) => {

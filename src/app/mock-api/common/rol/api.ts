@@ -38,7 +38,7 @@ export class RolMockApi {
     // private fetchRolesFromAPI(): void {
     //     // Realiza una solicitud POST a la API
     //     this._httpClient
-    //         .post<any>('http://192.168.2.30:5500/api/v1/auth/loginActiveDirectory', {
+    //         .post<any>('http://192.168.2.30:5500/api/v1/auth/login', {
     //             sAMAccountName: 'bbp.cgr', // Reemplaza con un usuario válido
     //             password: 'Colombia2024*',   // Reemplaza con una contraseña válida
     //         })

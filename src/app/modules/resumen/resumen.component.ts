@@ -24,6 +24,7 @@ import { ResumenService } from './resumen.service';
 import { GenericTableComponent } from '../common/generic-table/generic-table.component';
 import { DataServices } from '../resumen-edit/resumen-edit.service';
 import { Router } from '@angular/router';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 
 
 // Definición de rutas
@@ -117,7 +118,8 @@ export class ResumenComponent implements OnInit {
     
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,
-        private dataService: DataServices, private router: Router
+        private dataService: DataServices, private router: Router,
+        private notificationService: NotificationsService
     ) { }
 
     toggleModal(): void {
@@ -146,7 +148,7 @@ export class ResumenComponent implements OnInit {
     }
 
     visualizeFile(row: any):void{
-        this.dataService.viewFile(row.path)
+        this.dataService.viewFile(row.id);
         //Método para visualizar en el navegador un archivo
     }
 
@@ -154,6 +156,7 @@ export class ResumenComponent implements OnInit {
         const progreso = this.calculateProgress();
         const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
 
+        this.resumenService.enviarNotificacion(progreso);
         console.log(mensaje);
 
         console.log(`Color asociado al progreso: ${this.progressColor}`);
@@ -247,10 +250,10 @@ export class ResumenComponent implements OnInit {
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
                                 this.isDisabled = false;
+                                this.enviarNotificacion();
                             });
                             this.identityId =  response.data.id;
                             console.log('Id de la hv en creacion:', response.data.id);
-                            this.enviarNotificacion();
                         },
                         (error) => {
                             Swal.fire({

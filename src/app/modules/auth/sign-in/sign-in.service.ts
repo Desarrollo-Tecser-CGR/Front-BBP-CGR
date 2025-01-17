@@ -9,10 +9,10 @@ import { CONFIG } from '../../../config/config';
 })
 export class SignInService {
 
-   // private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
-    private apiUrl = `${CONFIG.apiHost}/api/v1/auth/loginActiveDirectory`;
+   // private apiUrl = `${GlobalConstants.API_BASE_URL}auth/login`;
+    private apiUrl = `${CONFIG.apiHost}/api/v1/auth/login`;
 
-    //private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
+    //private apiUrl = `${GlobalConstants.API_BASE_URL}auth/login`;
 
     constructor(private http: HttpClient) {}
 
