@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import {FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
+import {FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -155,7 +155,10 @@ export class ResumenComponent implements OnInit {
     }
 
     submitForm(): void {
-        if (this.horizontalStepperForm.valid) {
+
+        const isFormValid = this.checkFormValidity(this.horizontalStepperForm);
+
+        if (isFormValid) {
             // Procesar los valores del formulario
             const multiSelectFields = [
                 'supportReceived',
@@ -184,6 +187,13 @@ export class ResumenComponent implements OnInit {
             // Aplanar los datos
             console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
+            
+            // Transformar valores vacíos a null
+            Object.keys(flattenedValues).forEach((key) => {
+                if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
+                    flattenedValues[key] = null;
+                }
+            });            
     
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
@@ -192,8 +202,9 @@ export class ResumenComponent implements OnInit {
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
-                if (flattenedValues.estadoFlujo === 'candidata' && currentRole === 'validador') {
-                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar el estado de flujo
+                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Actualizar el estado de flujo
+                    console.log('Estado de flujo actualizado:', flattenedValues.estadoFlujo);
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -384,11 +395,36 @@ export class ResumenComponent implements OnInit {
             next: (response) => {
                 console.log('Datos recibidos:', response);
 
+                // Transformar el expectedImpact si viene como array de objetos
+                const expectedImpactIds = response.expectedImpact
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const stagesMethodologyIds = response.stagesMethodology
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];    
+
+                    const typeMaterialProducedIds = response.typeMaterialProduced
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const supportReceivedIds = response.supportReceived
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const taxonomyEventIds = response.taxonomyEvent
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                console.log ("impactos: ",expectedImpactIds);
+
+                console.log('Expected Impact recibido:', response.expectedImpact); // Verifica el formato
+
                 // Asignar los datos al formulario usando patchValue
                 this.horizontalStepperForm.patchValue({
                     step1: {
                         fechaDiligenciamiento: response.fechaDiligenciamiento || '',
-                        entityCgr: response.entityCgr || '',
+                        entityCgr: response.entityCgr.id || '',
                         nombreDependenciaArea: response.nombreDependenciaArea || '',
                     },
                     step2: {
@@ -409,19 +445,19 @@ export class ResumenComponent implements OnInit {
                         objectiveMainPractice: response.objectiveMainPractice?.id || '',
                     },
                     step4: {
-                        expectedImpact: response.expectedImpact || '',
+                        expectedImpact: expectedImpactIds,
                         metodologiaUsada: response.metodologiaUsada || '',
                         durationImplementation: response.durationImplementation?.id || '',
-                        stagesMethodology: response.stagesMethodology?.id || '',
+                        stagesMethodology: stagesMethodologyIds,
                         periodoDesarrolloInicio: response.periodoDesarrolloInicio || '',
                         periodoDesarrolloFin: response.periodoDesarrolloFin || '',
                     },
                     step5: {
-                        typeMaterialProduced: response.typeMaterialProduced?.id || '',
-                        supportReceived: response.supportReceived?.id || '',
+                        typeMaterialProduced: typeMaterialProducedIds,
+                        supportReceived: supportReceivedIds,
                         recognitionsNationalInternational: response.recognitionsNationalInternational?.id || '',
                         controlObject: response.controlObject?.id || '',
-                        taxonomyEvent: response.taxonomyEvent?.id || '',
+                        taxonomyEvent: taxonomyEventIds,
                         typePerformance: response.typePerformance?.id || '',
                         descripcionResultados: response.descripcionResultados || '',
                     },
@@ -429,6 +465,10 @@ export class ResumenComponent implements OnInit {
                         documentoActuacion: response.documentoActuacion || '',
                     },
                 });
+                if (this.cargo === 'caracterizador') {
+                    const typePracticeValue = response.typePractice?.id || '';
+                    this.onPracticaChange({ value: typePracticeValue });
+                }
             },
             error: (err) => {
                 console.error('Error al obtener los datos:', err);
@@ -653,47 +693,55 @@ export class ResumenComponent implements OnInit {
             this.selectedFiles = Array.from(event.dataTransfer.files);
         }
     }
+
+    private shouldExcludeControl(controlName: string): boolean {
+        const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
+        return excludedControls.includes(controlName);
+    }
     calculateProgress(): number {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
         let filledControls = 0;
-
+    
         formGroups.forEach((step) => {
-            const group = this.horizontalStepperForm.get(
-                step
-            ) as UntypedFormGroup;
+            const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
             if (group) {
                 const controls = group.controls;
+    
+                 Object.entries(controls).forEach(([controlName, control]) => {
+                // Excluir controles específicos
+                if (this.shouldExcludeControl(controlName)) {
+                    return;
+                }
 
-                Object.values(controls).forEach((control) => {
-                    if (!control.disabled) {
-                        totalControls++;
-                        // Considerar válido si tiene un valor (aunque no sea obligatorio)
-                        if (
-                            control.value &&
-                            control.value.toString().trim() !== ''
-                        ) {
-                            filledControls++;
+                // Incluir controles deshabilitados si el rol es "validador"
+                if (!control.disabled || this.isValidatorRole()) {
+                    totalControls++;
+                    // Contar como lleno si tiene un valor, aunque no sea obligatorio
+                    if (
+                        control.value &&
+                        control.value.toString().trim() !== ''
+                    ) {
+                        filledControls++;
                         }
                     }
                 });
             }
         });
-
+    
         // Evitar dividir por cero
         if (totalControls === 0) {
             return 0;
         }
-
+    
         // Calcular progreso
-        const progressValue = Math.round(
-            (filledControls / totalControls) * 100
-        );
+        const progressValue = Math.round((filledControls / totalControls) * 100);
         console.log(
             `Total controles: ${totalControls}, Controles llenos: ${filledControls}, Progreso: ${progressValue}%`
         );
         return progressValue;
     }
+    
     get progressColor(): string {
         if (this.progress <= 30) {
             return 'red'; // 0% - 30%: Rojo
@@ -703,11 +751,40 @@ export class ResumenComponent implements OnInit {
             return 'green'; // 63% - 100%: Verde
         }
     }
+    
+    /**
+     * Verifica si el rol actual es "validador".
+     */
+    private isValidatorRole(): boolean {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        return currentRole === 'validador';
+    }
+    
 // ======================== Logica multiselect entidad momentaneo ======================== //
     entityOptions = [
         { id: 1, name: 'Contraloría General de la República' },
         { id: 2, name: 'Registraduría Nacional del Estado Civil' },
     ];
+
+// ======================== Método para verificar validez del formulario (ignora campos deshabilitados) ======================== //
+checkFormValidity(form: FormGroup): boolean {
+    let isValid = true;
+
+    Object.keys(form.controls).forEach((step) => {
+        const group = form.get(step) as FormGroup;
+        if (group) {
+            Object.keys(group.controls).forEach((control) => {
+                const formControl = group.get(control);
+                if (formControl && formControl.enabled && formControl.invalid) {
+                    isValid = false;
+                }
+            });
+        }
+    });
+
+    return isValid;
+}
 
 // ======================== Logica que valida las fechas ======================== //
 validateFechas(): void {
