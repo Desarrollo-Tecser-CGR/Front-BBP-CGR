@@ -131,7 +131,7 @@ export class AuthService {
 
         // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
 
-        return this._httpClient.post(`${GlobalConstants.API_BASE_URL}/api/v1/auth/loginActiveDirectory`, auth).pipe(
+        return this._httpClient.post(`${GlobalConstants.API_BASE_URL}/api/v1/auth/login`, auth).pipe(
 
 
             switchMap((response: any) => {

@@ -9,7 +9,7 @@ import { Users } from './user.type';
 })
 export class GenaralModalService {
 
-    private apiUrl = `${GlobalConstants.API_BASE_URL}user`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/user`;
 
     constructor(private http: HttpClient) { }
 

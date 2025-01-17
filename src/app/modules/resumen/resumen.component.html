@@ -358,11 +358,11 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-                        <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons" matStepperNext [disabled]="!canProceed()">
+                        <div class="mt-0 flex justify-end" *ngIf="rol === 'registro'">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
-                        </div>
+                        </div>                        
 
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button" matStepperPrevious>
@@ -373,7 +373,9 @@
                                 class="px-8" 
                                 mat-flat-button 
                                 [color]="'primary'" 
-                                type="button">
+                                type="button" 
+                                matStepperNext 
+                                [disabled]="!canProceed()">
                                 Next
                             </button>
                             } @else{
@@ -420,6 +422,12 @@
                                         </div> 
                                         <div class="max-w-3x">
                                             <app-generic-table [data]="data" [columns]="columns" [buttons]="buttons"></app-generic-table>
+                                        </div>
+                                        <!-- Boton de Cambio de estado posterior a registro -->
+                                        <div class="mt-0 flex justify-end">
+                                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                                                Enviar Formulario
+                                            </button>
                                         </div>
                                  }
                                  @if (isEdit === false) {
@@ -503,13 +511,10 @@
             Enviar Documentos
             </button>
         </div>
-        <div class="modal-actions">
-            <button style="background: #f0ba41; color: #fff;" mat-raised-button
-                (click)="toggleModal()">Cancelar</button>
-            <button mat-raised-button color="primary" (click)="toggleModal()">Aceptar</button>
-        </div>
     </div>
 </div>
+
+
 
 <mat-menu #menu="matMenu" class="custom-menu">
     <button mat-menu-item>
