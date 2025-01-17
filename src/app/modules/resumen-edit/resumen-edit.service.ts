@@ -33,7 +33,7 @@ export class DataServices{
 
     public downloadFile(id : number):void{
       console.log('Descargando archivo con ID:', id); 
-      this.http.get(this.downloadUrl + id , {responseType: 'blob', observe: 'response'}).subscribe({
+      this.http.get(`${this.downloadUrl}${id}?action=download`, {responseType: 'blob', observe: 'response'}).subscribe({
       next: (response) =>{
         const constentDisposition = response.headers.get('Content-Disposition');
         let fileName = `archivo_${id}`;
@@ -74,11 +74,11 @@ export class DataServices{
      })
     };
 
-    public viewFile(url:string):void{
-      this.http.get(url,{responseType:'blob'}).subscribe((fileBlob)=>{
+    public viewFile(id: number):void{
+      this.http.get(`${this.downloadUrl}${id}?action=view`,{responseType:'blob'}).subscribe((fileBlob)=>{
         const fileURL = URL.createObjectURL(fileBlob);
         window.open(fileURL);
-      })
+      }) //
     }
     private columns: any[]=[
         {key:'id', label:'Id'},
