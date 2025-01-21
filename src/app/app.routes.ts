@@ -116,7 +116,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'caracterization', loadChildren: () =>
                 import('app/modules/caracterization/caracterization.routes'),
-                data: { requiredRoles: ['caracterizador','administrador'], module: '' }
+                data: { requiredRoles: ['caracterizador','administrador', 'jefeUnidad'], module: '' }
             },
         ]
     },
@@ -209,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad'], module: '' }
             },
         ]
     },
@@ -267,7 +267,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen-edit', loadChildren: () =>
                 import('app/modules/resumen-edit/resumen-edit.routes'),
-                data: { requiredRoles: ['validador','administrador' ,'caracterizador'], module: '' }
+                data: { requiredRoles: ['validador','administrador', 'caracterizador', 'jefeUnidad'], module: '' }
             },
         ]
     }

@@ -24,7 +24,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:newspaper',
         link : '/caracterization',
-        roles: ['administrador' , 'caracterizador']
+        roles: ['administrador' , 'caracterizador', 'jefeUnidad']
     },
     {
         id   : 'catalog',
@@ -64,7 +64,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador', 'validador' , 'caracterizador']
+        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad']
     },
     {
         id   : 'create',

@@ -91,6 +91,7 @@ export class ResumenComponent implements OnInit {
     taxonomyEventOptions: any[] = [];
     typePerformanceOptions: any[] = [];
     additionalInfoFromModal: string = ''; 
+    selectedUsersFromModal: any[] = [];
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
@@ -109,6 +110,7 @@ export class ResumenComponent implements OnInit {
             color:'primary'
         }
     ]
+    showButton: boolean;
     
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,
@@ -206,6 +208,16 @@ export class ResumenComponent implements OnInit {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Actualizar el estado de flujo
                     console.log('Estado de flujo actualizado:', flattenedValues.estadoFlujo);
                 }
+                // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+                }
+                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
+                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+                }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
                 this.resumenService
@@ -235,7 +247,11 @@ export class ResumenComponent implements OnInit {
                 if (flattenedValues.estadoFlujo === 'candidata') {
                     flattenedValues.estadoFlujo = 'candidata'; 
                 }
-    
+                // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU) en la creación:', flattenedValues.estadoFlujo);
+                }
                 // Llamar al servicio de creación
                 this.resumenService
                     .sendFormDataAsJson(flattenedValues)
@@ -296,6 +312,8 @@ export class ResumenComponent implements OnInit {
             this.buttonText = 'Acción';
         }
 
+         // Lógica adicional para manejar la visibilidad del botón (nuevo)
+        this.showButton = this.cargo !== 'jefeUnidad';
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
@@ -768,118 +786,121 @@ export class ResumenComponent implements OnInit {
     ];
 
 // ======================== Método para verificar validez del formulario (ignora campos deshabilitados) ======================== //
-checkFormValidity(form: FormGroup): boolean {
-    let isValid = true;
+    checkFormValidity(form: FormGroup): boolean {
+        let isValid = true;
 
-    Object.keys(form.controls).forEach((step) => {
-        const group = form.get(step) as FormGroup;
-        if (group) {
-            Object.keys(group.controls).forEach((control) => {
-                const formControl = group.get(control);
-                if (formControl && formControl.enabled && formControl.invalid) {
-                    isValid = false;
-                }
-            });
-        }
-    });
+        Object.keys(form.controls).forEach((step) => {
+            const group = form.get(step) as FormGroup;
+            if (group) {
+                Object.keys(group.controls).forEach((control) => {
+                    const formControl = group.get(control);
+                    if (formControl && formControl.enabled && formControl.invalid) {
+                        isValid = false;
+                    }
+                });
+            }
+        });
 
-    return isValid;
-}
+        return isValid;
+    }
 
 // ======================== Logica que valida las fechas ======================== //
-validateFechas(): void {
-    const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
-    const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
+    validateFechas(): void {
+        const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
+        const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
 
-    if (!fechaInicioControl || !fechaFinControl) {
-        return;
+        if (!fechaInicioControl || !fechaFinControl) {
+            return;
+        }
+
+        const fechaInicio = new Date(fechaInicioControl.value);
+        const fechaFin = new Date(fechaFinControl.value);
+
+        // Validar que fecha de fin no sea anterior a la de inicio
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            fechaFinControl.setErrors({ fechaFinAnterior: true });
+        } else {
+            fechaFinControl.setErrors(null);
+        }
     }
-
-    const fechaInicio = new Date(fechaInicioControl.value);
-    const fechaFin = new Date(fechaFinControl.value);
-
-    // Validar que fecha de fin no sea anterior a la de inicio
-    if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
-        fechaFinControl.setErrors({ fechaFinAnterior: true });
-    } else {
-        fechaFinControl.setErrors(null);
-    }
-}
 
 // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
-
-desestimarPractica(): void {
-    if (!this.Id) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar',
-        });
-        return;
-    }
-
-    const updatedData = { estadoFlujo: 'desestimada' };
-
-    this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
-        (response) => {
-            Swal.fire({
-                title: '¡Práctica Desestimada!',
-                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-            }).then(() => {
-                window.location.reload(); 
-            });
-        },
-        (error) => {
+    desestimarPractica(): void {
+        if (!this.Id) {
             Swal.fire({
                 title: 'Error',
-                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
+            return;
         }
-    );
-}
 
-    // ======================== Logica que muestra el modal en la vista ======================== //
+        const updatedData = { estadoFlujo: 'desestimada' };
 
-openCaracterizationModal(): void {
-    const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
-
-    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-        width: '500px',
-        data: { 
-            role: currentRole,
-            selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado
-            additionalInfo: this.additionalInfoFromModal // Pasar información adicional
-        },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-            // Guardar los datos seleccionados al cerrar el modal
-            this.selectedUserFromModal = result.selectedUser;
-            this.additionalInfoFromModal = result.additionalInfo || '';
-        } else {
-            console.log('Caracterización cancelada');
-        }
-    });
-}
-
-canProceed(): boolean {
-    const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
-
-    // Si el rol es "validador", verificar si hay un usuario seleccionado
-    if (currentRole === 'validador') {
-        return this.selectedUserFromModal !== null; // Permite avanzar solo si hay un usuario seleccionado
+        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
+            (response) => {
+                Swal.fire({
+                    title: '¡Práctica Desestimada!',
+                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            },
+            (error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                });
+            }
+        );
     }
 
-    // Para otros roles, permite avanzar
-    return true;
-}
+// ======================== Logica que muestra el modal en la vista ======================== //
+    openCaracterizationModal(): void {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        
+        const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+            width: '500px',
+            data: { 
+                role: currentRole,
+                selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado (para selección única)
+                selectedUsers: this.selectedUsersFromModal, // Pasar usuarios seleccionados (para selección múltiple)
+                additionalInfo: this.additionalInfoFromModal // Pasar información adicional
+            },
+        });
+        
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                // Guardar los datos seleccionados al cerrar el modal
+                this.selectedUserFromModal = result.selectedUser || null;
+                this.selectedUsersFromModal = result.selectedUsers; // Asegúrate de que esta propiedad exista y se maneje correctamente
+                this.additionalInfoFromModal = result.additionalInfo || '';
+            } else {
+                console.log('Caracterización cancelada');
+            }
+        });
+    }
 
+    canProceed(): boolean {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+    
+        if (currentRole === 'validador') {
+            // Para "validador", verificar si hay un usuario seleccionado (selección única)
+            return !!this.selectedUserFromModal; // Asegura que selectedUserFromModal no sea null o undefined
+        } else if (currentRole === 'caracterizador') {
+            // Para "caracterizador", verificar si hay usuarios seleccionados (selección múltiple)
+            return this.selectedUsersFromModal && this.selectedUsersFromModal.length > 0;
+        }
+    
+        // Para otros roles, permite avanzar sin restricciones
+        return true;
+    }
+    
 }

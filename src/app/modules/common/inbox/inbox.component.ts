@@ -75,11 +75,12 @@ export class InboxComponent implements OnInit {
 
   loadData(filters?: any): void {
     
-    if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
+    if (this.cargo === 'validador', 'administrador' , 'caracterizador', 'jefeUnidad') {
       const requestBody = {
         rol: this.cargo,
         ...filters, // Agrega los filtros si están definidos
-      };
+      }
+
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
           let response = dataRes.data;
