@@ -1,15 +1,22 @@
 <h2 class="dialog-title">Caracterizar</h2>
 
 <mat-dialog-content>
-  <!-- Seleccionable -->
   <mat-form-field appearance="fill">
     <mat-label>Selecciona un usuario</mat-label>
-    <mat-select [(ngModel)]="selectedUser" [compareWith]="compareUsers">
-        <mat-option *ngFor="let user of users" [value]="user">
-            {{ user.fullName }} - {{ user.cargo }}
-        </mat-option>
+    <!-- Botón para selección única -->
+    <mat-select *ngIf="currentRole === 'validador'" [(ngModel)]="selectedUser" [compareWith]="compareUsers" (selectionChange)="handleSelectionChange()">
+      <mat-option *ngFor="let user of users" [value]="user">
+        {{ user.fullName }} - {{ user.cargo }}
+      </mat-option>
     </mat-select>
-</mat-form-field>
+
+    <!-- Botón para selección múltiple -->
+    <mat-select *ngIf="currentRole !== 'validador'" [(ngModel)]="selectedUsers" [multiple]="true" [compareWith]="compareUsers" (selectionChange)="handleSelectionChange()">
+      <mat-option *ngFor="let user of users" [value]="user">
+        {{ user.fullName }} - {{ user.cargo }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
 
   <!-- Campo de texto adicional -->
   <mat-form-field appearance="fill" class="mt-4">

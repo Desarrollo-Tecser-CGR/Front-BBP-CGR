@@ -7,9 +7,6 @@ import { catchError, map, Observable, of, ReplaySubject, switchMap, tap, throwEr
 import { user as userData } from 'app/mock-api/common/user/data';
 import { Rol } from '../user/rol.types';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
-import { CONFIG } from '../../config/config';
-
-
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -141,7 +138,8 @@ export class AuthService {
 
         // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/login`, auth).pipe(
 
-        return this._httpClient.post(`${CONFIG.apiHost}/api/v1/auth/login`, auth).pipe(
+
+        return this._httpClient.post(`${GlobalConstants.API_BASE_URL}/api/v1/auth/login`, auth).pipe(
 
 
             switchMap((response: any) => {

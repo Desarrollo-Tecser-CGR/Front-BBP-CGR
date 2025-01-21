@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import {FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
+import {FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -75,7 +75,8 @@ export class ResumenComponent implements OnInit {
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
-    cargo: string;
+    // cargo: string;
+    cargo: string = ''; 
     isCaracterizationComplete: boolean = false;
     selectedUserFromModal: any = null;
     isDisabled: boolean = true;
@@ -97,6 +98,7 @@ export class ResumenComponent implements OnInit {
     additionalInfoFromModal: string = '';
     entidades: any[] = [];
     filteredEntities$: Observable<any[]>; 
+    selectedUsersFromModal: any[] = [];
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
@@ -115,6 +117,7 @@ export class ResumenComponent implements OnInit {
             action: (row: any) => this.visualizeFile(row),
         }
     ]
+    showButton: boolean;
     
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,
@@ -165,7 +168,10 @@ export class ResumenComponent implements OnInit {
     }
 
     submitForm(): void {
-        if (this.horizontalStepperForm.valid) {
+
+        const isFormValid = this.checkFormValidity(this.horizontalStepperForm);
+
+        if (isFormValid) {
             // Procesar los valores del formulario
             const multiSelectFields = [
                 'supportReceived',
@@ -194,7 +200,14 @@ export class ResumenComponent implements OnInit {
             // Aplanar los datos
             console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
-
+ 
+            // Transformar valores vacíos a null
+            Object.keys(flattenedValues).forEach((key) => {
+                if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
+                    flattenedValues[key] = null;
+                }
+            });            
+    
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
             const currentRole = roles
@@ -204,11 +217,19 @@ export class ResumenComponent implements OnInit {
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
-                if (
-                    flattenedValues.estadoFlujo === 'validacion' &&
-                    currentRole === 'validador'
-                ) {
-                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar el estado de flujo
+                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Actualizar el estado de flujo
+                    console.log('Estado de flujo actualizado:', flattenedValues.estadoFlujo);
+                }
+                // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+                }
+                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
+                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -236,10 +257,14 @@ export class ResumenComponent implements OnInit {
                     );
             } else {
                 // Verificar y actualizar el estadoFlujo antes de crear los datos
-                if (flattenedValues.estadoFlujo === 'Candidata') {
-                    flattenedValues.estadoFlujo = 'validación';
+                if (flattenedValues.estadoFlujo === 'candidata') {
+                    flattenedValues.estadoFlujo = 'candidata'; 
                 }
-
+                // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU) en la creación:', flattenedValues.estadoFlujo);
+                }
                 // Llamar al servicio de creación
                 this.resumenService
                     .sendFormDataAsJson(flattenedValues)
@@ -277,6 +302,7 @@ export class ResumenComponent implements OnInit {
         this.rol = this.roles[0]
         console.log("Rol en sesion: ", this.rol)  
 
+
         console.log('Id hv para editar y archivos:', this.Id);
         this.dataService.getFileByIdResumen(this.Id).subscribe(
             (response)=>{
@@ -287,66 +313,74 @@ export class ResumenComponent implements OnInit {
                 console.error('Error al guardar files en data:', e);
             } 
         )
+
+        // Logica de agregar campos seleccionables
+        this.entityOptions = [
+            { id: 1, name: 'Contraloría General de la República' },
+            { id: 2, name: 'Registraduría Nacional del Estado Civil' },
+            { id: 3, name: 'Ministerio de Hacienda' },
+        ];
+
+        this.data = this.dataService.getDataFiles();
         this.columns = this.dataService.getColumns();
         console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
-        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+        this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
 
         // Configurar el texto del botón basado en el rol
-        if (cargo === 'validador') {
+        if (this.cargo === 'validador') {
             this.buttonText = 'Caracterización';
-        } else if (cargo === 'caracterizador') {
+        } else if (this.cargo === 'caracterizador') {
             this.buttonText = 'Evaluación';
         } else {
             this.buttonText = 'Acción';
         }
 
+         // Lógica adicional para manejar la visibilidad del botón (nuevo)
+        this.showButton = this.cargo !== 'jefeUnidad';
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: [this.fechaDiligenciamiento, Validators.required],
-                entityCgr: [1, Validators.required],
-                nombreDependenciaArea: ['', Validators.required],
-            }),
+                fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
+                entityCgr: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+                nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+            }),  
             step2: this._formBuilder.group({
-                nombre: ['', [Validators.required, Validators.maxLength(50)]],
-                cargo: ['', [Validators.required, Validators.maxLength(50)]],
-                correo: ['', [Validators.required, Validators.email]],
-                contacto: [
-                    '',
-                    [Validators.required, Validators.pattern('^[0-9]{10}$')],
-                ],
+                nombre: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                cargo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                correo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.email]],
+                contacto: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.pattern('^[0-9]{10}$')],],
             }),
             step3: this._formBuilder.group({
-                typeStrategyIdentification: [],
-                typePractice: [],
+                typeStrategyIdentification: [{ value: '', disabled: this.cargo === 'validador' }],
+                typePractice: [{ value: '', disabled: this.cargo === 'validador' }],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [{ value: '', disabled: true}],
-                estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                levelGoodPractice: [{ value: '', disabled: true}],
-                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true }, Validators.maxLength(100)],
-                propositoPractica: [{ value: '', disabled: true }, Validators.maxLength(300)],
-                objectiveMainPractice: [{ value: '', disabled: true}]
+                typology: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                estadoFlujo: [{ value: 'candidata', disabled: true || this.cargo === 'validador' }],
+                levelGoodPractice: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(300)],
+                objectiveMainPractice: [{ value: '', disabled: true || this.cargo === 'validador' }]
             }),
             step4: this._formBuilder.group({
-                expectedImpact: [{ value: '', disabled: true}],
-                metodologiaUsada: [{ value: '', disabled: true }, [Validators.maxLength(500)]],
-                durationImplementation: [{ value: '', disabled: true}],
-                stagesMethodology: [{ value: '', disabled: true}],
-                periodoDesarrolloInicio: [{ value: '', disabled: true}],
-                periodoDesarrolloFin: [{ value: '', disabled: true}],
+                expectedImpact: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                metodologiaUsada: [{ value: '', disabled: true || this.cargo === 'validador' }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                stagesMethodology: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                periodoDesarrolloInicio: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                periodoDesarrolloFin: [{ value: '', disabled: true || this.cargo === 'validador' }],
             }),
             step5: this._formBuilder.group({
-                typeMaterialProduced: [{ value: '', disabled: true}],
-                supportReceived: [{ value: '', disabled: true}],
-                recognitionsNationalInternational: [{ value: '', disabled: true}],
-                controlObject: [{ value: '', disabled: true}],
-                taxonomyEvent: [{ value: '', disabled: true}],
-                typePerformance: [{ value: '', disabled: true}],
-                descripcionResultados: [{ value: '', disabled: true}],
+                typeMaterialProduced: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                supportReceived: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                recognitionsNationalInternational: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                controlObject: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                taxonomyEvent: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                typePerformance: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                descripcionResultados: [{ value: '', disabled: true || this.cargo === 'validador' }],
             }),
             step6: this._formBuilder.group({
-                documentoActuacion: [Validators.required],
+                documentoActuacion: [{ value: '', disabled: true || this.cargo === 'validador'  },Validators.required],
             }),
         });
         this.horizontalStepperForm.valueChanges.subscribe(() => {
@@ -387,7 +421,10 @@ export class ResumenComponent implements OnInit {
                 this.resumenService.getTypeByKey('taxonomyEvents');
             this.typePerformanceOptions =
                 this.resumenService.getTypeByKey('typePerformances');
-
+            this.horizontalStepperForm.get('step4.periodoDesarrolloInicio')?.valueChanges.subscribe(() => {
+                this.validateFechas();});
+            this.horizontalStepperForm.get('step4.periodoDesarrolloFin')?.valueChanges.subscribe(() => {
+                this.validateFechas();});
             console.log(
                 'Opciones para typeStrategyIdentification:',
                 this.typeStrategyOptions
@@ -399,14 +436,37 @@ export class ResumenComponent implements OnInit {
             next: (response) => {
                 console.log('Datos recibidos:', response);
 
+                // Transformar el expectedImpact si viene como array de objetos
+                const expectedImpactIds = response.expectedImpact
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const stagesMethodologyIds = response.stagesMethodology
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];    
+
+                    const typeMaterialProducedIds = response.typeMaterialProduced
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const supportReceivedIds = response.supportReceived
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const taxonomyEventIds = response.taxonomyEvent
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                console.log ("impactos: ",expectedImpactIds);
+
+                console.log('Expected Impact recibido:', response.expectedImpact); // Verifica el formato
+
                 // Asignar los datos al formulario usando patchValue
                 this.horizontalStepperForm.patchValue({
                     step1: {
-                        fechaDiligenciamiento:
-                            response.fechaDiligenciamiento || '',
-                        entityCgr: response.entityCgr || '',
-                        nombreDependenciaArea:
-                            response.nombreDependenciaArea || '',
+                        fechaDiligenciamiento: response.fechaDiligenciamiento || '',
+                        entityCgr: response.entityCgr.id || '',
+                        nombreDependenciaArea: response.nombreDependenciaArea || '',
                     },
                     step2: {
                         nombre: response.nombre || '',
@@ -429,25 +489,19 @@ export class ResumenComponent implements OnInit {
                             response.objectiveMainPractice?.id || '',
                     },
                     step4: {
-                        expectedImpact: response.expectedImpact || '',
+                        expectedImpact: expectedImpactIds,
                         metodologiaUsada: response.metodologiaUsada || '',
-                        durationImplementation:
-                            response.durationImplementation?.id || '',
-                        stagesMethodology: response.stagesMethodology?.id || '',
-                        periodoDesarrolloInicio:
-                            response.periodoDesarrolloInicio || '',
-                        periodoDesarrolloFin:
-                            response.periodoDesarrolloFin || '',
+                        durationImplementation: response.durationImplementation?.id || '',
+                        stagesMethodology: stagesMethodologyIds,
+                        periodoDesarrolloInicio: response.periodoDesarrolloInicio || '',
+                        periodoDesarrolloFin: response.periodoDesarrolloFin || '',
                     },
                     step5: {
-                        typeMaterialProduced:
-                            response.typeMaterialProduced?.id || '',
-                        supportReceived: response.supportReceived?.id || '',
-                        recognitionsNationalInternational:
-                            response.recognitionsNationalInternational?.id ||
-                            '',
+                        typeMaterialProduced: typeMaterialProducedIds,
+                        supportReceived: supportReceivedIds,
+                        recognitionsNationalInternational: response.recognitionsNationalInternational?.id || '',
                         controlObject: response.controlObject?.id || '',
-                        taxonomyEvent: response.taxonomyEvent?.id || '',
+                        taxonomyEvent: taxonomyEventIds,
                         typePerformance: response.typePerformance?.id || '',
                         descripcionResultados:
                             response.descripcionResultados || '',
@@ -456,6 +510,10 @@ export class ResumenComponent implements OnInit {
                         documentoActuacion: response.documentoActuacion || '',
                     },
                 });
+                if (this.cargo === 'caracterizador') {
+                    const typePracticeValue = response.typePractice?.id || '';
+                    this.onPracticaChange({ value: typePracticeValue });
+                }
             },
             error: (err) => {
                 console.error('Error al obtener los datos:', err);
@@ -493,39 +551,53 @@ export class ResumenComponent implements OnInit {
         const step3Form = this.horizontalStepperForm.get('step3');
         const step4Form = this.horizontalStepperForm.get('step4');
         const step5Form = this.horizontalStepperForm.get('step5');
- 
+        const propositoPracticaControl = step3Form?.get('propositoPractica');
+
         if (selectedValue.toString() === '4') {
             step3Form?.get('typology')?.enable();
             step3Form?.get('levelGoodPractice')?.enable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.enable();
-            step3Form?.get('propositoPractica')?.enable();
+            propositoPracticaControl?.enable();
             step3Form?.get('objectiveMainPractice')?.enable();
             step4Form?.get('expectedImpact')?.enable();
             step4Form?.get('metodologiaUsada')?.enable();
             step4Form?.get('durationImplementation')?.enable();
             step4Form?.get('stagesMethodology')?.enable();
+            step4Form?.get('durationImplementation')?.enable();
+            step4Form?.get('stagesMethodology')?.enable();
             step4Form?.get('periodoDesarrolloInicio')?.enable();
             step4Form?.get('periodoDesarrolloFin')?.enable();
-            step5Form?.get('tipoMaterialProducido')?.enable();
-            step5Form?.get('apoyoRecibido')?.enable();
-            step5Form
-                ?.get('reconocimientosNacionalesInternacionales')
-                ?.enable();
-            step5Form?.get('objetoControl')?.enable();
-            step5Form?.get('taxonomiaEvento')?.enable();
-            step5Form?.get('tipoActuacion')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
             step5Form?.get('descripcionResultados')?.enable();
-            step3Form
-                ?.get('codigoPractica')
-                ?.setValue('BP-' + this.generateConsecutive());
+            step3Form?.get('codigoPractica')?.setValue('BP-' + this.generateConsecutive());
+
+            propositoPracticaControl?.setValidators([
+                Validators.required,
+                Validators.maxLength(300),
+            ]);
         } else {
             step3Form?.get('typology')?.disable();
             step3Form?.get('levelGoodPractice')?.disable();
+            step3Form?.get('typology')?.disable();
+            step3Form?.get('levelGoodPractice')?.disable();
             step3Form?.get('nombreDescriptivoBuenaPractica')?.disable();
-            step3Form?.get('propositoPractica')?.disable();
+            propositoPracticaControl?.disable();
             step3Form?.get('objectiveMainPractice')?.disable();
             step4Form?.get('expectedImpact')?.disable();
             step4Form?.get('metodologiaUsada')?.disable();
+            step4Form?.get('durationImplementation')?.disable();
+            step4Form?.get('stagesMethodology')?.disable();
             step4Form?.get('durationImplementation')?.disable();
             step4Form?.get('stagesMethodology')?.disable();
             step4Form?.get('periodoDesarrolloInicio')?.disable();
@@ -538,9 +610,18 @@ export class ResumenComponent implements OnInit {
             step5Form?.get('controlObject')?.disable();
             step5Form?.get('taxonomyEvent')?.disable();
             step5Form?.get('typePerformance')?.disable();
+            step5Form?.get('typeMaterialProduced')?.disable();
+            step5Form?.get('supportReceived')?.disable();
+            step5Form?.get('recognitionsNationalInternational')?.disable();
+            step5Form?.get('controlObject')?.disable();
+            step5Form?.get('taxonomyEvent')?.disable();
+            step5Form?.get('typePerformance')?.disable();
             step5Form?.get('descripcionResultados')?.disable();
             step3Form?.get('objetivoPrincipalPractica')?.setValue('');
+
+            propositoPracticaControl?.clearValidators();
         }
+        propositoPracticaControl?.updateValueAndValidity();
     }
 
     private generateConsecutive(): string {
@@ -550,9 +631,14 @@ export class ResumenComponent implements OnInit {
     onDateChange(event: any, stepName: string, controlName: string): void {
         const date = event.value;
         const formattedDate = this.formatDate(date);
-        this.horizontalStepperForm
-            .get(`${stepName}.${controlName}`)
-            ?.setValue(formattedDate);
+    
+        const control = this.horizontalStepperForm.get(`${stepName}.${controlName}`);
+        control?.setValue(formattedDate);
+    
+        // Validación específica para las fechas de inicio y fin
+        if (controlName === 'periodoDesarrolloInicio' || controlName === 'periodoDesarrolloFin') {
+            this.validateFechas();
+        }
     }
 
     formatDate(date: Date): string {
@@ -660,47 +746,55 @@ export class ResumenComponent implements OnInit {
             this.selectedFiles = Array.from(event.dataTransfer.files);
         }
     }
+
+    private shouldExcludeControl(controlName: string): boolean {
+        const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
+        return excludedControls.includes(controlName);
+    }
     calculateProgress(): number {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
         let filledControls = 0;
-
+    
         formGroups.forEach((step) => {
-            const group = this.horizontalStepperForm.get(
-                step
-            ) as UntypedFormGroup;
+            const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
             if (group) {
                 const controls = group.controls;
+    
+                 Object.entries(controls).forEach(([controlName, control]) => {
+                // Excluir controles específicos
+                if (this.shouldExcludeControl(controlName)) {
+                    return;
+                }
 
-                Object.values(controls).forEach((control) => {
-                    if (!control.disabled) {
-                        totalControls++;
-                        // Considerar válido si tiene un valor (aunque no sea obligatorio)
-                        if (
-                            control.value &&
-                            control.value.toString().trim() !== ''
-                        ) {
-                            filledControls++;
+                // Incluir controles deshabilitados si el rol es "validador"
+                if (!control.disabled || this.isValidatorRole()) {
+                    totalControls++;
+                    // Contar como lleno si tiene un valor, aunque no sea obligatorio
+                    if (
+                        control.value &&
+                        control.value.toString().trim() !== ''
+                    ) {
+                        filledControls++;
                         }
                     }
                 });
             }
         });
-
+    
         // Evitar dividir por cero
         if (totalControls === 0) {
             return 0;
         }
-
+    
         // Calcular progreso
-        const progressValue = Math.round(
-            (filledControls / totalControls) * 100
-        );
+        const progressValue = Math.round((filledControls / totalControls) * 100);
         console.log(
             `Total controles: ${totalControls}, Controles llenos: ${filledControls}, Progreso: ${progressValue}%`
         );
         return progressValue;
     }
+    
     get progressColor(): string {
         if (this.progress <= 30) {
             return 'red'; // 0% - 30%: Rojo
@@ -710,7 +804,62 @@ export class ResumenComponent implements OnInit {
             return 'green'; // 63% - 100%: Verde
         }
     }
+    
+    /**
+     * Verifica si el rol actual es "validador".
+     */
+    private isValidatorRole(): boolean {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        return currentRole === 'validador';
+    }
+    
+// ======================== Logica multiselect entidad momentaneo ======================== //
+    entityOptions = [
+        { id: 1, name: 'Contraloría General de la República' },
+        { id: 2, name: 'Registraduría Nacional del Estado Civil' },
+    ];
 
+// ======================== Método para verificar validez del formulario (ignora campos deshabilitados) ======================== //
+    checkFormValidity(form: FormGroup): boolean {
+        let isValid = true;
+
+        Object.keys(form.controls).forEach((step) => {
+            const group = form.get(step) as FormGroup;
+            if (group) {
+                Object.keys(group.controls).forEach((control) => {
+                    const formControl = group.get(control);
+                    if (formControl && formControl.enabled && formControl.invalid) {
+                        isValid = false;
+                    }
+                });
+            }
+        });
+
+        return isValid;
+    }
+
+// ======================== Logica que valida las fechas ======================== //
+    validateFechas(): void {
+        const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
+        const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
+
+        if (!fechaInicioControl || !fechaFinControl) {
+            return;
+        }
+
+        const fechaInicio = new Date(fechaInicioControl.value);
+        const fechaFin = new Date(fechaFinControl.value);
+
+        // Validar que fecha de fin no sea anterior a la de inicio
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            fechaFinControl.setErrors({ fechaFinAnterior: true });
+        } else {
+            fechaFinControl.setErrors(null);
+        }
+    }
+
+// ======================== Logica que cambia el estado de la practica a desestimar ======================== //
     desestimarPractica(): void {
         if (!this.Id) {
             Swal.fire({
@@ -723,52 +872,48 @@ export class ResumenComponent implements OnInit {
         }
 
         const updatedData = { estadoFlujo: 'desestimada' };
-
-        this.resumenService
-            .updateStateWithPatch(this.Id, updatedData)
-            .subscribe(
-                (response) => {
-                    Swal.fire({
-                        title: '¡Práctica Desestimada!',
-                        text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                        icon: 'success',
-                        confirmButtonText: 'Aceptar',
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                },
-                (error) => {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                    });
-                }
-            );
+        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
+            (response) => {
+                Swal.fire({
+                    title: '¡Práctica Desestimada!',
+                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            },
+            (error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                });
+            }
+        );
     }
 
-    // ======================== Logica que muestra el modal en la vista ======================== //
-
+// ======================== Logica que muestra el modal en la vista ======================== //
     openCaracterizationModal(): void {
         const roles = localStorage.getItem('accessRoles');
-        const currentRole = roles
-            ? JSON.parse(roles)[0].toLowerCase()
-            : 'registro';
-
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        
         const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
             width: '500px',
-            data: {
+            data: { 
                 role: currentRole,
-                selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado
-                additionalInfo: this.additionalInfoFromModal, // Pasar información adicional
+                selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado (para selección única)
+                selectedUsers: this.selectedUsersFromModal, // Pasar usuarios seleccionados (para selección múltiple)
+                additionalInfo: this.additionalInfoFromModal // Pasar información adicional
             },
         });
-
+        
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 // Guardar los datos seleccionados al cerrar el modal
-                this.selectedUserFromModal = result.selectedUser;
+                this.selectedUserFromModal = result.selectedUser || null;
+                this.selectedUsersFromModal = result.selectedUsers; // Asegúrate de que esta propiedad exista y se maneje correctamente
                 this.additionalInfoFromModal = result.additionalInfo || '';
             } else {
                 console.log('Caracterización cancelada');
@@ -778,16 +923,17 @@ export class ResumenComponent implements OnInit {
 
     canProceed(): boolean {
         const roles = localStorage.getItem('accessRoles');
-        const currentRole = roles
-            ? JSON.parse(roles)[0].toLowerCase()
-            : 'registro';
-
-        // Si el rol es "validador", verificar si hay un usuario seleccionado
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+    
         if (currentRole === 'validador') {
-            return this.selectedUserFromModal !== null; // Permite avanzar solo si hay un usuario seleccionado
+            // Para "validador", verificar si hay un usuario seleccionado (selección única)
+            return !!this.selectedUserFromModal; // Asegura que selectedUserFromModal no sea null o undefined
+        } else if (currentRole === 'caracterizador') {
+            // Para "caracterizador", verificar si hay usuarios seleccionados (selección múltiple)
+            return this.selectedUsersFromModal && this.selectedUsersFromModal.length > 0;
         }
-
-        // Para otros roles, permite avanzar
+    
+        // Para otros roles, permite avanzar sin restricciones
         return true;
     }
 }

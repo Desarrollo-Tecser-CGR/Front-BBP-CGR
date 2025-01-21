@@ -1,32 +1,45 @@
-import { Component, ViewEncapsulation } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { RouterModule, Routes } from '@angular/router';
-import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
+import { AfterViewInit, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { LogService } from './follow.service';
+import { Router } from '@angular/router';
 
-// Definición de rutas
-const routes: Routes = [
-    { path: 'characterization', component: CharacterizationComponent },
-    { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
-];
 
 @Component({
-    selector     : 'follow',
-    standalone   : true,
-    templateUrl  : './follow.component.html',
-    styleUrl     : './follow.component.scss',
+    selector: 'follow',
+    standalone: true,
+    templateUrl: './follow.component.html',
+    styleUrls: ['./follow.component.scss'],
     encapsulation: ViewEncapsulation.None,
-    imports: [
-        MatIconModule,
-        MatTableModule,
-        MatMenuModule,
-        RouterModule
-    ]
+    imports: [MatTableModule, MatPaginatorModule, MatIconModule],
 })
-export class FollowComponent {
-    /**
-     * Constructor
-     */
-    constructor() {}
+
+
+
+export class FollowComponent implements OnInit {
+    displayedColumns: string[] = ['nombre', 'sesion', 'rol', 'estado'];
+    dataSource = new MatTableDataSource<any>([]);
+
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+    constructor(private logService: LogService, private router: Router) { }
+
+    ngOnInit(): void {
+        this.logService.getLogs().subscribe(
+            (logs) => {
+                this.dataSource.data = logs;
+                this.dataSource.paginator = this.paginator;
+            },
+            (error) => {
+                console.error('Error al cargar los datos:', error);
+            }
+        );
+    }
+
+    setPageSizeOptions(): number[] {
+        return [3, 5, 10];
+    }
+
+    navegar(): void { this.router.navigate(['/assignRole']); }
 }

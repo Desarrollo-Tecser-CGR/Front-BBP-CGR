@@ -19,6 +19,7 @@ import { SearchComponent } from 'app/layout/common/search/search.component';
 import { ShortcutsComponent } from 'app/layout/common/shortcuts/shortcuts.component';
 import { UserComponent } from 'app/layout/common/user/user.component';
 import { Subject, takeUntil } from 'rxjs';
+import { ButtonMenuComponent } from 'app/layout/common/buttonMenu/buttonMenu.component';
 
 @Component({
     selector: 'classic-layout',
@@ -39,6 +40,7 @@ import { Subject, takeUntil } from 'rxjs';
         NotificationsComponent,
         UserComponent,
         RouterOutlet,
+        ButtonMenuComponent,
         // QuickChatComponent,
     ],
 })

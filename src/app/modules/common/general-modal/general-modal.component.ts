@@ -28,20 +28,23 @@ import { MatInputModule } from '@angular/material/input';
 export class DialogOverviewExampleDialog {
   users: Usuario[] = []; // Usuarios cargados
   selectedUser: any; // Usuario seleccionado
+  selectedUsers: Usuario[] = []; // Usuarios seleccionados (para selección múltiple)
   currentRole: string; // Rol actual del usuario
   additionalInfo: string = ''; // Información adicional
 
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { role: string, selectedUser: any, additionalInfo: string },
     private genaralModalService: GenaralModalService,
-) {
-    this.currentRole = data.role;
-    this.selectedUser = data.selectedUser || null; 
-    this.additionalInfo = data.additionalInfo || ''; 
-    this.loadUsers();
-}
+    @Inject(MAT_DIALOG_DATA) public data: { role: string, selectedUser: any, selectedUsers: Usuario[], additionalInfo: string },
+  ) {}
 
+  ngOnInit(): void {
+    this.currentRole = this.data.role;
+    this.selectedUser = this.data.selectedUser || null;
+    this.selectedUsers = this.data.selectedUsers || []; // Asegúrate de manejar correctamente la lista de usuarios seleccionados
+    this.additionalInfo = this.data.additionalInfo || '';
+    this.loadUsers();
+  }
 
   loadUsers(): void {
     this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
@@ -69,9 +72,28 @@ export class DialogOverviewExampleDialog {
     } else if (this.currentRole === 'validador') {
       return users.filter((user) => user.cargo === 'caracterizador');
     } else if (this.currentRole === 'caracterizador') {
-      return users.filter((user) => user.cargo === 'evaluador');
+      return users.filter((user) => user.cargo === 'evaluador' || user.cargo === 'jefeUnidad');
     }
     return [];
+  }
+
+  handleSelectionChange(): void {
+    if (this.currentRole === 'caracterizador') {
+      // Si se selecciona un jefe de unidad, deseleccionamos los evaluadores
+      const selectedUsersCopy = [...this.selectedUsers]; // Hacemos una copia del arreglo de usuarios seleccionados
+      const jefeDeUnidad = this.selectedUsers.find(user => user.cargo === 'jefeUnidad');
+  
+      // Si hay un jefe de unidad seleccionado, deseleccionamos los evaluadores
+      if (jefeDeUnidad) {
+        // Filtramos los evaluadores que estén seleccionados y los deseleccionamos
+        this.selectedUsers = selectedUsersCopy.filter(user => user.cargo !== 'evaluador');
+      }
+    }
+    
+    // Si el rol es 'validador' y hay más de un usuario seleccionado, permitimos seleccionar solo uno
+    if (this.currentRole === 'validador' && this.selectedUsers.length > 1) {
+      this.selectedUsers = [this.selectedUsers[0]]; // Solo permite un usuario si es 'validador'
+    }
   }
 
   confirmSelection(): void {
@@ -79,12 +101,12 @@ export class DialogOverviewExampleDialog {
     console.log('Información adicional:', this.additionalInfo);
     this.dialogRef.close({
       selectedUser: this.selectedUser,
+      selectedUsers: this.selectedUsers, // Asegúrate de enviar la propiedad correcta
       additionalInfo: this.additionalInfo,
     }); 
   }
-  
+
   compareUsers(user1: Usuario, user2: Usuario): boolean {
     return user1 && user2 ? user1.fullName === user2.fullName : user1 === user2;
-}
-
+  }
 }

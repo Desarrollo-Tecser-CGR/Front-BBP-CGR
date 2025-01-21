@@ -1,7 +1,7 @@
 import { initialDataResolver } from './../../app.resolvers';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CONFIG } from 'app/config/config';
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
@@ -10,9 +10,11 @@ import { catchError, map, Observable, throwError } from 'rxjs';
     providedIn: 'root',
 })
 export class DataServices{
- 
-    private url =  `${CONFIG.apiHost}/api/v1/hojadevida/getIdentity/`;
-    private downloadUrl =  `${CONFIG.apiHost}/api/v1/hojadevida/file/`;
+
+    private url =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity/`;
+    private downloadUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/file/`;
+    private url =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/guardar`;
+
 
     constructor(private http: HttpClient){}
 

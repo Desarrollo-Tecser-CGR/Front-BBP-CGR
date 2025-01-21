@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
 import { InboxService } from './inbox.service';
-import { MatDialog } from '@angular/material/dialog';
 // import { DialogOverviewExampleDialog } from '../general-modal/general-modal.component';
-import { rol } from 'app/mock-api/common/rol/data';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { FilterService } from 'app/layout/common/advanced-search-modal/FilterService';
 
 
 @Component({
@@ -42,7 +41,7 @@ export class InboxComponent implements OnInit {
   ]; // Botones dinámicos
   private _router: any;
 
-  constructor(private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
+  constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
 
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
@@ -65,17 +64,27 @@ export class InboxComponent implements OnInit {
         action: (row: any) => this.validateRow(row),
       });
     }
-  
+    this.filterService.filter$.subscribe((filters) => {
+      if (filters) {
+        this.loadData(filters);
+      }
+    });
     this.loadData();
   }
   
 
-  loadData(): void {
-    if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
-      const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
+  loadData(filters?: any): void {
+    
+    if (this.cargo === 'validador', 'administrador' , 'caracterizador', 'jefeUnidad') {
+      const requestBody = {
+        rol: this.cargo,
+        ...filters, // Agrega los filtros si están definidos
+      }
+
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
           let response = dataRes.data;
+          console.log(response);
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({
@@ -86,6 +95,7 @@ export class InboxComponent implements OnInit {
           this.data = response; // Asignar los datos de la API
         },
         (error) => {
+          console.log(error);
           Swal.fire({
             title: 'Error',
             text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
@@ -105,7 +115,6 @@ export class InboxComponent implements OnInit {
   editRow(row: any): void {
     console.log('Estado del flujo:', row.estadoFlujo);
     console.log('Rol actual:', this.cargo);
-
     // Condición de prueba
     if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
         Swal.fire({
@@ -116,11 +125,9 @@ export class InboxComponent implements OnInit {
         });
         return;
     }
-
-    // Si cumple, permite la edición
     this.router.navigateByUrl('/resumen-edit/' + row.id);
-}
-
+    // Lógica para editar una fila
+  }
 
   deleteRow(row: any): void {
     console.log('Delete row:', row);

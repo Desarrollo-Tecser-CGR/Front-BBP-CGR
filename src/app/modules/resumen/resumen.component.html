@@ -84,7 +84,19 @@
                                         {{ entity.name }}
                                     </mat-option>
                                 </mat-autocomplete>
+                           
+
+                            <!-- testing_branch
+                              <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
+                                <mat-select formControlName="entityCgr" placeholder="Nombre de la entidad">
+                                    <mat-option *ngFor="let entity of entityOptions" [value]="entity.id">
+                                        {{ entity.name }}
+                                    </mat-option>
+                                </mat-select> -->
+
                             </mat-form-field>
+                            
+
                             <mat-form-field class="gt-xs:pl-3 flex-auto w-full" appearance="fill">
                                 <input matInput placeholder="Nombre de la dependencia"
                                     formControlName="nombreDependenciaArea" type="text" />
@@ -189,12 +201,12 @@
                             <mat-form-field class="flex-auto">
                                 <mat-label>Estado Flujo</mat-label>
                                 <mat-select formControlName="estadoFlujo">
-                                    <mat-option value="Candidata">Buena Practica Candidata</mat-option>
+                                    <mat-option value="candidata">Buena Practica Candidata</mat-option>
                                     <mat-option value="validacion">“Buena práctica en validación</mat-option>
-                                    <mat-option value="Caracterización">Buena práctica en caracterización</mat-option>
-                                    <mat-option value="Evaluación">Buena Práctica en Evaluación</mat-option>
-                                    <mat-option value="Establecida">Buena práctica establecida</mat-option>
-                                    <mat-option value="Descartada">Buena práctica Descartada</mat-option>
+                                    <mat-option value="caracterización">Buena práctica en caracterización</mat-option>
+                                    <mat-option value="evaluación">Buena Práctica en Evaluación</mat-option>
+                                    <mat-option value="establecida">Buena práctica establecida</mat-option>
+                                    <mat-option value="descartada">Buena práctica Descartada</mat-option>
                                 </mat-select>
                             </mat-form-field>
                             <mat-form-field class="flex-auto">
@@ -366,11 +378,11 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-                        <div class="mt-0 flex justify-end">
+                        <div class="mt-0 flex justify-end" *ngIf="rol === 'registro'">
                             <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
-                        </div>
+                        </div>                        
 
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button" matStepperPrevious>
@@ -400,7 +412,7 @@
                         </div>
 
                         <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
-                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
+                            <button *ngIf="showButton" class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
                                 {{ buttonText }}
                             </button>
 
@@ -430,6 +442,12 @@
                                         </div> 
                                         <div class="max-w-3x">
                                             <app-generic-table [data]="data" [columns]="columns" [buttons]="buttons"></app-generic-table>
+                                        </div>
+                                        <!-- Boton de Cambio de estado posterior a registro -->
+                                        <div class="mt-0 flex justify-end">
+                                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                                                Enviar Formulario
+                                            </button>
                                         </div>
                                  }
                                  @if (isEdit === false) {
@@ -513,11 +531,6 @@
             Enviar Documentos
             </button>
         </div>
-        <div class="modal-actions">
-            <button style="background: #f0ba41; color: #fff;" mat-raised-button
-                (click)="toggleModal()">Cancelar</button>
-            <button mat-raised-button color="primary" (click)="toggleModal()">Aceptar</button>
-        </div>
     </div>
 </div>
 
@@ -555,3 +568,4 @@
         <span class="internos">Workflow</span>
     </button>
 </mat-menu>
+
