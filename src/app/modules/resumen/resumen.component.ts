@@ -152,11 +152,13 @@ export class ResumenComponent implements OnInit {
         //Método para visualizar en el navegador un archivo
     }
 
-    enviarNotificacion(): void {
+    enviarNotificacion(resumeId:number): void {
+        const fullName = localStorage.getItem('accessNombre') || 'Usuario';
+        console.log('Username',fullName);
         const progreso = this.calculateProgress();
         const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
 
-        this.resumenService.enviarNotificacion(progreso);
+        this.resumenService.enviarNotificacion(resumeId, fullName);
         console.log(mensaje);
 
         console.log(`Color asociado al progreso: ${this.progressColor}`);
@@ -250,7 +252,7 @@ export class ResumenComponent implements OnInit {
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
                                 this.isDisabled = false;
-                                this.enviarNotificacion();
+                                this.enviarNotificacion(response.data.id);
                             });
                             this.identityId =  response.data.id;
                             console.log('Id de la hv en creacion:', response.data.id);

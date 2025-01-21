@@ -6,6 +6,7 @@ import registerUsersRoutes from '../auth/register-users/register-users.routes';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 
+
 @Injectable({
     providedIn: 'root',
 })
@@ -25,20 +26,33 @@ export class ResumenService {
         new BehaviorSubject<boolean>(false);
 
     constructor(private http: HttpClient,
-        private notificationsService: NotificationsService
+        private notificationsService: NotificationsService,
     ) {}
 
-    enviarNotificacion(progreso: number): void {
-        const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
-        const nuevaNotificacion: Notification = {
-            id: new Date().getTime().toString(), // ID único basado en timestamp
-            title: 'Progreso de Hoja de Vida',
-            description: mensaje,
-            time: new Date().toISOString(),
-            read: false,
-            expanded: false,
-        };
+    formatDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        console.log('Formatted Date:', formattedDate); 
+        return formattedDate;
+    }
 
+    enviarNotificacion(resumeId: number, user:string): void {
+        const mensaje = `El usuario ${user} ha generado un nuevo registro de hoja de vida # ${resumeId}`;
+        const nuevaNotificacion: Notification = {
+            icon: "heroicons_outline:document-check",
+            title: `Nuevo registro Hoja de vida # ${resumeId}`,
+            description: mensaje,
+            time: this.formatDate(new Date()),
+            expanded:false,
+            enabled:true,
+            readOnly: false,
+            sAMAccountName: user
+        };
     this.notificationsService.add(nuevaNotificacion).subscribe(() => {
         console.log('Notificación enviada:', mensaje);
         });

@@ -1,15 +1,17 @@
 <!-- Botón de usuario -->
-<button mat-icon-button [matMenuTriggerFor]="userActions" style="display: flex; align-items: center;">
-    <div style="display: flex; align-items: center;">
-        @if (showAvatar && user.avatar) {
-            <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 5px;"></mat-icon>
-        }
-        <div>
-            <p style="font-size: 12px; margin: 0;">{{ user?.fullName || 'Usuario' }}</p>
-            <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ user?.cargo || 'Cargo' }}</p>
+ <div class="w-full px-8">
+    <button mat-icon-button [matMenuTriggerFor]="userActions" style="display: flex; align-items: center; justify-items: center;">
+        <div style="display: flex; align-items: center;">
+            @if (showAvatar && user.avatar) {
+                <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 1em;"></mat-icon>
+            }
+            <div>
+                <p style="font-size: 12px; margin: 0;">{{ user?.fullName || 'Usuario' }}</p>
+                <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ user?.cargo || 'Cargo' }}</p>
+            </div>
         </div>
-    </div>
-</button>
+    </button>
+ </div>
 
 <!-- Menú desplegable -->
 <mat-menu [xPosition]="'before'" #userActions="matMenu">

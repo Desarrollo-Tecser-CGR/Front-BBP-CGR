@@ -57,6 +57,13 @@ export class AuthService {
     get accessNombre(): string {
         return localStorage.getItem('accessNombre') ?? '';
     }
+    set accessId(token: string) {
+        localStorage.setItem('accessId', token);
+    }
+
+    get accessId(): string {
+        return localStorage.getItem('accessId') ?? '';
+    }
 
     /**
      * Setter & getter for access token
