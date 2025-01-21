@@ -11,7 +11,7 @@ export class SignInService {
    // private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
     private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/auth/loginActiveDirectory`;
 
-    //private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
+    //private apiUrl = `${GlobalConstants.API_BASE_URL}auth/login`;
 
     constructor(private http: HttpClient) {}
 
