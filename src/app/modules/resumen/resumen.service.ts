@@ -3,17 +3,23 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import registerUsersRoutes from '../auth/register-users/register-users.routes';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
+import { Notification } from 'app/layout/common/notifications/notifications.types';
+
 
 @Injectable({
     providedIn: 'root',
 })
 export class ResumenService {
+
     private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/guardar`;
     private uploadUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/cargar-archivo`;
     private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
     private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity`;
     private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getAllTypes`;
+    private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
+
 
     // Propiedades para almacenar datos compartidos
     private typesData: { [key: string]: any[] } = {};
@@ -21,7 +27,38 @@ export class ResumenService {
     public isDataLoaded: BehaviorSubject<boolean> =
         new BehaviorSubject<boolean>(false);
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient,
+        private notificationsService: NotificationsService,
+    ) {}
+
+    formatDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        console.log('Formatted Date:', formattedDate); 
+        return formattedDate;
+    }
+
+    enviarNotificacion(resumeId: number, user:string): void {
+        const mensaje = `El usuario ${user} ha generado un nuevo registro de hoja de vida # ${resumeId}`;
+        const nuevaNotificacion: Notification = {
+            icon: "heroicons_outline:document-check",
+            title: `Nuevo registro Hoja de vida # ${resumeId}`,
+            description: mensaje,
+            time: this.formatDate(new Date()),
+            expanded:false,
+            enabled:true,
+            readOnly: false,
+            sAMAccountName: user
+        };
+    this.notificationsService.add(nuevaNotificacion).subscribe(() => {
+        console.log('Notificación enviada:', mensaje);
+        });
+    }
 
     sendFormDataAsJson(formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -92,5 +129,11 @@ export class ResumenService {
 
     getTypeByKey(key: string): any[] {
         return this.typesData[key] || [];
+    }
+
+    fetchEntities(query: string): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        const params = query ? { search: query } : {};
+        return this.http.get<any>(this.apiUrlEntities, { headers, params });
     }
 }

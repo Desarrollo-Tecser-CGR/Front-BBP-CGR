@@ -17,8 +17,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import { Notification } from 'app/layout/common/notifications/notifications.types';
 import { Subject, takeUntil } from 'rxjs';
+import { Notification } from 'app/layout/common/notifications/notifications.types';
  
 @Component({
     selector: 'notifications',
@@ -42,8 +42,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
     @ViewChild('notificationsPanel')
     private _notificationsPanel: TemplateRef<any>;
- 
-    notifications: Notification[];
+    roles: string;
+    rol: string;
+    notifications: any[] = [];
     unreadCount: number = 0;
     private _overlayRef: OverlayRef;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -66,19 +67,38 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        // Subscribe to notification changes
-        this._notificationsService.notifications$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((notifications: Notification[]) => {
-                // Load the notifications
-                this.notifications = notifications;
+        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
+        this.rol = this.roles[0]
+        if (this.rol === 'validador') {
+            this._notificationsService.getAll().subscribe(
+                (data)=>{
+                    console.log('Notificaciones recibidas en el componente:', data); 
+                    this.notifications = data;
+                    this._calculateUnreadCount();
+                    this._changeDetectorRef.markForCheck();
+    
+                },
+                (error)=>{
+                    console.error('Error al obtener las notificaciones:', error);
+                }
+            )
+        } 
+
+        // // Subscribe to notification changes
+        // this._notificationsService.notifications$
+        //     .pipe(takeUntil(this._unsubscribeAll))
+        //     .subscribe((notifications: Notification[]) => {
+        //         console.log('Notificaciones recibidas en el componente:', notifications); 
+
+        //         // Load the notifications
+        //         this.notifications = notifications;
  
-                // Calculate the unread count
-                this._calculateUnreadCount();
+        //         // Calculate the unread count
+        //         this._calculateUnreadCount();
  
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
+        //         // Mark for check
+        //         this._changeDetectorRef.markForCheck();
+        //     });
     }
  
     /**
@@ -86,8 +106,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      */
     ngOnDestroy(): void {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next(null);
-        this._unsubscribeAll.complete();
+        // this._unsubscribeAll.next(null);
+        // this._unsubscribeAll.complete();
  
         // Dispose the overlay
         if (this._overlayRef) {
@@ -139,25 +159,31 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      */
     toggleRead(notification: Notification): void {
         // Toggle the read status
-        notification.read = !notification.read;
+        notification.readOnly = !notification.readOnly;
  
         // Update the notification
         this._notificationsService
-            .update(notification.id, notification)
+            .update(notification.id)
             .subscribe();
     }
  
     toggleExpand(notification: Notification): void {
         notification.expanded = !notification.expanded;
-        this._notificationsService.update(notification.id, notification).subscribe();
+        this._notificationsService.update(notification.id).subscribe();
     }
    
     /**
      * Delete the given notification
      */
-    delete(notification: Notification): void {
+    delete(id:string): void {
         // Delete the notification
-        this._notificationsService.delete(notification.id).subscribe();
+        this._notificationsService.deleteNotification(id).subscribe({
+            next: ()=>{
+                const currentNotifications = this._notificationsService._notifications.getValue();
+            const updatedNotifications = currentNotifications.filter(notification => notification.id !== id);
+            this._notificationsService._notifications.next(updatedNotifications);
+            }
+        });
     }
  
     /**
