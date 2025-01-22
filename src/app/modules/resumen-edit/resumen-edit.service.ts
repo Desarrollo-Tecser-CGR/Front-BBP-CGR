@@ -13,7 +13,6 @@ export class DataServices{
 
     private url =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity/`;
     private downloadUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/file/`;
-    private url =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/guardar`;
 
 
     constructor(private http: HttpClient){}
