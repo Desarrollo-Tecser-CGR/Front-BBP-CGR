@@ -1,6 +1,6 @@
 export interface Notification {
+    id?: string;
     expanded: boolean;
-    id: string;
     icon?: string;
     image?: string;
     title?: string;
@@ -8,5 +8,7 @@ export interface Notification {
     time: string;
     link?: string;
     useRouter?: boolean;
-    read: boolean;
+    readOnly: boolean;
+    enabled: boolean;
+    sAMAccountName?:string;
 }

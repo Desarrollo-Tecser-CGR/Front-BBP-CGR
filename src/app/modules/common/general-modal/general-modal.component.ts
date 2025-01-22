@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 import { GenaralModalService } from './general-modal.service';
 import { Usuario } from './user.type';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'general-modal.component',
@@ -20,21 +21,28 @@ import { Usuario } from './user.type';
     FormsModule,
     MatButtonModule,
     MatDialogModule,
-    CommonModule
+    CommonModule,
+    MatInputModule
   ],
 })
 export class DialogOverviewExampleDialog {
   users: Usuario[] = []; // Usuarios cargados
   selectedUser: any; // Usuario seleccionado
+  selectedUsers: Usuario[] = []; // Usuarios seleccionados (para selección múltiple)
   currentRole: string; // Rol actual del usuario
+  additionalInfo: string = ''; // Información adicional
 
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
     private genaralModalService: GenaralModalService,
-    @Inject(MAT_DIALOG_DATA) public data: { role: string },
-    private http: HttpClient
-  ) {
-    this.currentRole = data.role; // Obtén el rol desde el componente padre
+    @Inject(MAT_DIALOG_DATA) public data: { role: string, selectedUser: any, selectedUsers: Usuario[], additionalInfo: string },
+  ) {}
+
+  ngOnInit(): void {
+    this.currentRole = this.data.role;
+    this.selectedUser = this.data.selectedUser || null;
+    this.selectedUsers = this.data.selectedUsers || []; // Asegúrate de manejar correctamente la lista de usuarios seleccionados
+    this.additionalInfo = this.data.additionalInfo || '';
     this.loadUsers();
   }
 
@@ -64,13 +72,41 @@ export class DialogOverviewExampleDialog {
     } else if (this.currentRole === 'validador') {
       return users.filter((user) => user.cargo === 'caracterizador');
     } else if (this.currentRole === 'caracterizador') {
-      return users.filter((user) => user.cargo === 'evaluador');
+      return users.filter((user) => user.cargo === 'evaluador' || user.cargo === 'jefeUnidad');
     }
     return [];
   }
 
+  handleSelectionChange(): void {
+    if (this.currentRole === 'caracterizador') {
+      // Si se selecciona un jefe de unidad, deseleccionamos los evaluadores
+      const selectedUsersCopy = [...this.selectedUsers]; // Hacemos una copia del arreglo de usuarios seleccionados
+      const jefeDeUnidad = this.selectedUsers.find(user => user.cargo === 'jefeUnidad');
+  
+      // Si hay un jefe de unidad seleccionado, deseleccionamos los evaluadores
+      if (jefeDeUnidad) {
+        // Filtramos los evaluadores que estén seleccionados y los deseleccionamos
+        this.selectedUsers = selectedUsersCopy.filter(user => user.cargo !== 'evaluador');
+      }
+    }
+    
+    // Si el rol es 'validador' y hay más de un usuario seleccionado, permitimos seleccionar solo uno
+    if (this.currentRole === 'validador' && this.selectedUsers.length > 1) {
+      this.selectedUsers = [this.selectedUsers[0]]; // Solo permite un usuario si es 'validador'
+    }
+  }
+
   confirmSelection(): void {
     console.log('Usuario seleccionado:', this.selectedUser);
-    this.dialogRef.close(this.selectedUser); // Cerrar el modal con el usuario seleccionado
+    console.log('Información adicional:', this.additionalInfo);
+    this.dialogRef.close({
+      selectedUser: this.selectedUser,
+      selectedUsers: this.selectedUsers, // Asegúrate de enviar la propiedad correcta
+      additionalInfo: this.additionalInfo,
+    }); 
+  }
+
+  compareUsers(user1: Usuario, user2: Usuario): boolean {
+    return user1 && user2 ? user1.fullName === user2.fullName : user1 === user2;
   }
 }

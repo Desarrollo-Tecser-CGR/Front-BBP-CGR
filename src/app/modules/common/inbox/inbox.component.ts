@@ -88,6 +88,7 @@ export class InboxComponent implements OnInit {
         ...filters, // Agrega los filtros si están definidos
       };
       console.log('datos cargados:', filters)
+
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
           let response = dataRes.data;
@@ -120,6 +121,18 @@ export class InboxComponent implements OnInit {
 
 
   editRow(row: any): void {
+    console.log('Estado del flujo:', row.estadoFlujo);
+    console.log('Rol actual:', this.cargo);
+    // Condición de prueba
+    if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
+        Swal.fire({
+            title: 'Acción no permitida',
+            text: 'No puedes editar este registro porque no está en estado de validación.',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar',
+        });
+        return;
+    }
     this.router.navigateByUrl('/resumen-edit/' + row.id);
     // Lógica para editar una fila
   }

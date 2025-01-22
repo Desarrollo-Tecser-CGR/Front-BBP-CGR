@@ -35,6 +35,7 @@ export class UserComponent implements OnInit, OnDestroy {
     user: User = {
         fullName: '', // Inicialización con valores predeterminados
         cargo: '',
+        id: ''
     };
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -60,15 +61,17 @@ export class UserComponent implements OnInit, OnDestroy {
         const fullName = localStorage.getItem('accessName') || 'Usuario';
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
-
+        const id = localStorage.getItem('accessId');
 
         console.log(fullName);
         console.log(cargo);
+        console.log('Id del usuario', id);
 
         // Inicializar `this.user` con datos del Local Storage
         this.user = {
             fullName: fullName,
             cargo: cargo,
+            id: id
         };
 
         // Marcar para detección de cambios

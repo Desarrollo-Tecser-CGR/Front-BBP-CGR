@@ -15,6 +15,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { RouterModule, Routes } from '@angular/router';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { debounceTime, distinctUntilChanged, map, Observable, switchMap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 import { DialogOverviewExampleDialog } from '../common/general-modal/general-modal.component';
@@ -22,6 +24,7 @@ import { ResumenService } from './resumen.service';
 import { GenericTableComponent } from '../common/generic-table/generic-table.component';
 import { DataServices } from '../resumen-edit/resumen-edit.service';
 import { Router } from '@angular/router';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 
 
 // Definición de rutas
@@ -56,7 +59,8 @@ const routes: Routes = [
         MatMenuModule,
         RouterModule, 
         DialogOverviewExampleDialog,
-        GenericTableComponent
+        GenericTableComponent,
+        MatAutocompleteModule,
     ],
     providers: [MatDatepickerModule],
 })
@@ -71,9 +75,10 @@ export class ResumenComponent implements OnInit {
     progress: number = 0;
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
+    // cargo: string;
     cargo: string = ''; 
     isCaracterizationComplete: boolean = false;
-    selectedUserFromModal: any = null; 
+    selectedUserFromModal: any = null;
     isDisabled: boolean = true;
     identityId: null=null;
     typeStrategyOptions: any[] = [];
@@ -90,7 +95,10 @@ export class ResumenComponent implements OnInit {
     controlObjectOptions: any[] = [];
     taxonomyEventOptions: any[] = [];
     typePerformanceOptions: any[] = [];
-    additionalInfoFromModal: string = ''; 
+    additionalInfoFromModal: string = '';
+    entidades: any[] = [];
+    filteredEntities$: Observable<any[]>; 
+    selectedUsersFromModal: any[] = [];
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
@@ -102,17 +110,19 @@ export class ResumenComponent implements OnInit {
             icon: 'heroicons_outline:arrow-down-tray',
             color:'accent',
             action: (row: any) => this.downloadFile(row),
-
         },
         {
             icon: 'heroicons_outline:magnifying-glass-circle',
-            color:'primary'
+            color:'primary',
+            action: (row: any) => this.visualizeFile(row),
         }
     ]
+    showButton: boolean;
     
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,
-        private dataService: DataServices, private router: Router
+        private dataService: DataServices, private router: Router,
+        private notificationService: NotificationsService
     ) { }
 
     toggleModal(): void {
@@ -135,20 +145,23 @@ export class ResumenComponent implements OnInit {
         }
     }
 
-    downloadFile(file:any):void{
-        this.router.navigateByUrl('',file.id)
+    downloadFile(row: any):void{
+        this.dataService.downloadFile(row.id)
         //Método para descargar un archivo
     }
 
-    visualizeFile(file:any):void{
-        this.router.navigateByUrl('',file.id)
+    visualizeFile(row: any):void{
+        this.dataService.viewFile(row.id);
         //Método para visualizar en el navegador un archivo
     }
 
-    enviarNotificacion(): void {
+    enviarNotificacion(resumeId:number): void {
+        const fullName = localStorage.getItem('accessNombre') || 'Usuario';
+        console.log('Username',fullName);
         const progreso = this.calculateProgress();
         const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
 
+        this.resumenService.enviarNotificacion(resumeId, fullName);
         console.log(mensaje);
 
         console.log(`Color asociado al progreso: ${this.progressColor}`);
@@ -187,7 +200,7 @@ export class ResumenComponent implements OnInit {
             // Aplanar los datos
             console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
-            
+ 
             // Transformar valores vacíos a null
             Object.keys(flattenedValues).forEach((key) => {
                 if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
@@ -197,7 +210,9 @@ export class ResumenComponent implements OnInit {
     
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
-            const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro'; // Obtener el rol actual
+            const currentRole = roles
+                ? JSON.parse(roles)[0].toLowerCase()
+                : 'registro'; // Obtener el rol actual
             console.log(flattenedValues.expectedImpact);
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
@@ -205,6 +220,16 @@ export class ResumenComponent implements OnInit {
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Actualizar el estado de flujo
                     console.log('Estado de flujo actualizado:', flattenedValues.estadoFlujo);
+                }
+                // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+                }
+                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
+                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -235,7 +260,11 @@ export class ResumenComponent implements OnInit {
                 if (flattenedValues.estadoFlujo === 'candidata') {
                     flattenedValues.estadoFlujo = 'candidata'; 
                 }
-    
+                // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU) en la creación:', flattenedValues.estadoFlujo);
+                }
                 // Llamar al servicio de creación
                 this.resumenService
                     .sendFormDataAsJson(flattenedValues)
@@ -248,10 +277,10 @@ export class ResumenComponent implements OnInit {
                                 confirmButtonText: 'Aceptar',
                             }).then(() => {
                                 this.isDisabled = false;
+                                this.enviarNotificacion(response.data.id);
                             });
                             this.identityId =  response.data.id;
                             console.log('Id de la hv en creacion:', response.data.id);
-                            this.enviarNotificacion();
                         },
                         (error) => {
                             Swal.fire({
@@ -273,6 +302,18 @@ export class ResumenComponent implements OnInit {
         this.rol = this.roles[0]
         console.log("Rol en sesion: ", this.rol)  
 
+
+        console.log('Id hv para editar y archivos:', this.Id);
+        this.dataService.getFileByIdResumen(this.Id).subscribe(
+            (response)=>{
+                this.data = response;
+                console.log('Files guardados en data:', this.data);
+            },
+            (e) =>{
+                console.error('Error al guardar files en data:', e);
+            } 
+        )
+
         // Logica de agregar campos seleccionables
         this.entityOptions = [
             { id: 1, name: 'Contraloría General de la República' },
@@ -280,7 +321,7 @@ export class ResumenComponent implements OnInit {
             { id: 3, name: 'Ministerio de Hacienda' },
         ];
 
-        this.data = this.dataService.getDataFiles();
+        //this.data = this.dataService.getDataFiles();
         this.columns = this.dataService.getColumns();
         console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
@@ -296,6 +337,8 @@ export class ResumenComponent implements OnInit {
             this.buttonText = 'Acción';
         }
 
+         // Lógica adicional para manejar la visibilidad del botón (nuevo)
+        this.showButton = this.cargo !== 'jefeUnidad';
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
                 fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
@@ -358,9 +401,7 @@ export class ResumenComponent implements OnInit {
                 this.resumenService.getTypeByKey('objectiveMainPractices');
             this.expectedImpactOptions =
                 this.resumenService.getTypeByKey('expectedImpacts');
-                console.log(
-                    'Opciones para expected:',
-                    this.expectedImpactOptions);
+            console.log('Opciones para expected:', this.expectedImpactOptions);
             this.stagesMethodologyOptions =
                 this.resumenService.getTypeByKey('stagesMethodologys');
             this.durationImplementationOptions =
@@ -434,15 +475,18 @@ export class ResumenComponent implements OnInit {
                         contacto: response.contacto || '',
                     },
                     step3: {
-                        typeStrategyIdentification: response.typeStrategyIdentification?.id || '',
+                        typeStrategyIdentification:
+                            response.typeStrategyIdentification?.id || '',
                         typePractice: response.typePractice?.id || '',
                         codigoPractica: response.codigoPractica || '',
                         typology: response.typology?.id || '',
                         estadoFlujo: response.estadoFlujo || 'Candidata',
                         levelGoodPractice: response.levelGoodPractice?.id || '',
-                        nombreDescriptivoBuenaPractica: response.nombreDescriptivoBuenaPractica || '',
+                        nombreDescriptivoBuenaPractica:
+                            response.nombreDescriptivoBuenaPractica || '',
                         propositoPractica: response.propositoPractica || '',
-                        objectiveMainPractice: response.objectiveMainPractice?.id || '',
+                        objectiveMainPractice:
+                            response.objectiveMainPractice?.id || '',
                     },
                     step4: {
                         expectedImpact: expectedImpactIds,
@@ -459,7 +503,8 @@ export class ResumenComponent implements OnInit {
                         controlObject: response.controlObject?.id || '',
                         taxonomyEvent: taxonomyEventIds,
                         typePerformance: response.typePerformance?.id || '',
-                        descripcionResultados: response.descripcionResultados || '',
+                        descripcionResultados:
+                            response.descripcionResultados || '',
                     },
                     step6: {
                         documentoActuacion: response.documentoActuacion || '',
@@ -478,6 +523,28 @@ export class ResumenComponent implements OnInit {
             },
         });
     }
+    private setupAutocomplete(): void {
+        const entityCgrControl = this.horizontalStepperForm.get('step1.entityCgr');
+        if (entityCgrControl) {
+            this.filteredEntities$ = entityCgrControl.valueChanges.pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((query: string) =>
+                    this.resumenService.fetchEntities(query).pipe(
+                        map((response: any) => response.data || [])
+                    )
+                )
+            );
+        }
+    }
+    onEntitySelected(entity: any): void {
+        const entityCgrControl = this.horizontalStepperForm.get('step1.entityCgr');
+        if (entityCgrControl) {
+            entityCgrControl.setValue(entity.name); 
+        }
+        console.log('Entidad seleccionada:', entity); 
+    }
+
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
         console.log('Valor seleccionado:', selectedValue);
@@ -537,7 +604,9 @@ export class ResumenComponent implements OnInit {
             step4Form?.get('periodoDesarrolloFin')?.disable();
             step5Form?.get('typeMaterialProduced')?.disable();
             step5Form?.get('supportReceived')?.disable();
-            step5Form?.get('recognitionsNationalInternational')?.disable();
+            step5Form
+                ?.get('recognitionsNationalInternational')
+                ?.disable();
             step5Form?.get('controlObject')?.disable();
             step5Form?.get('taxonomyEvent')?.disable();
             step5Form?.get('typePerformance')?.disable();
@@ -578,8 +647,8 @@ export class ResumenComponent implements OnInit {
         const day = ('0' + date.getDate()).slice(-2);
         return `${year}-${month}-${day}`;
     }
-    
-    // nuevo
+
+    // aplanar datos a json / listas array 
     flattenObject(input: any): any {
         const output = {};
         const multiselectFields = [
@@ -589,15 +658,21 @@ export class ResumenComponent implements OnInit {
             'taxonomyEvent',
             'stagesMethodology',
         ];
-    
+
         for (const step in input) {
             const stepData = input[step];
             for (const key in stepData) {
                 if (multiselectFields.includes(key)) {
-                    if (typeof stepData[key] === 'string' && stepData[key].includes(',')) {
+                    if (
+                        typeof stepData[key] === 'string' &&
+                        stepData[key].includes(',')
+                    ) {
                         // Convertir cadenas con comas a listas de números
                         output[key] = stepData[key].split(',').map(Number);
-                    } else if (typeof stepData[key] === 'string' && stepData[key] !== '') {
+                    } else if (
+                        typeof stepData[key] === 'string' &&
+                        stepData[key] !== ''
+                    ) {
                         // Convertir cadenas individuales a una lista con un solo número
                         output[key] = [Number(stepData[key])];
                     } else {
@@ -610,36 +685,14 @@ export class ResumenComponent implements OnInit {
                 }
             }
         }
-    
+
         return output;
-    }    
-    
-    // flattenObject(obj: any): any {
-    //     let result: any = {};
-    
-    //     for (const key in obj) {
-    //         if (obj.hasOwnProperty(key)) {
-    //             if (Array.isArray(obj[key])) {
-    //                 // No transformar arrays
-    //                 result[key] = obj[key];
-    //             } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-    //                 const temp = this.flattenObject(obj[key]);
-    //                 for (const subKey in temp) {
-    //                     if (temp.hasOwnProperty(subKey)) {
-    //                         result[subKey] = temp[subKey];
-    //                     }
-    //                 }
-    //             } else {
-    //                 result[key] = obj[key];
-    //             }
-    //         }
-    //     }
-    //     return result;
-    // }
-            
-    
+    }
+
     onExpectedImpactChange(): void {
-        console.log(this.horizontalStepperForm.get('step4.expectedImpact').value);
+        console.log(
+            this.horizontalStepperForm.get('step4.expectedImpact').value
+        );
     }
 
     submitDocumentoActuacion(identityId:number): void {
@@ -768,118 +821,119 @@ export class ResumenComponent implements OnInit {
     ];
 
 // ======================== Método para verificar validez del formulario (ignora campos deshabilitados) ======================== //
-checkFormValidity(form: FormGroup): boolean {
-    let isValid = true;
+    checkFormValidity(form: FormGroup): boolean {
+        let isValid = true;
 
-    Object.keys(form.controls).forEach((step) => {
-        const group = form.get(step) as FormGroup;
-        if (group) {
-            Object.keys(group.controls).forEach((control) => {
-                const formControl = group.get(control);
-                if (formControl && formControl.enabled && formControl.invalid) {
-                    isValid = false;
-                }
-            });
-        }
-    });
+        Object.keys(form.controls).forEach((step) => {
+            const group = form.get(step) as FormGroup;
+            if (group) {
+                Object.keys(group.controls).forEach((control) => {
+                    const formControl = group.get(control);
+                    if (formControl && formControl.enabled && formControl.invalid) {
+                        isValid = false;
+                    }
+                });
+            }
+        });
 
-    return isValid;
-}
+        return isValid;
+    }
 
 // ======================== Logica que valida las fechas ======================== //
-validateFechas(): void {
-    const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
-    const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
+    validateFechas(): void {
+        const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
+        const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
 
-    if (!fechaInicioControl || !fechaFinControl) {
-        return;
+        if (!fechaInicioControl || !fechaFinControl) {
+            return;
+        }
+
+        const fechaInicio = new Date(fechaInicioControl.value);
+        const fechaFin = new Date(fechaFinControl.value);
+
+        // Validar que fecha de fin no sea anterior a la de inicio
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            fechaFinControl.setErrors({ fechaFinAnterior: true });
+        } else {
+            fechaFinControl.setErrors(null);
+        }
     }
-
-    const fechaInicio = new Date(fechaInicioControl.value);
-    const fechaFin = new Date(fechaFinControl.value);
-
-    // Validar que fecha de fin no sea anterior a la de inicio
-    if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
-        fechaFinControl.setErrors({ fechaFinAnterior: true });
-    } else {
-        fechaFinControl.setErrors(null);
-    }
-}
 
 // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
-
-desestimarPractica(): void {
-    if (!this.Id) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar',
-        });
-        return;
-    }
-
-    const updatedData = { estadoFlujo: 'desestimada' };
-
-    this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
-        (response) => {
-            Swal.fire({
-                title: '¡Práctica Desestimada!',
-                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-            }).then(() => {
-                window.location.reload(); 
-            });
-        },
-        (error) => {
+    desestimarPractica(): void {
+        if (!this.Id) {
             Swal.fire({
                 title: 'Error',
-                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
+            return;
         }
-    );
-}
 
-    // ======================== Logica que muestra el modal en la vista ======================== //
-
-openCaracterizationModal(): void {
-    const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
-
-    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-        width: '500px',
-        data: { 
-            role: currentRole,
-            selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado
-            additionalInfo: this.additionalInfoFromModal // Pasar información adicional
-        },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-            // Guardar los datos seleccionados al cerrar el modal
-            this.selectedUserFromModal = result.selectedUser;
-            this.additionalInfoFromModal = result.additionalInfo || '';
-        } else {
-            console.log('Caracterización cancelada');
-        }
-    });
-}
-
-canProceed(): boolean {
-    const roles = localStorage.getItem('accessRoles');
-    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
-
-    // Si el rol es "validador", verificar si hay un usuario seleccionado
-    if (currentRole === 'validador') {
-        return this.selectedUserFromModal !== null; // Permite avanzar solo si hay un usuario seleccionado
+        const updatedData = { estadoFlujo: 'desestimada' };
+        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
+            (response) => {
+                Swal.fire({
+                    title: '¡Práctica Desestimada!',
+                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            },
+            (error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                });
+            }
+        );
     }
 
-    // Para otros roles, permite avanzar
-    return true;
-}
+// ======================== Logica que muestra el modal en la vista ======================== //
+    openCaracterizationModal(): void {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        
+        const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+            width: '500px',
+            data: { 
+                role: currentRole,
+                selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado (para selección única)
+                selectedUsers: this.selectedUsersFromModal, // Pasar usuarios seleccionados (para selección múltiple)
+                additionalInfo: this.additionalInfoFromModal // Pasar información adicional
+            },
+        });
+        
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                // Guardar los datos seleccionados al cerrar el modal
+                this.selectedUserFromModal = result.selectedUser || null;
+                this.selectedUsersFromModal = result.selectedUsers; // Asegúrate de que esta propiedad exista y se maneje correctamente
+                this.additionalInfoFromModal = result.additionalInfo || '';
+            } else {
+                console.log('Caracterización cancelada');
+            }
+        });
+    }
 
+    canProceed(): boolean {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+    
+        if (currentRole === 'validador') {
+            // Para "validador", verificar si hay un usuario seleccionado (selección única)
+            return !!this.selectedUserFromModal; // Asegura que selectedUserFromModal no sea null o undefined
+        } else if (currentRole === 'caracterizador') {
+            // Para "caracterizador", verificar si hay usuarios seleccionados (selección múltiple)
+            return this.selectedUsersFromModal && this.selectedUsersFromModal.length > 0;
+        }
+    
+        // Para otros roles, permite avanzar sin restricciones
+        return true;
+    }
 }
