@@ -321,7 +321,7 @@ export class ResumenComponent implements OnInit {
             { id: 3, name: 'Ministerio de Hacienda' },
         ];
 
-        this.data = this.dataService.getDataFiles();
+        //this.data = this.dataService.getDataFiles();
         this.columns = this.dataService.getColumns();
         console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
