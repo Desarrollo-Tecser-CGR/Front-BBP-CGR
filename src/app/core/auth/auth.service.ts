@@ -47,12 +47,12 @@ export class AuthService {
         return localStorage.getItem('accessToken') ?? '';
     }
 
-    set accessNombre(token: string) {
-        localStorage.setItem('accessNombre', token);
+    set accessName(token: string) {
+        localStorage.setItem('accessName', token);
     }
 
-    get accessNombre(): string {
-        return localStorage.getItem('accessNombre') ?? '';
+    get accessName(): string {
+        return localStorage.getItem('accessName') ?? '';
     }
 
     /**
@@ -139,7 +139,7 @@ export class AuthService {
 
                 // Store the access token in the local storage
                 this.accessToken = response.user.token;
-                this.accessNombre = credentials.sAMAccountName;
+                this.accessName = credentials.sAMAccountName;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;

@@ -2,18 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
 import { InboxService } from './inbox.service';
-// import { DialogOverviewExampleDialog } from '../general-modal/general-modal.component';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { FilterService } from 'app/layout/common/advanced-search-modal/FilterService';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @Component({
   selector: 'app-inbox',
   standalone: true,
   templateUrl: './inbox.component.html',
-  styleUrls: ['./inbox.component.scss'], // Corrección: Usar styleUrls
-  imports: [GenericTableComponent, MatDatepickerModule], // Corrección: Mover MatDatepickerModule a imports //// , DialogOverviewExampleDialog
+  styleUrls: ['./inbox.component.scss'],
+  imports: [
+    GenericTableComponent,
+    MatDatepickerModule,
+    MatButtonModule,
+    MatIconModule
+  ],
 })
 export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
@@ -66,7 +72,8 @@ export class InboxComponent implements OnInit {
     }
     this.filterService.filter$.subscribe((filters) => {
       if (filters) {
-        this.loadData(filters);
+        console.log('Filtros emitidos desde FilterService:', filters);
+        this.loadData(filters); // Siempre carga datos con los filtros emitidos
       }
     });
     this.loadData();
@@ -74,12 +81,13 @@ export class InboxComponent implements OnInit {
   
 
   loadData(filters?: any): void {
-    
-    if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
+    console.log('Cargando datos con filtros:', filters || 'sin filtros');
+
+    if (['validador', 'administrador', 'caracterizador', "jefeunidad"].includes(this.cargo)) {
       const requestBody = {
-        rol: this.cargo,
         ...filters, // Agrega los filtros si están definidos
       };
+      console.log('datos cargados:', filters)
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
           let response = dataRes.data;
@@ -155,6 +163,12 @@ export class InboxComponent implements OnInit {
       }
     );
   }
+
+  pageLoad(): void {
+    console.log('Evento onload disparado.');
+    window.location.reload()
+  }
+
   // ======================== Logica que muestra el modal en la vista ======================== //
 
   //  openCaracterizationModal(row: any): void {

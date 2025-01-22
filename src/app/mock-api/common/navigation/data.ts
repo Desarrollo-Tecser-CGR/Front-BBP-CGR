@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico']
     },
     {
         id   : 'resumen',

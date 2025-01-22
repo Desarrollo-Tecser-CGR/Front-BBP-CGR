@@ -57,7 +57,7 @@ export class UserComponent implements OnInit, OnDestroy {
      */
     ngOnInit(): void {
         // Recuperar datos desde el localStorage
-        const fullName = localStorage.getItem('accessNombre') || 'Usuario';
+        const fullName = localStorage.getItem('accessName') || 'Usuario';
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
 
