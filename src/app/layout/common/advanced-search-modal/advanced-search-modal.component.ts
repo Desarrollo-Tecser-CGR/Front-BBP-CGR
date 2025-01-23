@@ -11,6 +11,14 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FilterService } from '../advanced-search-modal/FilterService';
+import { Router, RouterModule } from '@angular/router';
+// import { InboxComponent  } from '../../../modules/common/inbox/inbox.component';
+
+// const routes: Routes = [
+//   { path: 'Inbox', component: InboxComponent },
+//   { path: '', redirectTo: '/users', pathMatch: 'full' }
+// ];
+
 @Component({
   selector: 'quick-chat',
   templateUrl: './advanced-search-modal.component.html',
@@ -27,7 +35,8 @@ import { FilterService } from '../advanced-search-modal/FilterService';
     MatDatepickerModule,
     MatNativeDateModule,
     TextFieldModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterModule
   ],
 })
 export class AdvancedSearchModalComponent {
@@ -36,6 +45,7 @@ export class AdvancedSearchModalComponent {
   constructor(
     private fb: FormBuilder,
     private filterService: FilterService,
+    private router: Router,
     public dialogRef: MatDialogRef<AdvancedSearchModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -65,7 +75,9 @@ export class AdvancedSearchModalComponent {
   }
 
   applySearch(): void {
+    
     if (this.advancedSearchForm.valid) {
+
       // Envía los filtros al servicio compartido
 
       let fechaDiligenciamiento = this.advancedSearchForm.get('fechaDiligenciamiento')?.value;
@@ -88,5 +100,11 @@ export class AdvancedSearchModalComponent {
       this.dialogRef.close();
     }
 
+  }
+
+  refresh(): void {
+    this.advancedSearchForm.reset(); // Reinicia todos los campos del formulario
+    this.filterService.updateFilters(null); // Limpia los filtros aplicados
+    console.log('Formulario reiniciado y filtros eliminados.');
   }
 }

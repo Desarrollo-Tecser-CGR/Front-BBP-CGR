@@ -11,4 +11,5 @@ export class FilterService {
   updateFilters(filters: any): void {
     this.filterSubject.next(filters);
   }
+
 }

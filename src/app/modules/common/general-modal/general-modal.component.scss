@@ -5,8 +5,10 @@
     padding: 16px;
     border-bottom: 1px solid #ccc;
 }
-  
+
 mat-form-field {
-    width: 100%; /* Ajusta el ancho al 100% del contenedor */
-    max-width: 500px; /* Puedes definir un ancho máximo si lo deseas */
+    width: 100%;
+    /* Ajusta el ancho al 100% del contenedor */
+    max-width: 500px;
+    /* Puedes definir un ancho máximo si lo deseas */
 }

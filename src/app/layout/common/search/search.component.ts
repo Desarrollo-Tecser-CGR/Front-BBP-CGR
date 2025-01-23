@@ -2,6 +2,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
+
 import {
     Component,
     ElementRef,
@@ -33,7 +34,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
+import { RouterLink,  Router, RouterModule  } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations/public-api';
 import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
 import { AdvancedSearchModalComponent } from '../advanced-search-modal/advanced-search-modal.component';
@@ -59,6 +60,7 @@ import { MatDialog } from '@angular/material/dialog';
         MatFormFieldModule,
         MatInputModule,
         NgClass,
+        RouterModule
     ],
     providers: [
         {
@@ -89,7 +91,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
         private _elementRef: ElementRef,
         private _httpClient: HttpClient,
         private _renderer2: Renderer2,
-        private _dialog: MatDialog
+        private _dialog: MatDialog,
+        private router: Router,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -157,7 +160,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        // Subscribe to the search field value changes
+
         this.searchControl.valueChanges
             .pipe(
                 debounceTime(this.debounce),
@@ -261,20 +264,24 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
+
     openAdvancedSearch(): void {
-        const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
-            width: '600px',
-            data: {
-                // Puedes pasar parámetros iniciales aquí si es necesario
-            },
-        });
+        this.router.navigate(['/inbox']).then(() => {
+            const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
+                width: '600px',
+                data: {
+                    // Puedes pasar parámetros iniciales aquí si es necesario
+                },
+            });
     
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                // Maneja los datos retornados del modal
-                this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
-                this.search.emit(result); // Emitir el resultado avanzado
-            }
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                    // Maneja los datos retornados del modal
+                    this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
+                    this.search.emit(result); // Emitir el resultado avanzado
+                }
+            });
         });
-    }    
+    }
+    
 }
