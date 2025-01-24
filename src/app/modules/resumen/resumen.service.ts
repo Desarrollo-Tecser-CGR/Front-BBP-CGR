@@ -6,7 +6,6 @@ import registerUsersRoutes from '../auth/register-users/register-users.routes';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 
-
 @Injectable({
     providedIn: 'root',
 })
@@ -19,7 +18,6 @@ export class ResumenService {
     private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity`;
     private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getAllTypes`;
     private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
-
 
     // Propiedades para almacenar datos compartidos
     private typesData: { [key: string]: any[] } = {};
@@ -60,23 +58,23 @@ export class ResumenService {
         });
     }
 
-    sendFormDataAsJson(formData: any): Observable<any> {
+    sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        return this.http.post(this.apiUrl, formData, { headers }).pipe(
-            map((response: any)=>{
+        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; // Concatenar el nombre al endpoint
+    
+        return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
+            map((response: any) => {
                 console.log('Data:', response);
                 const id = response.data.id;
                 console.log('Id hv:', id);
                 return response;
             }),
-            catchError((e)=>{
+            catchError((e) => {
                 console.error('Error al obtener los datos:', e);
                 return throwError(e);
             }),
-            );
+        );
     }
-
-    
 
     uploadFile(identityId: number, fileData: FormData): Observable<any> {
         console.log('Id pasando al servicio de carga', identityId)
@@ -99,7 +97,6 @@ export class ResumenService {
         return this.http.patch(url, updatedData, { headers });
     }
     
-
     fetchAllTypes(): Observable<any> {
         return new Observable((observer) => {
             this.http.get<any>(this.apiUrlgetdates).subscribe(

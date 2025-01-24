@@ -201,19 +201,19 @@ export class ResumenComponent implements OnInit {
             console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
  
+            
             // Transformar valores vacíos a null
             Object.keys(flattenedValues).forEach((key) => {
                 if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
                     flattenedValues[key] = null;
                 }
             });            
-    
+            
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
-            const currentRole = roles
-                ? JSON.parse(roles)[0].toLowerCase()
-                : 'registro'; // Obtener el rol actual
+            const currentRole = roles ? JSON.parse(roles)[0].toLowerCase(): 'registro'; // Obtener el rol actual
             console.log(flattenedValues.expectedImpact);
+
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
@@ -265,30 +265,33 @@ export class ResumenComponent implements OnInit {
                     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
                     console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU) en la creación:', flattenedValues.estadoFlujo);
                 }
+                
+                // Obtener el nombre del usuario desde el localStorage
+                const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
+
                 // Llamar al servicio de creación
-                this.resumenService
-                    .sendFormDataAsJson(flattenedValues)
-                    .subscribe(
-                        (response) => {
-                            Swal.fire({
-                                title: '¡Formulario Enviado!',
-                                text: 'Tu formulario ha sido enviado con éxito.',
-                                icon: 'success',
-                                confirmButtonText: 'Aceptar',
-                            }).then(() => {
-                                this.isDisabled = false;
-                                this.enviarNotificacion(response.data.id);
-                            });
-                            this.identityId =  response.data.id;
-                            console.log('Id de la hv en creacion:', response.data.id);
-                        },
-                        (error) => {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'No se pudo enviar el formulario. Intenta nuevamente.',
-                                icon: 'error',
-                                confirmButtonText: 'Aceptar',
-                            });
+                this.resumenService.sendFormDataAsJson(flattenedValues, sAMAccountName).subscribe(
+                    (response) => {
+                        Swal.fire({
+                            title: '¡Formulario Enviado!',
+                            text: 'Tu formulario ha sido enviado con éxito.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                        }).then(() => {
+                            this.isDisabled = false;
+                            this.enviarNotificacion(response.data.id);
+                        });
+                        this.identityId = response.data.id;
+                        console.log('Id de la hv en creacion:', response.data.id);
+                    },
+                    (error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo enviar el formulario. Intenta nuevamente.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                        });
+                        console.log('Datos enviados al servidor:', flattenedValues);
                         }
                     );
             }
@@ -510,7 +513,7 @@ export class ResumenComponent implements OnInit {
                         documentoActuacion: response.documentoActuacion || '',
                     },
                 });
-                if (this.cargo === 'caracterizador') {
+                if (this.cargo === 'caracterizador'|| this.cargo === 'jefeUnidad') {
                     const typePracticeValue = response.typePractice?.id || '';
                     this.onPracticaChange({ value: typePracticeValue });
                 }
@@ -751,6 +754,7 @@ export class ResumenComponent implements OnInit {
         const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
         return excludedControls.includes(controlName);
     }
+    
     calculateProgress(): number {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
@@ -813,7 +817,7 @@ export class ResumenComponent implements OnInit {
         const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
         return currentRole === 'validador';
     }
-    
+
 // ======================== Logica multiselect entidad momentaneo ======================== //
     entityOptions = [
         { id: 1, name: 'Contraloría General de la República' },
