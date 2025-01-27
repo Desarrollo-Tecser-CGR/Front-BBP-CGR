@@ -1,3 +1,4 @@
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
@@ -46,12 +47,14 @@ export class InboxComponent implements OnInit {
     // },
   ]; // Botones dinámicos
   private _router: any;
+  fullName: string = '';
 
-  constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
+  constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router, private notificationsService: NotificationsService) { } // , private dialog: MatDialog
 
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+    this.fullName = localStorage.getItem('accessName') || 'Usuario';
   
     // Definir botones dinámicamente según el rol
     this.buttons = [
@@ -166,6 +169,7 @@ export class InboxComponent implements OnInit {
           // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
           //   this.router.navigate([this.router.url]);
           // });
+          this.notificationsService.sendNotification(row.id, this.fullName, 2)
           this.loadData();
         });
       },
