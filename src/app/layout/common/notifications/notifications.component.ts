@@ -1,3 +1,4 @@
+import { Notification } from './notifications.types';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
@@ -17,8 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import { Subject, takeUntil } from 'rxjs';
-import { Notification } from 'app/layout/common/notifications/notifications.types';
+import { Subject, takeUntil, filter } from 'rxjs';
  
 @Component({
     selector: 'notifications',
@@ -44,7 +44,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     private _notificationsPanel: TemplateRef<any>;
     roles: string;
     rol: string;
-    notifications: any[] = [];
+    notifications: any[]= [];
     unreadCount: number = 0;
     private _overlayRef: OverlayRef;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -57,7 +57,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _notificationsService: NotificationsService,
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef
-    ) {}
+    ) {
+    }
  
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -68,12 +69,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      */
     ngOnInit(): void {
         this.roles = JSON.parse(localStorage.getItem('accessRoles'));
-        this.rol = this.roles[0]
+        this.rol = this.roles[0];
+        this._notificationsService._notifications.asObservable();
+
         if (this.rol === 'validador') {
-            this._notificationsService.getAll().subscribe(
+
+            this._notificationsService._notifications.subscribe(
                 (data)=>{
                     console.log('Notificaciones recibidas en el componente:', data); 
-                    this.notifications = data;
+                    this.notifications= data;
                     this._calculateUnreadCount();
                     this._changeDetectorRef.markForCheck();
     
@@ -81,24 +85,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 (error)=>{
                     console.error('Error al obtener las notificaciones:', error);
                 }
-            )
-        } 
+            );
+        };
 
-        // // Subscribe to notification changes
-        // this._notificationsService.notifications$
-        //     .pipe(takeUntil(this._unsubscribeAll))
-        //     .subscribe((notifications: Notification[]) => {
-        //         console.log('Notificaciones recibidas en el componente:', notifications); 
 
-        //         // Load the notifications
-        //         this.notifications = notifications;
- 
-        //         // Calculate the unread count
-        //         this._calculateUnreadCount();
- 
-        //         // Mark for check
-        //         this._changeDetectorRef.markForCheck();
-        //     });
     }
  
     /**
@@ -106,8 +96,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      */
     ngOnDestroy(): void {
         // Unsubscribe from all subscriptions
-        // this._unsubscribeAll.next(null);
-        // this._unsubscribeAll.complete();
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
  
         // Dispose the overlay
         if (this._overlayRef) {
@@ -178,11 +168,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     delete(id:string): void {
         // Delete the notification
         this._notificationsService.deleteNotification(id).subscribe({
-            next: ()=>{
-                const currentNotifications = this._notificationsService._notifications.getValue();
-            const updatedNotifications = currentNotifications.filter(notification => notification.id !== id);
-            this._notificationsService._notifications.next(updatedNotifications);
-            }
+            
         });
     }
  
@@ -259,9 +245,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         let count = 0;
  
         if (this.notifications && this.notifications.length) {
-            count = this.notifications.filter(
-                (notification) => !notification.read
-            ).length;
+            count =this.notifications.filter(
+                (notification) => !notification.readOnly).length;
         }
  
         this.unreadCount = count;
