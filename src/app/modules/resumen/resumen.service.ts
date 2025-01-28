@@ -33,8 +33,7 @@ export class ResumenService {
 
     sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; // Concatenar el nombre al endpoint
-   
+        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; 
         return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
             map((response: any) => {
                 console.log('Data:', response);
