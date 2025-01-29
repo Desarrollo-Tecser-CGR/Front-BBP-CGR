@@ -57,13 +57,10 @@ export class DialogOverviewExampleDialog {
         } else if (response.usuarios && Array.isArray(response.usuarios)) {
           this.users = this.filterUsersByRole(response.usuarios);
         } else {
-          console.error('La respuesta no contiene un arreglo válido de usuarios.');
           this.users = [];
         }
-        console.log('Usuarios cargados:', this.users);
       },
       (error) => {
-        console.error('Error al cargar usuarios:', error);
       }
     );
   }
@@ -99,8 +96,6 @@ export class DialogOverviewExampleDialog {
   }
 
   confirmSelection(): void {
-    console.log('Usuario seleccionado:', this.selectedUser);
-    console.log('Información adicional:', this.additionalInfo);
     this.dialogRef.close({
       selectedUser: this.selectedUser,
       selectedUsers: this.selectedUsers, // Asegúrate de enviar la propiedad correcta

@@ -184,14 +184,12 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
                     .get(endpoint, { params: { query: value } }) // Pasa el valor como parámetro
                     .subscribe((resultSets: any) => {
                         
-                        console.log('Resultados de la API:', resultSets);
                         // Guarda los resultados
                         this.resultSets = resultSets;
     
                         // Emite el evento con los resultados
                         this.search.next(resultSets);
                     }, error => {
-                        console.error('Error en la llamada API:', error);
                     });
             });
     }

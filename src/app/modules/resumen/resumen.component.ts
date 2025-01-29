@@ -139,9 +139,7 @@ export class ResumenComponent implements OnInit {
         const input = event.target as HTMLInputElement;
         if (input.files) {
             this.selectedFiles = Array.from(input.files);
-            console.log('Archivo seleccionado:', this.selectedFiles);
         } else {
-            console.log('No se seleccionó ningún archivo.');
         }
     }
 
@@ -157,14 +155,11 @@ export class ResumenComponent implements OnInit {
 
     enviarNotificacion(resumeId:number): void {
         const fullName = localStorage.getItem('accessNombre') || 'Usuario';
-        console.log('Username',fullName);
         const progreso = this.calculateProgress();
         const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
 
         this.resumenService.enviarNotificacion(resumeId, fullName);
-        console.log(mensaje);
 
-        console.log(`Color asociado al progreso: ${this.progressColor}`);
     }
 
     submitForm(): void {
@@ -198,7 +193,6 @@ export class ResumenComponent implements OnInit {
             });
 
             // Aplanar los datos
-            console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
  
             // Agregar el comentario (information adicional) aquí
@@ -214,7 +208,6 @@ export class ResumenComponent implements OnInit {
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
             const currentRole = roles ? JSON.parse(roles)[0].toLowerCase(): 'registro'; // Obtener el rol actual
-            console.log(flattenedValues.expectedImpact);
 
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
@@ -222,7 +215,6 @@ export class ResumenComponent implements OnInit {
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
                     const nuevoEstadoFlujo = 'caracterizada'; // Estado actualizado
                     flattenedValues.estadoFlujo = nuevoEstadoFlujo;
-                    console.log('Estado de flujo actualizado:', nuevoEstadoFlujo);
             
                     // Usar la función para manejar la actualización
                     this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
@@ -231,12 +223,10 @@ export class ResumenComponent implements OnInit {
                 // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
                 if (currentRole === 'caracterizador') {
                     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
-                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
                 }
                 // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
                 if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
-                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
                     // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
                     const patchData = {
                         actualizaciones: {
@@ -250,7 +240,6 @@ export class ResumenComponent implements OnInit {
                     // Llamar al servicio de actualización con PATCH
                     this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
                         (response) => {
-                            console.log('Respuesta del servidor:', response);
                             // Mostrar mensaje de éxito
                             Swal.fire({
                                 title: '¡Actualización Exitosa!',
@@ -306,7 +295,6 @@ export class ResumenComponent implements OnInit {
                 // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
                 if (currentRole === 'caracterizador') {
                     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
-                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU) en la creación:', flattenedValues.estadoFlujo);
                 }
                 
                 // Obtener el nombre del usuario desde el localStorage
@@ -325,7 +313,6 @@ export class ResumenComponent implements OnInit {
                             this.enviarNotificacion(response.data.id);
                         });
                         this.identityId = response.data.id;
-                        console.log('Id de la hv en creacion:', response.data.id);
                     },
                     (error) => {
                         Swal.fire({
@@ -334,29 +321,23 @@ export class ResumenComponent implements OnInit {
                             icon: 'error',
                             confirmButtonText: 'Aceptar',
                         });
-                        console.log('Datos enviados al servidor:', flattenedValues);
                         }
                     );
             }
         } else {
-            console.warn('Formulario no válido');
         }
     }
 
     ngOnInit(): void {
         this.roles = JSON.parse(localStorage.getItem('accessRoles'));
         this.rol = this.roles[0]
-        console.log("Rol en sesion: ", this.rol)  
 
 
-        console.log('Id hv para editar y archivos:', this.Id);
         this.dataService.getFileByIdResumen(this.Id).subscribe(
             (response)=>{
                 this.data = response;
-                console.log('Files guardados en data:', this.data);
             },
             (e) =>{
-                console.error('Error al guardar files en data:', e);
             } 
         )
 
@@ -369,7 +350,6 @@ export class ResumenComponent implements OnInit {
 
         //this.data = this.dataService.getDataFiles();
         this.columns = this.dataService.getColumns();
-        console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
         this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
@@ -431,7 +411,6 @@ export class ResumenComponent implements OnInit {
         });
         this.horizontalStepperForm.valueChanges.subscribe(() => {
             this.progress = this.calculateProgress();
-            console.log('Progreso actualizado:', this.progress);
         });
         this.resumenService.fetchAllTypes().subscribe(() => {
             this.typeStrategyOptions = this.resumenService.getTypeByKey(
@@ -447,7 +426,6 @@ export class ResumenComponent implements OnInit {
                 this.resumenService.getTypeByKey('objectiveMainPractices');
             this.expectedImpactOptions =
                 this.resumenService.getTypeByKey('expectedImpacts');
-            console.log('Opciones para expected:', this.expectedImpactOptions);
             this.stagesMethodologyOptions =
                 this.resumenService.getTypeByKey('stagesMethodologys');
             this.durationImplementationOptions =
@@ -471,16 +449,11 @@ export class ResumenComponent implements OnInit {
                 this.validateFechas();});
             this.horizontalStepperForm.get('step4.periodoDesarrolloFin')?.valueChanges.subscribe(() => {
                 this.validateFechas();});
-            console.log(
-                'Opciones para typeStrategyIdentification:',
-                this.typeStrategyOptions
-            ); // Log para depurar
         });
 
         this.progress = this.calculateProgress();
         this.resumenService.getDataAsJson(this.Id.toString()).subscribe({
             next: (response) => {
-                console.log('Datos recibidos:', response);
 
                 // Transformar el expectedImpact si viene como array de objetos
                 const expectedImpactIds = response.expectedImpact
@@ -503,9 +476,6 @@ export class ResumenComponent implements OnInit {
                     ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
                     : [];
 
-                console.log ("impactos: ",expectedImpactIds);
-
-                console.log('Expected Impact recibido:', response.expectedImpact); // Verifica el formato
 
                 // Asignar los datos al formulario usando patchValue
                 this.horizontalStepperForm.patchValue({
@@ -562,10 +532,8 @@ export class ResumenComponent implements OnInit {
                 }
             },
             error: (err) => {
-                console.error('Error al obtener los datos:', err);
             },
             complete: () => {
-                console.log('Datos cargados en el formulario');
             },
         });
     }
@@ -588,12 +556,10 @@ export class ResumenComponent implements OnInit {
         if (entityCgrControl) {
             entityCgrControl.setValue(entity.name); 
         }
-        console.log('Entidad seleccionada:', entity); 
     }
 
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
-        console.log('Valor seleccionado:', selectedValue);
         const step3Form = this.horizontalStepperForm.get('step3');
         const step4Form = this.horizontalStepperForm.get('step4');
         const step5Form = this.horizontalStepperForm.get('step5');
@@ -736,13 +702,9 @@ export class ResumenComponent implements OnInit {
     }
 
     onExpectedImpactChange(): void {
-        console.log(
-            this.horizontalStepperForm.get('step4.expectedImpact').value
-        );
     }
 
     submitDocumentoActuacion(identityId:number): void {
-        console.log('Intentando enviar los documentos con el ID:', identityId);
 
         if (this.selectedFiles.length > 0) {
             const formData = new FormData();
@@ -752,7 +714,6 @@ export class ResumenComponent implements OnInit {
             formData.append('files', file);
           });
 
-            console.log('FormData construido:', formData);
 
             // Enviamos los archivos al servicio
             this.resumenService.uploadFile(identityId,formData).subscribe(
@@ -763,7 +724,6 @@ export class ResumenComponent implements OnInit {
                         icon: 'success',
                         confirmButtonText: 'Aceptar',
                     })
-                    console.log('Documentos enviados con éxito:', response);
                     // Limpiamos la selección tras el envío exitoso
                     this.selectedFiles = [];
                 },
@@ -774,11 +734,9 @@ export class ResumenComponent implements OnInit {
                         icon: 'error',
                         confirmButtonText: 'Aceptar',
                     })
-                    console.error('Error al enviar los documentos:', error);
                 }
             );
         } else {
-            console.warn('No hay archivos seleccionados.');
         }
     }
 
@@ -836,9 +794,6 @@ export class ResumenComponent implements OnInit {
     
         // Calcular progreso
         const progressValue = Math.round((filledControls / totalControls) * 100);
-        console.log(
-            `Total controles: ${totalControls}, Controles llenos: ${filledControls}, Progreso: ${progressValue}%`
-        );
         return progressValue;
     }
     
@@ -877,7 +832,6 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
     // Llamar al servicio de actualización
     this.resumenService.updateDataAsJson(id, patchData).subscribe(
         (response) => {
-            console.log('Respuesta del servidor:', response);
             Swal.fire({
                 title: '¡Actualización Exitosa!',
                 text: successMessage,
@@ -1000,11 +954,7 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
                 this.selectedUserFromModal = result.selectedUser || null;
                 this.selectedUsersFromModal = result.selectedUsers || []; // Asegúrate de que esta propiedad exista y se maneje correctamente
                 this.additionalInfoFromModal = result.additionalInfo || '';
-
-                console.log('Usuario seleccionado:', this.selectedUserFromModal?.fullName);
-                console.log('Información adicional:', this.additionalInfoFromModal);
             } else {
-                console.log('Caracterización cancelada');
             }
         });
     }

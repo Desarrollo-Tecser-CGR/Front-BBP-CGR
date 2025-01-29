@@ -39,11 +39,7 @@ export class InboxComponent implements OnInit {
       color: 'accent',
       action: (row: any) => this.validateRow(row),
     },
-    // {
-    //   label: 'Open Modal',
-    //   color: 'accent', // Puedes elegir un color diferente
-    //   action: (row: any) => this.openCaracterizationModal(row), // Enviar datos de la fila al modal
-    // },
+    // 
   ]; // Botones dinámicos
   private _router: any;
 
@@ -72,7 +68,6 @@ export class InboxComponent implements OnInit {
     }
     this.filterService.filter$.subscribe((filters) => {
       if (filters) {
-        console.log('Filtros emitidos desde FilterService:', filters);
         this.loadData(filters); // Siempre carga datos con los filtros emitidos
       }
     });
@@ -81,7 +76,6 @@ export class InboxComponent implements OnInit {
   
 
   loadData(filters?: any): void {
-    console.log('Cargando datos con filtros:', filters || 'sin filtros');
 
     if (['validador', 'administrador', 'caracterizador', "jefeUnidad"].includes(this.cargo)) {
       const requestBody = {
@@ -90,12 +84,10 @@ export class InboxComponent implements OnInit {
 
       };
       
-      console.log('datos cargados:', filters)
 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
           let response = dataRes.data;
-          console.log(response);
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({
@@ -106,7 +98,6 @@ export class InboxComponent implements OnInit {
           this.data = response; // Asignar los datos de la API
         },
         (error) => {
-          console.log(error);
           Swal.fire({
             title: 'Error',
             text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
@@ -124,8 +115,6 @@ export class InboxComponent implements OnInit {
 
 
   editRow(row: any): void {
-    console.log('Estado del flujo:', row.estadoFlujo);
-    console.log('Rol actual:', this.cargo);
     // Condición de prueba
     if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
         Swal.fire({
@@ -141,7 +130,6 @@ export class InboxComponent implements OnInit {
   }
 
   deleteRow(row: any): void {
-    console.log('Delete row:', row);
     // Lógica para eliminar una fila
   }
 
@@ -150,7 +138,6 @@ export class InboxComponent implements OnInit {
     const accessName = localStorage.getItem('accessName'); // Obtener el accessName del localStorage
 
     if (!accessName) {
-        console.warn('No se encontró el accessName en el almacenamiento local.');
         return; // Finaliza si no hay accessName
     }
 
@@ -175,7 +162,6 @@ export class InboxComponent implements OnInit {
             });
         },
         (error) => {
-            console.error('Error al actualizar el estado de flujo:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'Hubo un problema al actualizar el estado de flujo.',
@@ -187,23 +173,9 @@ export class InboxComponent implements OnInit {
 }
 
   pageLoad(): void {
-    console.log('Evento onload disparado.');
     window.location.reload()
   }
 
-  // ======================== Logica que muestra el modal en la vista ======================== //
-
-  //  openCaracterizationModal(row: any): void {
-  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-  //      width: '500px',
-  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
-  //    });
-
-  //    dialogRef.afterClosed().subscribe((result) => {
-  //      console.log('Modal cerrado con:', result);
-  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
-  //    });
-  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 

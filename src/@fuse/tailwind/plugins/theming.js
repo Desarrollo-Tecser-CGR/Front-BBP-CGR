@@ -135,7 +135,6 @@ const theming = plugin.withOptions(
             try {
                 data = fs.readFileSync(filename, { encoding: 'utf8' });
             } catch (err) {
-                console.error(err);
             }
 
             /* Write the file if the map has been changed */
@@ -143,7 +142,6 @@ const theming = plugin.withOptions(
                 try {
                     fs.writeFileSync(filename, sassMap, { encoding: 'utf8' });
                 } catch (err) {
-                    console.error(err);
                 }
             }
 

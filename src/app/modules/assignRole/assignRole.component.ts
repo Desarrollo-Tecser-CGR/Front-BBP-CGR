@@ -101,7 +101,6 @@ export class AssignRoleComponent implements OnInit {
     private postapiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/user`;
 
     loadUsers(): void {
-        // this.http.get('http://192.168.2.42:8001/api/v1/user').subscribe((response: any) => {
         this.http.get(this.getapiUrl).subscribe((response: any) => {
             if (response && Array.isArray(response.data)) {
                 // Mapea los usuarios para usar idUser y userName
@@ -112,7 +111,6 @@ export class AssignRoleComponent implements OnInit {
                     cargo: user.cargo
                 }));
             } else {
-                console.error('El formato de datos de los usuarios es incorrecto:', response);
             }
         });
     }
@@ -122,7 +120,6 @@ export class AssignRoleComponent implements OnInit {
     }
 
     loadRoles(): void {
-        // this.http.get('http://192.168.2.42:8001/api/v1/role').subscribe((response: any) => {
         this.http.get(this.rolapiUrl).subscribe((response: any) => {
             if (response && Array.isArray(response.data)) {
                 // Mapea los roles para usar id y name
@@ -131,7 +128,6 @@ export class AssignRoleComponent implements OnInit {
                     name: role.name
                 }));
             } else {
-                console.error('El formato de datos de los roles es incorrecto:', response);
             }
         });
     }
@@ -142,7 +138,6 @@ export class AssignRoleComponent implements OnInit {
             roleIds: this.selectedRoleIds
         };
 
-        // this.http.post('http://192.168.2.42:8001/api/v1/user', payload).subscribe(
         this.http.post(this.postapiUrl, payload).subscribe(
             () => {
                 Swal.fire({
@@ -153,7 +148,6 @@ export class AssignRoleComponent implements OnInit {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = '../example';
-                        console.error('Roles asignados correctamente.');
                     }
                 });
             },
@@ -164,7 +158,6 @@ export class AssignRoleComponent implements OnInit {
                     icon: 'error',
                     confirmButtonText: 'Cerrar'
                 });
-                console.error('Error al asignar los roles: ', error);
             }
         );
     }

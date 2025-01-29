@@ -37,7 +37,6 @@ export class ResumenService {
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
         const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        console.log('Formatted Date:', formattedDate); 
         return formattedDate;
     }
 
@@ -54,7 +53,6 @@ export class ResumenService {
             sAMAccountName: user
         };
     this.notificationsService.add(nuevaNotificacion).subscribe(() => {
-        console.log('Notificación enviada:', mensaje);
         });
     }
 
@@ -64,20 +62,16 @@ export class ResumenService {
     
         return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
             map((response: any) => {
-                console.log('Data:', response);
                 const id = response.data.id;
-                console.log('Id hv:', id);
                 return response;
             }),
             catchError((e) => {
-                console.error('Error al obtener los datos:', e);
                 return throwError(e);
             }),
         );
     }
 
     uploadFile(identityId: number, fileData: FormData): Observable<any> {
-        console.log('Id pasando al servicio de carga', identityId)
         return this.http.post(this.uploadUrl+`?identityId=${identityId}` , fileData);
     }
 
@@ -104,21 +98,13 @@ export class ResumenService {
                 (response) => {
                     if (response && response.data) {
                         this.typesData = response.data; 
-                        console.log(
-                            'Datos cargados del servicio:',
-                            this.typesData
-                        ); 
                         this.isDataLoaded.next(true); 
                     } else {
-                        console.error(
-                            'No se encontró el campo data en la respuesta.'
-                        );
                     }
                     observer.next(response);
                     observer.complete();
                 },
                 (error) => {
-                    console.error('Error al obtener los datos:', error);
                     observer.error(error);
                 }
             );

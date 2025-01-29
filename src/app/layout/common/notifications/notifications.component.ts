@@ -71,34 +71,18 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.rol = this.roles[0]
         if (this.rol === 'validador') {
             this._notificationsService.getAll().subscribe(
-                (data)=>{
-                    console.log('Notificaciones recibidas en el componente:', data); 
+                (data)=>{ 
                     this.notifications = data;
                     this._calculateUnreadCount();
                     this._changeDetectorRef.markForCheck();
     
                 },
                 (error)=>{
-                    console.error('Error al obtener las notificaciones:', error);
                 }
             )
         } 
 
-        // // Subscribe to notification changes
-        // this._notificationsService.notifications$
-        //     .pipe(takeUntil(this._unsubscribeAll))
-        //     .subscribe((notifications: Notification[]) => {
-        //         console.log('Notificaciones recibidas en el componente:', notifications); 
-
-        //         // Load the notifications
-        //         this.notifications = notifications;
- 
-        //         // Calculate the unread count
-        //         this._calculateUnreadCount();
- 
-        //         // Mark for check
-        //         this._changeDetectorRef.markForCheck();
-        //     });
+       
     }
  
     /**
