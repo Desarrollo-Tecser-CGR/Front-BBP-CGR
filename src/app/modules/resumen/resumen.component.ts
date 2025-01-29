@@ -201,7 +201,9 @@ export class ResumenComponent implements OnInit {
             console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
  
-            
+            // Agregar el comentario (information adicional) aquí
+            flattenedValues.comentarioUsuario = this.additionalInfoFromModal || '';
+
             // Transformar valores vacíos a null
             Object.keys(flattenedValues).forEach((key) => {
                 if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
@@ -218,8 +220,13 @@ export class ResumenComponent implements OnInit {
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
-                    flattenedValues.estadoFlujo = 'caracterizada'; // Actualizar el estado de flujo
-                    console.log('Estado de flujo actualizado:', flattenedValues.estadoFlujo);
+                    const nuevoEstadoFlujo = 'caracterizada'; // Estado actualizado
+                    flattenedValues.estadoFlujo = nuevoEstadoFlujo;
+                    console.log('Estado de flujo actualizado:', nuevoEstadoFlujo);
+            
+                    // Usar la función para manejar la actualización
+                    this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
+                    return; // Salir después de manejar el flujo
                 }
                 // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
                 if (currentRole === 'caracterizador') {
@@ -230,6 +237,42 @@ export class ResumenComponent implements OnInit {
                 if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
                     console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+                    // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
+                    const patchData = {
+                        actualizaciones: {
+                            estadoFlujo: 'caracterizada_JU', // Actualizar estado de flujo
+                        },
+                        sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario seleccionado desde el modal
+                        estadoFlujo: 'caracterizada_JU', // Estado de flujo actualizado
+                        comentarioUsuario: this.additionalInfoFromModal || '', // Información adicional desde el modal
+                    };
+
+                    // Llamar al servicio de actualización con PATCH
+                    this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                        (response) => {
+                            console.log('Respuesta del servidor:', response);
+                            // Mostrar mensaje de éxito
+                            Swal.fire({
+                                title: '¡Actualización Exitosa!',
+                                text: 'El formulario ha sido actualizado.',
+                                icon: 'success',
+                                confirmButtonText: 'Aceptar',
+                            }).then(() => {
+                                window.location.href = './example'; // Redirigir después de la actualización
+                            });
+                        },
+                        (error) => {
+                            // En caso de error
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar',
+                            });
+                        }
+                    );
+                    return;
+                    
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -818,6 +861,44 @@ export class ResumenComponent implements OnInit {
         return currentRole === 'validador';
     }
 
+
+
+// ======================== Logica envio de datos estructurados por PATCH ======================== //
+private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: string): void {
+    const patchData = {
+        actualizaciones: {
+            estadoFlujo, // Actualizar estado de flujo
+        },
+        sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario
+        estadoFlujo,
+        comentarioUsuario: this.additionalInfoFromModal || '', // Comentario adicional desde el modal
+    };
+
+    // Llamar al servicio de actualización
+    this.resumenService.updateDataAsJson(id, patchData).subscribe(
+        (response) => {
+            console.log('Respuesta del servidor:', response);
+            Swal.fire({
+                title: '¡Actualización Exitosa!',
+                text: successMessage,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                window.location.href = './example';
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+}
+
+
 // ======================== Logica multiselect entidad momentaneo ======================== //
     entityOptions = [
         { id: 1, name: 'Contraloría General de la República' },
@@ -917,8 +998,11 @@ export class ResumenComponent implements OnInit {
             if (result) {
                 // Guardar los datos seleccionados al cerrar el modal
                 this.selectedUserFromModal = result.selectedUser || null;
-                this.selectedUsersFromModal = result.selectedUsers; // Asegúrate de que esta propiedad exista y se maneje correctamente
+                this.selectedUsersFromModal = result.selectedUsers || []; // Asegúrate de que esta propiedad exista y se maneje correctamente
                 this.additionalInfoFromModal = result.additionalInfo || '';
+
+                console.log('Usuario seleccionado:', this.selectedUserFromModal?.fullName);
+                console.log('Información adicional:', this.additionalInfoFromModal);
             } else {
                 console.log('Caracterización cancelada');
             }

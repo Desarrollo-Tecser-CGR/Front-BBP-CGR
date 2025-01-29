@@ -18,8 +18,8 @@ export class InboxService {
         return this.http.post<any>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     }
 
-    setValidateStatus(requestBody: { rol: string; id: number  }): Observable<any[]> {
-        return this.http.post<any[]>(this.apiUrlSetStatus, requestBody); // Enviar cuerpo de la solicitud
-    }
-
+    setValidateStatus(requestBody: { rol: string; id: number }, accessName: string): Observable<any[]> {
+        const apiUrlWithAccessName = `${this.apiUrlSetStatus}/${accessName}`;
+        return this.http.post<any[]>(apiUrlWithAccessName, requestBody);
+    }    
 }

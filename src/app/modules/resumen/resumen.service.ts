@@ -88,8 +88,9 @@ export class ResumenService {
     updateDataAsJson(id: number, formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         const url = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity/${id}`;
-        return this.http.patch(url, formData, { headers }); 
-    }    
+        return this.http.patch(url, formData, { headers, responseType: 'text' as 'json' }); // Cambiar responseType a 'text'
+    }
+    
 
     updateStateWithPatch(id: number, updatedData: any): Observable<any> {
         const url = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity/${id}`;

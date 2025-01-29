@@ -147,38 +147,44 @@ export class InboxComponent implements OnInit {
 
   validateRow(row: any): void {
     const requestBody = { rol: this.cargo, id: row.id }; // Cuerpo de la solicitud
-    this.inboxService.setValidateStatus(requestBody).subscribe(
-      (response) => {
-        if (response.length > 0) {
-          this.columns = Object.keys(response[0]).map((key) => ({
-            key: key,
-            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
-          }));
+    const accessName = localStorage.getItem('accessName'); // Obtener el accessName del localStorage
+
+    if (!accessName) {
+        console.warn('No se encontró el accessName en el almacenamiento local.');
+        return; // Finaliza si no hay accessName
+    }
+
+    // Llamar al endpoint con el accessName
+    this.inboxService.setValidateStatus(requestBody, accessName).subscribe(
+        (response) => {
+            if (response.length > 0) {
+                this.columns = Object.keys(response[0]).map((key) => ({
+                    key: key,
+                    label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+                }));
+            }
+            this.data = response;
+
+            Swal.fire({
+                title: '¡Registro Actualizado!',
+                text: 'El registro ha sido actualizado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                this.loadData(); // Recargar los datos después de la operación
+            });
+        },
+        (error) => {
+            console.error('Error al actualizar el estado de flujo:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al actualizar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
         }
-        this.data = response;
-        Swal.fire({
-          title: '¡Registro Actualizado!',
-          text: 'El registro ha sido actualizado con éxito.',
-          icon: 'success',
-          confirmButtonText: 'Aceptar',
-        }).then(() => {
-          // // Recargar la ruta actual
-          // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          //   this.router.navigate([this.router.url]);
-          // });
-          this.loadData();
-        });
-      },
-      (error) => {
-        Swal.fire({
-          title: 'Error',
-          text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-      }
     );
-  }
+}
 
   pageLoad(): void {
     console.log('Evento onload disparado.');

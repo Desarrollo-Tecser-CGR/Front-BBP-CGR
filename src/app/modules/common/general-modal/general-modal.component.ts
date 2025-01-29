@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { GenaralModalService } from './general-modal.service';
 import { Usuario } from './user.type';
 import { MatInputModule } from '@angular/material/input';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'general-modal.component',
@@ -35,6 +36,7 @@ export class DialogOverviewExampleDialog {
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
     private genaralModalService: GenaralModalService,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: { role: string, selectedUser: any, selectedUsers: Usuario[], additionalInfo: string },
   ) {}
 
