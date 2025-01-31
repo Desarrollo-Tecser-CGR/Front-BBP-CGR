@@ -25,7 +25,7 @@ export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
   columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
   cargo: string;
-
+  fullName: string;
   buttons = [
     {
       // label: 'Edit',
@@ -34,7 +34,7 @@ export class InboxComponent implements OnInit {
       action: (row: any) => this.editRow(row),
     },
     {
-      // label: 'Delete',
+      // label: 'Validate',
       icon: 'heroicons_outline:document-check',
       color: 'accent',
       action: (row: any) => this.validateRow(row),
@@ -48,7 +48,8 @@ export class InboxComponent implements OnInit {
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
-  
+    this.fullName = localStorage.getItem('accessName') || 'Usuario';
+    console.log ('este es el nombre que trae', this.fullName)
     // Definir botones dinámicamente según el rol
     this.buttons = [
       {

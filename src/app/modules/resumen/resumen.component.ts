@@ -26,7 +26,6 @@ import { DataServices } from '../resumen-edit/resumen-edit.service';
 import { Router } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 
-
 // Definición de rutas
 const routes: Routes = [
     { path: 'characterization', component: CharacterizationComponent },
@@ -223,16 +222,24 @@ export class ResumenComponent implements OnInit {
                 // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
                 if (currentRole === 'caracterizador') {
                     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
-                }
-                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
-                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
-                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
-                    // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
-                    const patchData = {
+                    // console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+
+
+                    // Obtener usuario guardado en localStorage (si existe)
+                    const storedUser = localStorage.getItem('selectedUser');
+                    const selectedUser = storedUser ? JSON.parse(storedUser) : null;
+                    // Extraer solo el userName del primer usuario en la lista
+                    const selectedUserName = selectedUser.length > 0 ? selectedUser[0].userName : 'error-sin-usuario';
+
+                    // console.log('Usuario recuperado de localStorage:', selectedUser);
+                    // console.log('UserName extraído:', selectedUserName);
+                    // console.log('Usuario recuperado de localStorage:', selectedUser);
+                     // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
+                     const patchData = {
                         actualizaciones: {
                             estadoFlujo: 'caracterizada_JU', // Actualizar estado de flujo
                         },
-                        sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario seleccionado desde el modal
+                        sAMAccountName: selectedUserName, // Usuario seleccionado desde el modal
                         estadoFlujo: 'caracterizada_JU', // Estado de flujo actualizado
                         comentarioUsuario: this.additionalInfoFromModal || '', // Información adicional desde el modal
                     };
@@ -261,7 +268,13 @@ export class ResumenComponent implements OnInit {
                         }
                     );
                     return;
-                    
+                 
+
+                }
+                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
+                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+                      
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -293,9 +306,9 @@ export class ResumenComponent implements OnInit {
                     flattenedValues.estadoFlujo = 'candidata'; 
                 }
                 // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
-                if (currentRole === 'caracterizador') {
-                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
-                }
+                // if (currentRole === 'caracterizador') {
+                //     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
+                // }
                 
                 // Obtener el nombre del usuario desde el localStorage
                 const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
@@ -954,6 +967,16 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
                 this.selectedUserFromModal = result.selectedUser || null;
                 this.selectedUsersFromModal = result.selectedUsers || []; // Asegúrate de que esta propiedad exista y se maneje correctamente
                 this.additionalInfoFromModal = result.additionalInfo || '';
+
+                if (this.selectedUsersFromModal) {
+                    // Guardar en localStorage como JSON
+                    localStorage.setItem('selectedUser', JSON.stringify(this.selectedUsersFromModal));
+                } else {
+                    localStorage.removeItem('selectedUser'); // Limpiar si no hay usuario seleccionado
+                }
+
+                // console.log('Usuarios seleccionados:', this.selectedUsersFromModal); // Verifica que todos los usuarios estén aquí
+                // console.log('Información adicional:', this.additionalInfoFromModal);
             } else {
             }
         });

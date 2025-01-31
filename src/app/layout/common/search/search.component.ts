@@ -177,7 +177,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
                 filter((value) => value && value.length >= this.minLength)
             )
             .subscribe((value) => {
-                const endpoint = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity`;
+                const endpoint = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`;
     
                 // Llamada GET con parámetros en la URL
                 this._httpClient

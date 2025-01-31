@@ -11,12 +11,12 @@ import { Notification } from 'app/layout/common/notifications/notifications.type
 })
 export class ResumenService {
 
-    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/guardar`;
-    private uploadUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/cargar-archivo`;
-    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/save`;
+    private uploadUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
+    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
-    private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity`;
-    private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getAllTypes`;
+    private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity`;
+    private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getAllTypes`;
     private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
 
     // Propiedades para almacenar datos compartidos
@@ -81,13 +81,13 @@ export class ResumenService {
 
     updateDataAsJson(id: number, formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        const url = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity/${id}`;
+        const url = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity/${id}`;
         return this.http.patch(url, formData, { headers, responseType: 'text' as 'json' }); // Cambiar responseType a 'text'
     }
     
 
     updateStateWithPatch(id: number, updatedData: any): Observable<any> {
-        const url = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/updateIdentity/${id}`;
+        const url = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity/${id}`;
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         return this.http.patch(url, updatedData, { headers });
     }

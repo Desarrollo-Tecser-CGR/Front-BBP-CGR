@@ -8,8 +8,8 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 })
 export class InboxService {
 
-    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/inbox-bbp`;
-    private apiUrlSetStatus = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/setValidateStatus`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/inboxBbp`;
+    private apiUrlSetStatus = `${GlobalConstants.API_BASE_URL}/api/v1/resume/setValidateStatus`;
 
     constructor(private http: HttpClient) { }
 
