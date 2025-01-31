@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'evaluador'], module: '' }
             },
         ]
     },
@@ -209,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador'], module: '' }
             },
         ]
     },
@@ -255,7 +255,6 @@ export const appRoutes: Route[] = [
             },
         ]
     },
-
     {
         path: '',
         canActivate: [AuthGuard],
@@ -268,6 +267,21 @@ export const appRoutes: Route[] = [
             {path: 'resumen-edit', loadChildren: () =>
                 import('app/modules/resumen-edit/resumen-edit.routes'),
                 data: { requiredRoles: ['validador','administrador', 'caracterizador', 'jefeUnidad'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'evaluation-questionnaire', loadChildren: () =>
+                import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
+                data: { requiredRoles: ['evaluador'], module: '' }
             },
         ]
     }

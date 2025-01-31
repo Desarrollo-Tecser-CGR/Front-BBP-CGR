@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico', 'evaluador']
     },
     {
         id   : 'resumen',
@@ -64,7 +64,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad']
+        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador']
     },
     {
         id   : 'create',
