@@ -8,8 +8,8 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 })
 export class InboxService {
 
-    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/inbox-bbp`;
-    private apiUrlSetStatus = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/setValidateStatus`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/inboxBbp`;
+    private apiUrlSetStatus = `${GlobalConstants.API_BASE_URL}/api/v1/resume/setValidateStatus`;
 
     constructor(private http: HttpClient) { }
 
@@ -18,8 +18,9 @@ export class InboxService {
         return this.http.post<any>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     }
 
-    setValidateStatus(requestBody: { rol: string; id: number  }): Observable<any[]> {
-        return this.http.post<any[]>(this.apiUrlSetStatus, requestBody); // Enviar cuerpo de la solicitud
+    setValidateStatus(requestBody: { rol: string; id: number }, accessName: string): Observable<any[]> {
+        const apiUrlWithAccessName = `${this.apiUrlSetStatus}/${accessName}`;
+        return this.http.post<any[]>(apiUrlWithAccessName, requestBody);
     }
 
 }

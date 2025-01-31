@@ -39,12 +39,7 @@ export class InboxComponent implements OnInit {
       icon: 'heroicons_outline:document-check',
       color: 'accent',
       action: (row: any) => this.validateRow(row),
-    },
-    // {
-    //   label: 'Open Modal',
-    //   color: 'accent', // Puedes elegir un color diferente
-    //   action: (row: any) => this.openCaracterizationModal(row), // Enviar datos de la fila al modal
-    // },
+    }
   ]; // Botones dinámicos
   private _router: any;
   fullName: string = '';
@@ -55,15 +50,27 @@ export class InboxComponent implements OnInit {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
     this.fullName = localStorage.getItem('accessName') || 'Usuario';
+    console.log('Fullname inbox', this.fullName);
   
     // Definir botones dinámicamente según el rol
-    this.buttons = [
-      {
-        icon: 'heroicons_outline:pencil-square',
-        color: 'primary',
-        action: (row: any) => this.editRow(row),
-      },
-    ];
+    if (this.cargo === 'evaluador') {
+        this.buttons = [
+          {
+            icon: 'feather:check-square',
+            color: 'primary', 
+            action: (row: any) => this.evaluatePractice(row), 
+          },
+        ]
+    } else{
+      this.buttons = [
+        {
+          icon: 'heroicons_outline:pencil-square',
+          color: 'primary',
+          action: (row: any) => this.editRow(row),
+        },
+      ];
+    }
+    
   
     // Agregar el botón de validación solo para validador y administrador
     if (['validador', 'administrador'].includes(this.cargo)) {
@@ -86,7 +93,7 @@ export class InboxComponent implements OnInit {
   loadData(filters?: any): void {
     console.log('Cargando datos con filtros:', filters || 'sin filtros');
 
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad"].includes(this.cargo)) {
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         ...filters, // Agrega los filtros si están definidos
@@ -124,7 +131,11 @@ export class InboxComponent implements OnInit {
 
     }
   }
-
+  evaluatePractice(row:any):void{
+    if(this.cargo === 'evaluador'){
+      this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
+    }
+  }
 
   editRow(row: any): void {
     console.log('Estado del flujo:', row.estadoFlujo);
@@ -150,44 +161,47 @@ export class InboxComponent implements OnInit {
 
   validateRow(row: any): void {
     const requestBody = { rol: this.cargo, id: row.id }; // Cuerpo de la solicitud
-    this.inboxService.setValidateStatus(requestBody).subscribe(
-      (response) => {
-        if (response.length > 0) {
-          this.columns = Object.keys(response[0]).map((key) => ({
-            key: key,
-            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
-          }));
-        }
-        this.data = response;
-        Swal.fire({
-          title: '¡Registro Actualizado!',
-          text: 'El registro ha sido actualizado con éxito.',
-          icon: 'success',
-          confirmButtonText: 'Aceptar',
-        }).then(() => {
-          // // Recargar la ruta actual
-          // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          //   this.router.navigate([this.router.url]);
-          // });
-          this.notificationsService.sendNotification(row.id, this.fullName, 2)
-          this.loadData();
-        });
-      },
-      (error) => {
-        Swal.fire({
-          title: 'Error',
-          text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-      }
-    );
-  }
+    const accessName = localStorage.getItem('accessName'); // Obtener el accessName del localStorage
 
+    if (!accessName) {
+        return; // Finaliza si no hay accessName
+    }
+
+    // Llamar al endpoint con el accessName
+    this.inboxService.setValidateStatus(requestBody, accessName).subscribe(
+        (response) => {
+            if (response.length > 0) {
+                this.columns = Object.keys(response[0]).map((key) => ({
+                    key: key,
+                    label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+                }));
+            }
+            this.data = response;
+
+            Swal.fire({
+                title: '¡Registro Actualizado!',
+                text: 'El registro ha sido actualizado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                this.loadData(); // Recargar los datos después de la operación
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al actualizar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+}
   pageLoad(): void {
     console.log('Evento onload disparado.');
     window.location.reload()
   }
+
 
   // ======================== Logica que muestra el modal en la vista ======================== //
 

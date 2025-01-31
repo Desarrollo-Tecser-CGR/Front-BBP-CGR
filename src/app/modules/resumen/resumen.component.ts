@@ -102,6 +102,7 @@ export class ResumenComponent implements OnInit {
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
+    @Input() isReadOnly: boolean = false;
     
     data: any[] = [];
     columns: { key: string; label: string }[] = [];
@@ -217,7 +218,7 @@ export class ResumenComponent implements OnInit {
                 : 'registro'; // Obtener el rol actual
             console.log(flattenedValues.expectedImpact);
             // Lógica para decidir si se crea o se actualiza
-            if (this.isEdit && this.Id) {
+            if (this.isEdit || this.isReadOnly && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
                     flattenedValues.estadoFlujo = 'caracterizada'; 
@@ -351,46 +352,46 @@ export class ResumenComponent implements OnInit {
         this.showButton = this.cargo !== 'jefeUnidad';
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
-                entityCgr: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
-                nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+                fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' || this.cargo === 'evaluador' }],
+                entityCgr: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }, Validators.required],
+                nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }, Validators.required],
             }),  
             step2: this._formBuilder.group({
-                nombre: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
-                cargo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
-                correo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.email]],
-                contacto: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.pattern('^[0-9]{10}$')],],
+                nombre: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }, [Validators.required, Validators.maxLength(50)]],
+                cargo: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }, [Validators.required, Validators.maxLength(50)]],
+                correo: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }, [Validators.required, Validators.email]],
+                contacto: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }, [Validators.required, Validators.pattern('^[0-9]{10}$')],],
             }),
             step3: this._formBuilder.group({
-                typeStrategyIdentification: [{ value: '', disabled: this.cargo === 'validador' }],
-                typePractice: [{ value: '', disabled: this.cargo === 'validador' }],
+                typeStrategyIdentification: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                typePractice: [{ value: '', disabled: this.cargo === 'validador' || this.cargo === 'evaluador' }],
                 codigoPractica: [{ value: '', disabled: true }],
-                typology: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                estadoFlujo: [{ value: 'candidata', disabled: true || this.cargo === 'validador' }],
-                levelGoodPractice: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(100)],
-                propositoPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(300)],
-                objectiveMainPractice: [{ value: '', disabled: true || this.cargo === 'validador' }]
+                typology: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                estadoFlujo: [{ value: 'candidata', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                levelGoodPractice: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }, Validators.maxLength(300)],
+                objectiveMainPractice: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }]
             }),
             step4: this._formBuilder.group({
-                expectedImpact: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                metodologiaUsada: [{ value: '', disabled: true || this.cargo === 'validador' }, [Validators.maxLength(500)]],
-                durationImplementation: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                stagesMethodology: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                periodoDesarrolloInicio: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                periodoDesarrolloFin: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                expectedImpact: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                metodologiaUsada: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                stagesMethodology: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                periodoDesarrolloInicio: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                periodoDesarrolloFin: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
             }),
             step5: this._formBuilder.group({
-                typeMaterialProduced: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                supportReceived: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                recognitionsNationalInternational: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                controlObject: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                taxonomyEvent: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                typePerformance: [{ value: '', disabled: true || this.cargo === 'validador' }],
-                descripcionResultados: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                typeMaterialProduced: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                supportReceived: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                recognitionsNationalInternational: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                controlObject: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                taxonomyEvent: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                typePerformance: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
+                descripcionResultados: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador' }],
             }),
             step6: this._formBuilder.group({
-                documentoActuacion: [{ value: '', disabled: true || this.cargo === 'validador'  },Validators.required],
+                documentoActuacion: [{ value: '', disabled: true || this.cargo === 'validador' || this.cargo === 'evaluador'  },Validators.required],
             }),
         });
         this.horizontalStepperForm.valueChanges.subscribe(() => {

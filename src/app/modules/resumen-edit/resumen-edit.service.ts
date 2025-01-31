@@ -11,8 +11,8 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 })
 export class DataServices{
 
-    private url =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity/`;
-    private downloadUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/file/`;
+    private url =  `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity/`;
+    private downloadUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/resume/file/`;
 
 
     constructor(private http: HttpClient){}
