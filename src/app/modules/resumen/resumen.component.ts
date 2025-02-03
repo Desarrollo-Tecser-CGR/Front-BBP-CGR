@@ -117,6 +117,7 @@ export class ResumenComponent implements OnInit {
         }
     ]
     showButton: boolean;
+    fullName: string = '';
     
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,
@@ -152,16 +153,20 @@ export class ResumenComponent implements OnInit {
         //Método para visualizar en el navegador un archivo
     }
 
-    enviarNotificacion(resumeId:number): void {
-        const fullName = localStorage.getItem('accessNombre') || 'Usuario';
+
+    sendNotification(resumeId:number): void {
+        const fullName = localStorage.getItem('accessName') || 'Usuario';
+        console.log('Username',fullName);
         const progreso = this.calculateProgress();
         const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
 
-        this.resumenService.enviarNotificacion(resumeId, fullName);
-
+        this.notificationService.sendNotification(resumeId, fullName, 1);
+        console.log(mensaje);
+    
     }
 
     submitForm(): void {
+        this.fullName = localStorage.getItem('accessName') || 'Usuario';
 
         const isFormValid = this.checkFormValidity(this.horizontalStepperForm);
 
@@ -217,7 +222,9 @@ export class ResumenComponent implements OnInit {
             
                     // Usar la función para manejar la actualización
                     this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
+                    this.notificationService.sendNotification(this.Id, this.fullName, 2)
                     return; // Salir después de manejar el flujo
+
                 }
                 // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
                 if (currentRole === 'caracterizador') {
@@ -267,14 +274,20 @@ export class ResumenComponent implements OnInit {
                             });
                         }
                     );
+                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+                    this.notificationService.sendNotification(this.Id, this.fullName, 6);
                     return;
                  
+
 
                 }
                 // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
                 if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
-                      
+
+                    this.notificationService.sendNotification(this.Id, this.fullName, 6)
+                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -306,34 +319,34 @@ export class ResumenComponent implements OnInit {
                     flattenedValues.estadoFlujo = 'candidata'; 
                 }
                 // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
-                // if (currentRole === 'caracterizador') {
-                //     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
-                // }
-                
-                // Obtener el nombre del usuario desde el localStorage
-                const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
 
-                // Llamar al servicio de creación
-                this.resumenService.sendFormDataAsJson(flattenedValues, sAMAccountName).subscribe(
-                    (response) => {
-                        Swal.fire({
-                            title: '¡Formulario Enviado!',
-                            text: 'Tu formulario ha sido enviado con éxito.',
-                            icon: 'success',
-                            confirmButtonText: 'Aceptar',
-                        }).then(() => {
-                            this.isDisabled = false;
-                            this.enviarNotificacion(response.data.id);
-                        });
-                        this.identityId = response.data.id;
-                    },
-                    (error) => {
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'No se pudo enviar el formulario. Intenta nuevamente.',
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                        });
+                 // Obtener el nombre del usuario desde el localStorage
+                 const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
+ 
+                 // Llamar al servicio de creación
+                 this.resumenService.sendFormDataAsJson(flattenedValues, sAMAccountName).subscribe(
+                     (response) => {
+                         Swal.fire({
+                             title: '¡Formulario Enviado!',
+                             text: 'Tu formulario ha sido enviado con éxito.',
+                             icon: 'success',
+                             confirmButtonText: 'Aceptar',
+                         }).then(() => {
+                             this.isDisabled = false;
+                             this.sendNotification(response.data.id);
+                         });
+                         this.identityId = response.data.id;
+                         console.log('Id de la hv en creacion:', response.data.id);
+                     },
+                     (error) => {
+                         Swal.fire({
+                             title: 'Error',
+                             text: 'No se pudo enviar el formulario. Intenta nuevamente.',
+                             icon: 'error',
+                             confirmButtonText: 'Aceptar',
+                         });
+                         console.log('Datos enviados al servidor:', flattenedValues);
+
                         }
                     );
             }
@@ -891,7 +904,7 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
         return isValid;
     }
 
-// ======================== Logica que valida las fechas ======================== //
+// ======================== Logica que valida las fechas ========================= //
     validateFechas(): void {
         const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
         const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');

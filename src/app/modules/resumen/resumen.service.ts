@@ -26,35 +26,7 @@ export class ResumenService {
         new BehaviorSubject<boolean>(false);
 
     constructor(private http: HttpClient,
-        private notificationsService: NotificationsService,
     ) {}
-
-    formatDate(date: Date): string {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        return formattedDate;
-    }
-
-    enviarNotificacion(resumeId: number, user:string): void {
-        const mensaje = `El usuario ${user} ha generado un nuevo registro de hoja de vida # ${resumeId}`;
-        const nuevaNotificacion: Notification = {
-            icon: "heroicons_outline:document-check",
-            title: `Nuevo registro Hoja de vida # ${resumeId}`,
-            description: mensaje,
-            time: this.formatDate(new Date()),
-            expanded:false,
-            enabled:true,
-            readOnly: false,
-            sAMAccountName: user
-        };
-    this.notificationsService.add(nuevaNotificacion).subscribe(() => {
-        });
-    }
 
     sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -62,15 +34,16 @@ export class ResumenService {
     
         return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
             map((response: any) => {
+
                 const id = response.data.id;
                 return response;
             }),
             catchError((e) => {
+                console.error('Error al obtener los datos:', e);
                 return throwError(e);
             }),
         );
     }
-
     uploadFile(identityId: number, fileData: FormData): Observable<any> {
         return this.http.post(this.uploadUrl+`?identityId=${identityId}` , fileData);
     }

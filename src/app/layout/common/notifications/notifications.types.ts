@@ -11,4 +11,5 @@ export interface Notification {
     readOnly: boolean;
     enabled: boolean;
     sAMAccountName?:string;
+    notificationType:number;
 }
