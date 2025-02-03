@@ -81,6 +81,7 @@ export class InboxComponent implements OnInit {
     if (['validador', 'administrador', 'caracterizador', "jefeUnidad"].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
+        sAMAccountName: this.fullName,
         ...filters, // Agrega los filtros si están definidos
 
       };
@@ -88,6 +89,8 @@ export class InboxComponent implements OnInit {
 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
+          console.log('Cuerpo de la petición:', requestBody);
+
           let response = dataRes.data;
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila

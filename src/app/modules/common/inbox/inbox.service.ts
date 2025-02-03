@@ -13,7 +13,7 @@ export class InboxService {
 
     constructor(private http: HttpClient) { }
 
-    getDataAsJson(requestBody: { rol: string }): Observable<any> {
+    getDataAsJson(requestBody: { rol: string; sAMAccountName: string }): Observable<any> {
         return this.http.post<any>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
     }
 
