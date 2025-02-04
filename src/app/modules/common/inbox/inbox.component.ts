@@ -91,21 +91,21 @@ export class InboxComponent implements OnInit {
   
 
   loadData(filters?: any): void {
-    console.log('Cargando datos con filtros:', filters || 'sin filtros');
-
+ 
     if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
+        sAMAccountName: this.fullName,
         ...filters, // Agrega los filtros si están definidos
-
+ 
       };
-      
-      console.log('datos cargados:', filters)
-
+     
+ 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
+          console.log('Cuerpo de la petición:', requestBody);
+ 
           let response = dataRes.data;
-          console.log(response);
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({
@@ -116,7 +116,6 @@ export class InboxComponent implements OnInit {
           this.data = response; // Asignar los datos de la API
         },
         (error) => {
-          console.log(error);
           Swal.fire({
             title: 'Error',
             text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
@@ -128,9 +127,10 @@ export class InboxComponent implements OnInit {
       );
     }
     else {
-
+ 
     }
   }
+  
   evaluatePractice(row:any):void{
     if(this.cargo === 'evaluador'){
       this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);

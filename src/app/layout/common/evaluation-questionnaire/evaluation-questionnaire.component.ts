@@ -1,5 +1,5 @@
-import { throwError } from 'rxjs';
-import { Component, OnInit, Input, ViewEncapsulation, Renderer2 } from '@angular/core';
+import { catchError, of, throwError, map } from 'rxjs';
+import { Component, OnInit, Input, ViewEncapsulation, Renderer2, importProvidersFrom } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -9,7 +9,7 @@ import { MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { ResumenService } from 'app/modules/resumen/resumen.service';
 import Swal from 'sweetalert2';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import {FormBuilder, FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators,FormArray, Form
+import {FormBuilder, FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators,FormArray, Form, FormControl
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ResumenComponent } from 'app/modules/resumen/resumen.component';
@@ -21,7 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { QuestionnaireService } from './evaluation-questionnaire.service';
-
+import { NgForOf } from '@angular/common'; 
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -43,95 +43,109 @@ import { QuestionnaireService } from './evaluation-questionnaire.service';
         MatDatepickerModule,
         FormsModule,
         ReactiveFormsModule,
-        MatCheckbox
+        MatCheckbox,
+        NgForOf,
+          
   ],
   templateUrl: './evaluation-questionnaire.component.html',
   styleUrl: './evaluation-questionnaire.component.scss'
 })
 
 export class EvaluationQuestionnaireComponent{
-    id: string='';
-    formData: any = {};
-    data: any = {};
-    questions : any = [];
-    verticalStepperForm: FormGroup;
-    
-    constructor(
-      private resumenService: ResumenService, 
+  id: string = '';
+  data: any = {};
+  questions: any[] = [];
+  verticalStepperForm: FormGroup;
+
+  constructor(
+      private resumenService: ResumenService,
       private route: ActivatedRoute,
-      private fb:FormBuilder,
+      private fb: FormBuilder,
       private questionnaireService: QuestionnaireService
-      ){
-    }
+  ) {
+      this.verticalStepperForm = this.fb.group({
+          questionGroups: this.fb.array([])
+      });
+  }
 
-    ngOnInit(): void{
-      //traer hoja de vida por id
-      this.id=this.route.snapshot.paramMap.get('id');
+
+  ngOnInit(): void {
+      this.id = this.route.snapshot.paramMap.get('id');
       this.resumenService.getDataAsJson(this.id).subscribe(
-      (response)=>{
-          this.data = response;
-          console.log('Practica:', this.data);
-          return this.data;
-      },
-      (error)=>{
-        Swal.fire({
-        title: 'Error',
-        text: `No se pudo abrir la practica.${error}`,
-        icon: 'error',
-        confirmButtonText: 'Aceptar',
-        });
-      }
-    );
+          (response) => {
+              this.data = response;
+              console.log('Práctica:', this.data);
+          },
+          (error) => {
+              Swal.fire({
+                  title: 'Error',
+                  text: `No se pudo abrir la práctica. ${error}`,
+                  icon: 'error',
+                  confirmButtonText: 'Aceptar',
+              });
+          }
+      );
 
-    this.questionnaireService.getQuestionsGroups().subscribe(
-      (groups)=>{
-        this.questions = groups;
-        console.log('Preguntas en el ts:', this.questions);
-        this.verticalStepperForm = this.fb.group(
-          this.questions.reduce((steps, group, index)=>{
-            steps[`step${index + 1}`]= this.fb.group({
-              questions: this.fb.array(
-                group.map(()=> this.fb.control(false))
-              )
-          });
-          return steps;
-        },
-      (error)=>{
-        Swal.fire({
-          title: 'Error',
-          text: `No se pudo abrir el cuestionario.${error}`,
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-          });
-      }
-      ));
-    });
+      // Obtener preguntas
+      this.questionnaireService.getQuestionsGroups().pipe(
+          catchError((error) => {
+              Swal.fire({
+                  title: 'Error',
+                  text: `No se pudo abrir el cuestionario. ${error.message}`,
+                  icon: 'error',
+                  confirmButtonText: 'Aceptar',
+              });
+              return of([]);
+          })
+      ).subscribe((groups) => {
+          if (!groups || groups.length === 0) {
+              console.warn('No se recibieron grupos de preguntas.');
+              return;
+          }
+          this.questions = groups;
+          console.log('Preguntas', this.questions);
+          this.populateForm();
+      });
   }
+  get questionsArray(): FormArray {
+    return this.verticalStepperForm.get('questionGroups') as FormArray;
+  }
+
+  populateForm():void {
+    this.questions.forEach((group, groupIndex)=>{
+        const groupFromArray = this.fb.array([]);
+        group.forEach((question:any)=>{
+            const optionsFormArray = this.fb.array([]);
+            question.options.map(()=> this.fb.control(false));
+            });
+            const questionFormGroup = this.fb.group({
+                question:  this.questions
+            })
+            this.questionsArray.push(groupFromArray);
+        });
+    };
+  }
+  // getQuestions(index: number): FormArray {
+  //   return this.verticalStepperForm.get(`step${index + 1}.questions`) as FormArray;
+  // }
   
-  getQuestions(index: number):FormArray{
-    return this.verticalStepperForm.get(`step${index}.questions`) as FormArray;
-  }
+  // checkFormValidity(form: FormGroup): boolean {
+  //   let isValid = true;
+  
+  //   Object.keys(form.controls).forEach((step) => {
+  //     const group = form.get(step) as FormGroup;
+  //     if (group) {
+  //       Object.keys(group.controls).forEach((control) => {
+  //         const formControl = group.get(control);
+  //         if (formControl && formControl.enabled && formControl.invalid) {
+  //           isValid = false;
+  //         }
+  //       });
+  //     }
+  //   });
+  
+  //   return isValid;
+  // }
 
-      //incluir formulario de evaluación 
-      checkFormValidity(form: FormGroup): boolean {
-        let isValid = true;
-
-        Object.keys(form.controls).forEach((step) => {
-            const group = form.get(step) as FormGroup;
-            if (group) {
-                Object.keys(group.controls).forEach((control) => {
-                    const formControl = group.get(control);
-                    if (formControl && formControl.enabled && formControl.invalid) {
-                        isValid = false;
-                    }
-                });
-            }
-        });
-
-        return isValid;
-    }
-    
-
-}
 
 

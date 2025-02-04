@@ -10,7 +10,7 @@ import { catchError, map, Observable, of, throwError } from 'rxjs';
 })
 
 export class QuestionnaireService{
-    private data:[
+    private data =[
         {id:1, comment:false, question:'¿La buena práctica está documentada de manera clara y concisa?',options:[{option:'Si'}, {option:'No'}]},
         {id:2, comment:false, question:'¿La descripción de la buena práctica está escrita en un lenguaje accesible para todos los públicos (sin tecnicismos innecesarios)?',options:[{option:'Si'},{option:'No'}]},
         {id:3, comment:false, question:'¿Las etapas o fases de implementación de la buena práctica son fáciles de seguir y entender?',options:[{option:'Si'},{option:'No'}]},
@@ -53,7 +53,6 @@ export class QuestionnaireService{
         for(let i = 0; i<this.data.length; i+= groupSize){
             result.push(this.data.slice(i, i + groupSize));
         }
-        console.log('Preguntas', result);
         return of(result);
         }
     }
