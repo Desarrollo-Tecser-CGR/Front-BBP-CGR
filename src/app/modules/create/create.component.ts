@@ -161,7 +161,6 @@ export class CreateComponent {
         // Send Data 
         this.createService.saveFormData(formData).subscribe(
             (response) => {
-                console.log('Formulario guardado con éxito:', response);
                 // Show Alert
                 Swal.fire({
                     title: '¡Formulario Guardado!',
@@ -177,7 +176,6 @@ export class CreateComponent {
                 });
             },
             (error) => {
-                console.error('Error al guardar el formulario:', error);
                 Swal.fire({
                     title: 'Error',
                     text: `Hubo un problema al guardar el formulario: ${error.error?.message || 'Error desconocido'}`,

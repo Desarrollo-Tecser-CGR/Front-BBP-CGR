@@ -270,5 +270,20 @@ export const appRoutes: Route[] = [
                 data: { requiredRoles: ['validador','administrador', 'caracterizador', 'jefeUnidad'], module: '' }
             },
         ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
+            },
+        ]
     }
 ];

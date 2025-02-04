@@ -8,7 +8,6 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
     providedIn: 'root',
 })
 export class LogService {
-    // private apiUrl = 'http://192.168.2.42:8001/api/v1/log';
     private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/log`;
     
     constructor(private http: HttpClient) {}

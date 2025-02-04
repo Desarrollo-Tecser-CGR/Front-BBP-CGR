@@ -6,12 +6,13 @@ import { Injectable } from '@angular/core';
 import { CONFIG } from 'app/config/config';
 import { user } from 'app/mock-api/common/user/data';
 import { BehaviorSubject, catchError, forkJoin, map, Observable, ReplaySubject, switchMap, take, tap, throwError } from 'rxjs';
- 
+
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
     private apiUrl = `${CONFIG.apiHost}/api/v1/notification`;
- 
+
     public _notifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
+
     constructor(private _httpClient: HttpClient) { }
 
     /**
@@ -20,17 +21,18 @@ export class NotificationsService {
     get notifications$(){
         return this._notifications.asObservable();
     }
+
     setNotifications(notification: Notification[]):void{
         this._notifications.next(notification);
     }
 
     create(notification: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        return this._httpClient.post(this.apiUrl,notification ).pipe(
-            map((response: any)=>{
-                console.log('Data:', response);
+        return this._httpClient.post(this.apiUrl, notification).pipe(
+            map((response: any) => {
                 return response;
             }),
+
             catchError((e)=>{
                 console.log('Error al obtener los datos:', e);
                  return throwError(e);
@@ -120,13 +122,14 @@ export class NotificationsService {
     getByType(typeId: number): Observable<any[]>{
         return this._httpClient.get<Notification[]>(`${this.apiUrl}/byTypeId/${typeId}`).pipe(
             map((response:any)=>{
+
                 const data = response.data;
                 const currentNotifications = this._notifications.getValue();
                 const updateNotifications = [...currentNotifications, ...data];
                 this._notifications.next(updateNotifications);
                 return data;
             }),
-            catchError((e)=>{
+            catchError((e) => {
                 return throwError(e);
             })
         );
@@ -134,18 +137,17 @@ export class NotificationsService {
 
     update(id: string): Observable<void> {
         const currentNotifications = this._notifications.getValue();
-            const requests = currentNotifications.map((notification) =>
+        const requests = currentNotifications.map((notification) =>
             this._httpClient.patch<void>(`${this.apiUrl}/editReadOnly/${id}`, '')
         );
-    
+
         return forkJoin(requests).pipe(
             tap(() => {
                 currentNotifications.forEach((notification) => (notification.readOnly = true));
                 this._notifications.next(currentNotifications);
             }),
-            map(() => undefined), 
+            map(() => undefined),
             catchError((e) => {
-                console.error('Error al marcar todas las notificaciones como leídas:', e);
                 return throwError(() =>
                     new Error('No se pudieron marcar las notificaciones como leídas. Intente nuevamente más tarde.')
                 );
@@ -175,7 +177,7 @@ export class NotificationsService {
             })
         );
     };
- 
+
     /**
      * Mark all notifications as read
      */
@@ -186,8 +188,9 @@ export class NotificationsService {
         return new Observable((observer) => {
             observer.next();
             observer.complete();
-    })}
- 
+        })
+    }
+
     /**
      * METODO PARA UTILIZAR LAS NOTIFICACIONES EN UN SISTEMA
      */
@@ -195,10 +198,12 @@ export class NotificationsService {
         localStorage.setItem('notifications', JSON.stringify(notifications));
     }
 
+
     add(data: any): Observable<void> {
         console.log('Notificación creada:', data); // Verifica la notificación antes de agregarla
         return this._httpClient.post<any>(this.apiUrl, data).pipe(
             map((newNotification)=>{
+
                 const currentNotifications = this._notifications.getValue();
                 currentNotifications.push(newNotification);
                 // const updatedNotifications = [...currentNotifications, newNotification];
@@ -208,9 +213,8 @@ export class NotificationsService {
 
                 this._saveNotifications(currentNotifications);
             }),
-            catchError((e)=>{
-                console.error('Error al agregar la notificacion', e);
-                return throwError(()=>e)
+            catchError((e) => {
+                return throwError(() => e)
             })
         )
 

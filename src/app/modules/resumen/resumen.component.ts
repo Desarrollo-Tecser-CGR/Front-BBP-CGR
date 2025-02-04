@@ -26,7 +26,6 @@ import { DataServices } from '../resumen-edit/resumen-edit.service';
 import { Router } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 
-
 // Definición de rutas
 const routes: Routes = [
     { path: 'characterization', component: CharacterizationComponent },
@@ -140,9 +139,7 @@ export class ResumenComponent implements OnInit {
         const input = event.target as HTMLInputElement;
         if (input.files) {
             this.selectedFiles = Array.from(input.files);
-            console.log('Archivo seleccionado:', this.selectedFiles);
         } else {
-            console.log('No se seleccionó ningún archivo.');
         }
     }
 
@@ -156,6 +153,7 @@ export class ResumenComponent implements OnInit {
         //Método para visualizar en el navegador un archivo
     }
 
+
     sendNotification(resumeId:number): void {
         const fullName = localStorage.getItem('accessName') || 'Usuario';
         console.log('Username',fullName);
@@ -164,8 +162,7 @@ export class ResumenComponent implements OnInit {
 
         this.notificationService.sendNotification(resumeId, fullName, 1);
         console.log(mensaje);
-
-        console.log(`Color asociado al progreso: ${this.progressColor}`);
+    
     }
 
     submitForm(): void {
@@ -200,44 +197,97 @@ export class ResumenComponent implements OnInit {
             });
 
             // Aplanar los datos
-            console.log(formValues);
             const flattenedValues = this.flattenObject(formValues);
  
+            // Agregar el comentario (information adicional) aquí
+            flattenedValues.comentarioUsuario = this.additionalInfoFromModal || '';
+
             // Transformar valores vacíos a null
             Object.keys(flattenedValues).forEach((key) => {
                 if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
                     flattenedValues[key] = null;
                 }
             });            
-    
+            
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
-            const currentRole = roles
-                ? JSON.parse(roles)[0].toLowerCase()
-                : 'registro'; // Obtener el rol actual
-            console.log(flattenedValues.expectedImpact);
+            const currentRole = roles ? JSON.parse(roles)[0].toLowerCase(): 'registro'; // Obtener el rol actual
+
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
-                    flattenedValues.estadoFlujo = 'caracterizada'; 
+                    const nuevoEstadoFlujo = 'caracterizada'; // Estado actualizado
+                    flattenedValues.estadoFlujo = nuevoEstadoFlujo;
+            
+                    // Usar la función para manejar la actualización
+                    this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
                     this.notificationService.sendNotification(this.Id, this.fullName, 2)
+                    return; // Salir después de manejar el flujo
 
-                    // Actualizar el estado de flujo
-                    console.log('Estado de flujo actualizado:', flattenedValues.estadoFlujo);
                 }
                 // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
                 if (currentRole === 'caracterizador') {
                     flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
+                    // console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+
+
+                    // Obtener usuario guardado en localStorage (si existe)
+                    const storedUser = localStorage.getItem('selectedUser');
+                    const selectedUser = storedUser ? JSON.parse(storedUser) : null;
+                    // Extraer solo el userName del primer usuario en la lista
+                    const selectedUserName = selectedUser.length > 0 ? selectedUser[0].userName : 'error-sin-usuario';
+
+                    // console.log('Usuario recuperado de localStorage:', selectedUser);
+                    // console.log('UserName extraído:', selectedUserName);
+                    // console.log('Usuario recuperado de localStorage:', selectedUser);
+                     // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
+                     const patchData = {
+                        actualizaciones: {
+                            estadoFlujo: 'caracterizada_JU', // Actualizar estado de flujo
+                        },
+                        sAMAccountName: selectedUserName, // Usuario seleccionado desde el modal
+                        estadoFlujo: 'caracterizada_JU', // Estado de flujo actualizado
+                        comentarioUsuario: this.additionalInfoFromModal || '', // Información adicional desde el modal
+                    };
+
+                    // Llamar al servicio de actualización con PATCH
+                    this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                        (response) => {
+                            // Mostrar mensaje de éxito
+                            Swal.fire({
+                                title: '¡Actualización Exitosa!',
+                                text: 'El formulario ha sido actualizado.',
+                                icon: 'success',
+                                confirmButtonText: 'Aceptar',
+                            }).then(() => {
+                                window.location.href = './example'; // Redirigir después de la actualización
+                            });
+                        },
+                        (error) => {
+                            // En caso de error
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar',
+                            });
+                        }
+                    );
                     console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
                     this.notificationService.sendNotification(this.Id, this.fullName, 6);
+                    return;
+                 
+
 
                 }
                 // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
                 if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
                     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+
                     this.notificationService.sendNotification(this.Id, this.fullName, 6)
                     console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+
                 }
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -269,10 +319,7 @@ export class ResumenComponent implements OnInit {
                     flattenedValues.estadoFlujo = 'candidata'; 
                 }
                 // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
-                if (currentRole === 'caracterizador') {
-                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar el estado de flujo directamente
-                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU) en la creación:', flattenedValues.estadoFlujo);
-                }
+
                  // Obtener el nombre del usuario desde el localStorage
                  const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
  
@@ -299,28 +346,24 @@ export class ResumenComponent implements OnInit {
                              confirmButtonText: 'Aceptar',
                          });
                          console.log('Datos enviados al servidor:', flattenedValues);
+
                         }
                     );
             }
         } else {
-            console.warn('Formulario no válido');
         }
     }
 
     ngOnInit(): void {
         this.roles = JSON.parse(localStorage.getItem('accessRoles'));
         this.rol = this.roles[0]
-        console.log("Rol en sesion: ", this.rol)  
 
 
-        console.log('Id hv para editar y archivos:', this.Id);
         this.dataService.getFileByIdResumen(this.Id).subscribe(
             (response)=>{
                 this.data = response;
-                console.log('Files guardados en data:', this.data);
             },
             (e) =>{
-                console.error('Error al guardar files en data:', e);
             } 
         )
 
@@ -333,7 +376,6 @@ export class ResumenComponent implements OnInit {
 
         //this.data = this.dataService.getDataFiles();
         this.columns = this.dataService.getColumns();
-        console.log('Id Practica ' + this.Id);
         // Obtener el rol desde localStorage
         const roles = localStorage.getItem('accessRoles');
         this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
@@ -395,7 +437,6 @@ export class ResumenComponent implements OnInit {
         });
         this.horizontalStepperForm.valueChanges.subscribe(() => {
             this.progress = this.calculateProgress();
-            console.log('Progreso actualizado:', this.progress);
         });
         this.resumenService.fetchAllTypes().subscribe(() => {
             this.typeStrategyOptions = this.resumenService.getTypeByKey(
@@ -411,7 +452,6 @@ export class ResumenComponent implements OnInit {
                 this.resumenService.getTypeByKey('objectiveMainPractices');
             this.expectedImpactOptions =
                 this.resumenService.getTypeByKey('expectedImpacts');
-            console.log('Opciones para expected:', this.expectedImpactOptions);
             this.stagesMethodologyOptions =
                 this.resumenService.getTypeByKey('stagesMethodologys');
             this.durationImplementationOptions =
@@ -435,16 +475,11 @@ export class ResumenComponent implements OnInit {
                 this.validateFechas();});
             this.horizontalStepperForm.get('step4.periodoDesarrolloFin')?.valueChanges.subscribe(() => {
                 this.validateFechas();});
-            console.log(
-                'Opciones para typeStrategyIdentification:',
-                this.typeStrategyOptions
-            ); // Log para depurar
         });
 
         this.progress = this.calculateProgress();
         this.resumenService.getDataAsJson(this.Id.toString()).subscribe({
             next: (response) => {
-                console.log('Datos recibidos:', response);
 
                 // Transformar el expectedImpact si viene como array de objetos
                 const expectedImpactIds = response.expectedImpact
@@ -467,9 +502,6 @@ export class ResumenComponent implements OnInit {
                     ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
                     : [];
 
-                console.log ("impactos: ",expectedImpactIds);
-
-                console.log('Expected Impact recibido:', response.expectedImpact); // Verifica el formato
 
                 // Asignar los datos al formulario usando patchValue
                 this.horizontalStepperForm.patchValue({
@@ -520,16 +552,14 @@ export class ResumenComponent implements OnInit {
                         documentoActuacion: response.documentoActuacion || '',
                     },
                 });
-                if (this.cargo === 'caracterizador') {
+                if (this.cargo === 'caracterizador'|| this.cargo === 'jefeUnidad') {
                     const typePracticeValue = response.typePractice?.id || '';
                     this.onPracticaChange({ value: typePracticeValue });
                 }
             },
             error: (err) => {
-                console.error('Error al obtener los datos:', err);
             },
             complete: () => {
-                console.log('Datos cargados en el formulario');
             },
         });
     }
@@ -552,12 +582,10 @@ export class ResumenComponent implements OnInit {
         if (entityCgrControl) {
             entityCgrControl.setValue(entity.name); 
         }
-        console.log('Entidad seleccionada:', entity); 
     }
 
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
-        console.log('Valor seleccionado:', selectedValue);
         const step3Form = this.horizontalStepperForm.get('step3');
         const step4Form = this.horizontalStepperForm.get('step4');
         const step5Form = this.horizontalStepperForm.get('step5');
@@ -700,13 +728,9 @@ export class ResumenComponent implements OnInit {
     }
 
     onExpectedImpactChange(): void {
-        console.log(
-            this.horizontalStepperForm.get('step4.expectedImpact').value
-        );
     }
 
     submitDocumentoActuacion(identityId:number): void {
-        console.log('Intentando enviar los documentos con el ID:', identityId);
 
         if (this.selectedFiles.length > 0) {
             const formData = new FormData();
@@ -716,7 +740,6 @@ export class ResumenComponent implements OnInit {
             formData.append('files', file);
           });
 
-            console.log('FormData construido:', formData);
 
             // Enviamos los archivos al servicio
             this.resumenService.uploadFile(identityId,formData).subscribe(
@@ -727,7 +750,6 @@ export class ResumenComponent implements OnInit {
                         icon: 'success',
                         confirmButtonText: 'Aceptar',
                     })
-                    console.log('Documentos enviados con éxito:', response);
                     // Limpiamos la selección tras el envío exitoso
                     this.selectedFiles = [];
                 },
@@ -738,11 +760,9 @@ export class ResumenComponent implements OnInit {
                         icon: 'error',
                         confirmButtonText: 'Aceptar',
                     })
-                    console.error('Error al enviar los documentos:', error);
                 }
             );
         } else {
-            console.warn('No hay archivos seleccionados.');
         }
     }
 
@@ -761,6 +781,7 @@ export class ResumenComponent implements OnInit {
         const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
         return excludedControls.includes(controlName);
     }
+    
     calculateProgress(): number {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
@@ -799,9 +820,6 @@ export class ResumenComponent implements OnInit {
     
         // Calcular progreso
         const progressValue = Math.round((filledControls / totalControls) * 100);
-        console.log(
-            `Total controles: ${totalControls}, Controles llenos: ${filledControls}, Progreso: ${progressValue}%`
-        );
         return progressValue;
     }
     
@@ -823,7 +841,44 @@ export class ResumenComponent implements OnInit {
         const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
         return currentRole === 'validador';
     }
-    
+
+
+
+// ======================== Logica envio de datos estructurados por PATCH ======================== //
+private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: string): void {
+    const patchData = {
+        actualizaciones: {
+            estadoFlujo, // Actualizar estado de flujo
+        },
+        sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario
+        estadoFlujo,
+        comentarioUsuario: this.additionalInfoFromModal || '', // Comentario adicional desde el modal
+    };
+
+    // Llamar al servicio de actualización
+    this.resumenService.updateDataAsJson(id, patchData).subscribe(
+        (response) => {
+            Swal.fire({
+                title: '¡Actualización Exitosa!',
+                text: successMessage,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                window.location.href = './example';
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+}
+
+
 // ======================== Logica multiselect entidad momentaneo ======================== //
     entityOptions = [
         { id: 1, name: 'Contraloría General de la República' },
@@ -923,10 +978,19 @@ export class ResumenComponent implements OnInit {
             if (result) {
                 // Guardar los datos seleccionados al cerrar el modal
                 this.selectedUserFromModal = result.selectedUser || null;
-                this.selectedUsersFromModal = result.selectedUsers; // Asegúrate de que esta propiedad exista y se maneje correctamente
+                this.selectedUsersFromModal = result.selectedUsers || []; // Asegúrate de que esta propiedad exista y se maneje correctamente
                 this.additionalInfoFromModal = result.additionalInfo || '';
+
+                if (this.selectedUsersFromModal) {
+                    // Guardar en localStorage como JSON
+                    localStorage.setItem('selectedUser', JSON.stringify(this.selectedUsersFromModal));
+                } else {
+                    localStorage.removeItem('selectedUser'); // Limpiar si no hay usuario seleccionado
+                }
+
+                // console.log('Usuarios seleccionados:', this.selectedUsersFromModal); // Verifica que todos los usuarios estén aquí
+                // console.log('Información adicional:', this.additionalInfoFromModal);
             } else {
-                console.log('Caracterización cancelada');
             }
         });
     }

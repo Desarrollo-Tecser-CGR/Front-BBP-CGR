@@ -74,6 +74,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/create',
         roles: ['administrador']
 
+    },
+    {
+        id   : 'committee',
+        title: 'Comite',
+        type : 'basic',
+        icon : 'heroicons_outline:queue-list',
+        link : '/committee',
+        roles: ['administrador']
     }
 ];
 export const compactNavigation: FuseNavigationItem[] = [

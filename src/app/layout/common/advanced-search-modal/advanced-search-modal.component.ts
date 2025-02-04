@@ -85,13 +85,11 @@ export class AdvancedSearchModalComponent {
       if (fechaDiligenciamiento) {
         fechaDiligenciamiento = this.formatDateToYYYYMMDD(fechaDiligenciamiento);
         this.advancedSearchForm.patchValue({ fechaDiligenciamiento });
-        console.log('Fecha formateada:', fechaDiligenciamiento);
       }
 
       if (this.advancedSearchForm.valid) {
         // Envía los filtros al servicio compartido
         this.filterService.updateFilters(this.advancedSearchForm.value);
-        console.log('Formulario válido con fecha formateada:', this.advancedSearchForm.value);
         this.dialogRef.close();
       }
 
@@ -105,6 +103,5 @@ export class AdvancedSearchModalComponent {
   refresh(): void {
     this.advancedSearchForm.reset(); // Reinicia todos los campos del formulario
     this.filterService.updateFilters(null); // Limpia los filtros aplicados
-    console.log('Formulario reiniciado y filtros eliminados.');
   }
 }

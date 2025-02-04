@@ -143,7 +143,6 @@ export class AuthService {
 
 
             switchMap((response: any) => {
-                console.log(response);
 
                 // Store the access token in the local storage
                 this.accessToken = response.user.token;
@@ -161,39 +160,7 @@ export class AuthService {
                 this._roles.next(listCargo);
                 this.accessRoles = listCargo;
 
-                // if(auth.sAMAccountName == 'bbp.cgr') {
-
-                //     return this.getRoles().pipe(
-                //         map((roles) => {
-                //             console.log(roles);
-
-                //             this.accessRoles = roles;
-                //             // Devuelve un objeto que contiene el token y los roles
-                //             return {
-                //                 token: response.user.token,
-                //                 roles: roles,
-                //             };
-                //         })
-                //     );
-                // }
-
-                // if(auth.sAMAccountName == 'user2') {
-
-                //     return this.getRolesDos().pipe(
-                //         map((roles) => {
-                //             console.log(roles);
-
-                //             this.accessRoles = roles;
-                //             // Devuelve un objeto que contiene el token y los roles
-                //             return {
-                //                 token: response.user.token,
-                //                 roles: roles,
-                //             };
-                //         })
-                //     );
-                // }
-
-                // Return a new observable with the response
+              
                 return of(response);
             })
         );

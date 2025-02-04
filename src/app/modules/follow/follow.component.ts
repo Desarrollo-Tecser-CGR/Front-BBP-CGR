@@ -32,7 +32,6 @@ export class FollowComponent implements OnInit {
                 this.dataSource.paginator = this.paginator;
             },
             (error) => {
-                console.error('Error al cargar los datos:', error);
             }
         );
     }

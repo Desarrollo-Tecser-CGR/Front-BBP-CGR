@@ -26,7 +26,7 @@ export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
   columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
   cargo: string;
-
+  fullName: string;
   buttons = [
     {
       // label: 'Edit',
@@ -35,19 +35,14 @@ export class InboxComponent implements OnInit {
       action: (row: any) => this.editRow(row),
     },
     {
-      // label: 'Delete',
+      // label: 'Validate',
       icon: 'heroicons_outline:document-check',
       color: 'accent',
       action: (row: any) => this.validateRow(row),
     },
-    // {
-    //   label: 'Open Modal',
-    //   color: 'accent', // Puedes elegir un color diferente
-    //   action: (row: any) => this.openCaracterizationModal(row), // Enviar datos de la fila al modal
-    // },
+    // 
   ]; // Botones dinámicos
   private _router: any;
-  fullName: string = '';
 
   constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router, private notificationsService: NotificationsService) { } // , private dialog: MatDialog
 
@@ -55,7 +50,9 @@ export class InboxComponent implements OnInit {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
     this.fullName = localStorage.getItem('accessName') || 'Usuario';
-  
+
+    console.log ('este es el nombre que trae', this.fullName)
+
     // Definir botones dinámicamente según el rol
     this.buttons = [
       {
@@ -75,7 +72,6 @@ export class InboxComponent implements OnInit {
     }
     this.filterService.filter$.subscribe((filters) => {
       if (filters) {
-        console.log('Filtros emitidos desde FilterService:', filters);
         this.loadData(filters); // Siempre carga datos con los filtros emitidos
       }
     });
@@ -84,21 +80,21 @@ export class InboxComponent implements OnInit {
   
 
   loadData(filters?: any): void {
-    console.log('Cargando datos con filtros:', filters || 'sin filtros');
 
     if (['validador', 'administrador', 'caracterizador', "jefeUnidad"].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
+        sAMAccountName: this.fullName,
         ...filters, // Agrega los filtros si están definidos
 
       };
       
-      console.log('datos cargados:', filters)
 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
+          console.log('Cuerpo de la petición:', requestBody);
+
           let response = dataRes.data;
-          console.log(response);
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
             this.columns = Object.keys(response[0]).map((key) => ({
@@ -109,7 +105,6 @@ export class InboxComponent implements OnInit {
           this.data = response; // Asignar los datos de la API
         },
         (error) => {
-          console.log(error);
           Swal.fire({
             title: 'Error',
             text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
@@ -127,8 +122,6 @@ export class InboxComponent implements OnInit {
 
 
   editRow(row: any): void {
-    console.log('Estado del flujo:', row.estadoFlujo);
-    console.log('Rol actual:', this.cargo);
     // Condición de prueba
     if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
         Swal.fire({
@@ -144,64 +137,52 @@ export class InboxComponent implements OnInit {
   }
 
   deleteRow(row: any): void {
-    console.log('Delete row:', row);
     // Lógica para eliminar una fila
   }
 
   validateRow(row: any): void {
     const requestBody = { rol: this.cargo, id: row.id }; // Cuerpo de la solicitud
-    this.inboxService.setValidateStatus(requestBody).subscribe(
-      (response) => {
-        if (response.length > 0) {
-          this.columns = Object.keys(response[0]).map((key) => ({
-            key: key,
-            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
-          }));
+    const accessName = localStorage.getItem('accessName'); // Obtener el accessName del localStorage
+
+    if (!accessName) {
+        return; // Finaliza si no hay accessName
+    }
+
+    // Llamar al endpoint con el accessName
+    this.inboxService.setValidateStatus(requestBody, accessName).subscribe(
+        (response) => {
+            if (response.length > 0) {
+                this.columns = Object.keys(response[0]).map((key) => ({
+                    key: key,
+                    label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+                }));
+            }
+            this.data = response;
+
+            Swal.fire({
+                title: '¡Registro Actualizado!',
+                text: 'El registro ha sido actualizado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                this.loadData(); // Recargar los datos después de la operación
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al actualizar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
         }
-        this.data = response;
-        Swal.fire({
-          title: '¡Registro Actualizado!',
-          text: 'El registro ha sido actualizado con éxito.',
-          icon: 'success',
-          confirmButtonText: 'Aceptar',
-        }).then(() => {
-          // // Recargar la ruta actual
-          // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          //   this.router.navigate([this.router.url]);
-          // });
-          this.notificationsService.sendNotification(row.id, this.fullName, 2)
-          this.loadData();
-        });
-      },
-      (error) => {
-        Swal.fire({
-          title: 'Error',
-          text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-      }
     );
-  }
+}
 
   pageLoad(): void {
-    console.log('Evento onload disparado.');
     window.location.reload()
   }
 
-  // ======================== Logica que muestra el modal en la vista ======================== //
-
-  //  openCaracterizationModal(row: any): void {
-  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-  //      width: '500px',
-  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
-  //    });
-
-  //    dialogRef.afterClosed().subscribe((result) => {
-  //      console.log('Modal cerrado con:', result);
-  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
-  //    });
-  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 
