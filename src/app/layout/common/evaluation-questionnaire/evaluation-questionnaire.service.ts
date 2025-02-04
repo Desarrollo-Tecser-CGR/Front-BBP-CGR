@@ -48,7 +48,7 @@ export class QuestionnaireService{
     ]
     constructor(){}
     
-    getQuestionsGroups(groupSize:number = 6) : Observable<any[]>{
+    getQuestionsGroups(groupSize:number = 2) : Observable<any[]>{
         const result = [];
         for(let i = 0; i<this.data.length; i+= groupSize){
             result.push(this.data.slice(i, i + groupSize));

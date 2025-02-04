@@ -1,4 +1,4 @@
-import { catchError, of, throwError, map } from 'rxjs';
+import { catchError, of, throwError, map, Observable } from 'rxjs';
 import { Component, OnInit, Input, ViewEncapsulation, Renderer2, importProvidersFrom } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,6 @@ import { MatButtonModule} from '@angular/material/button';
 import { MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { ResumenService } from 'app/modules/resumen/resumen.service';
 import Swal from 'sweetalert2';
-import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import {FormBuilder, FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators,FormArray, Form, FormControl
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -21,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { QuestionnaireService } from './evaluation-questionnaire.service';
-import { NgForOf } from '@angular/common'; 
+import { CommonModule, NgForOf } from '@angular/common'; 
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -45,107 +44,88 @@ import { NgForOf } from '@angular/common';
         ReactiveFormsModule,
         MatCheckbox,
         NgForOf,
-          
+        CommonModule
   ],
   templateUrl: './evaluation-questionnaire.component.html',
   styleUrl: './evaluation-questionnaire.component.scss'
 })
 
-export class EvaluationQuestionnaireComponent{
+export class EvaluationQuestionnaireComponent implements OnInit{
   id: string = '';
   data: any = {};
   questions: any[] = [];
   verticalStepperForm: FormGroup;
 
-  constructor(
-      private resumenService: ResumenService,
-      private route: ActivatedRoute,
-      private fb: FormBuilder,
-      private questionnaireService: QuestionnaireService
-  ) {
-      this.verticalStepperForm = this.fb.group({
-          questionGroups: this.fb.array([])
-      });
-  }
+  questionsGroups$: Observable<any[]>;
+  currentGroupIndex: number = 0; // Índice del grupo actual
+  currentGroup: any[] = []; // Preguntas del grupo actual
+  allGroups: any[] = []; // Lista de todos los grupos de preguntas
+  allQuestions: any[] = []; // Lista de todas las preguntas (aplanadas)
+  answeredQuestions: { [key: string]: string } = {}; // Respuestas guardadas
+  currentQuestionIndex: number = 0; // Índice de la pregunta actual
+  groupSize: number = 2; // Número de preguntas por grupo
 
+  constructor(
+    private resumenService: ResumenService,
+    private route: ActivatedRoute,
+    private fb: FormBuilder,
+    private questionnaireService: QuestionnaireService
+  ) {
+    this.verticalStepperForm = this.fb.group({
+      questionGroups: this.fb.array([]),
+    });
+  }
 
   ngOnInit(): void {
-      this.id = this.route.snapshot.paramMap.get('id');
-      this.resumenService.getDataAsJson(this.id).subscribe(
-          (response) => {
-              this.data = response;
-              console.log('Práctica:', this.data);
-          },
-          (error) => {
-              Swal.fire({
-                  title: 'Error',
-                  text: `No se pudo abrir la práctica. ${error}`,
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-              });
-          }
-      );
-
-      // Obtener preguntas
-      this.questionnaireService.getQuestionsGroups().pipe(
-          catchError((error) => {
-              Swal.fire({
-                  title: 'Error',
-                  text: `No se pudo abrir el cuestionario. ${error.message}`,
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-              });
-              return of([]);
-          })
-      ).subscribe((groups) => {
-          if (!groups || groups.length === 0) {
-              console.warn('No se recibieron grupos de preguntas.');
-              return;
-          }
-          this.questions = groups;
-          console.log('Preguntas', this.questions);
-          this.populateForm();
-      });
-  }
-  get questionsArray(): FormArray {
-    return this.verticalStepperForm.get('questionGroups') as FormArray;
+    this.questionsGroups$ = this.questionnaireService.getQuestionsGroups();
+    this.questionsGroups$.subscribe((groups) => {
+      this.allGroups = groups; // Poblar allGroups con los grupos de preguntas
+      this.allQuestions = this.allGroups.flatMap(group => group); // Aplanar los grupos en un solo array
+      this.loadGroup(this.currentGroupIndex); // Cargar el primer grupo
+    });
   }
 
-  populateForm():void {
-    this.questions.forEach((group, groupIndex)=>{
-        const groupFromArray = this.fb.array([]);
-        group.forEach((question:any)=>{
-            const optionsFormArray = this.fb.array([]);
-            question.options.map(()=> this.fb.control(false));
-            });
-            const questionFormGroup = this.fb.group({
-                question:  this.questions
-            })
-            this.questionsArray.push(groupFromArray);
-        });
-    };
+  // Cargar un grupo específico
+  loadGroup(index: number): void {
+    if (index >= 0 && index < this.allGroups.length) {
+      this.currentGroup = this.allGroups[index]; // Actualizar el grupo actual
+      this.currentGroupIndex = index; // Actualizar el índice del grupo actual
+    }
   }
-  // getQuestions(index: number): FormArray {
-  //   return this.verticalStepperForm.get(`step${index + 1}.questions`) as FormArray;
-  // }
-  
-  // checkFormValidity(form: FormGroup): boolean {
-  //   let isValid = true;
-  
-  //   Object.keys(form.controls).forEach((step) => {
-  //     const group = form.get(step) as FormGroup;
-  //     if (group) {
-  //       Object.keys(group.controls).forEach((control) => {
-  //         const formControl = group.get(control);
-  //         if (formControl && formControl.enabled && formControl.invalid) {
-  //           isValid = false;
-  //         }
-  //       });
-  //     }
-  //   });
-  
-  //   return isValid;
-  // }
+
+  // Navegar a una pregunta específica
+  goToQuestion(index: number): void {
+    if (index >= 0 && index < this.allQuestions.length) {
+      this.currentQuestionIndex = index; // Actualizar el índice de la pregunta actual
+      const groupIndex = Math.floor(index / this.groupSize); // Calcular el grupo correspondiente
+      this.loadGroup(groupIndex); // Cargar el grupo correspondiente
+    }
+  }
+
+  // Navegar al grupo anterior
+  previousGroup(): void {
+    if (this.currentGroupIndex > 0) {
+      this.loadGroup(this.currentGroupIndex - 1); // Cargar el grupo anterior
+    }
+  }
+
+  // Navegar al siguiente grupo
+  nextGroup(): void {
+    if (this.currentGroupIndex < this.allGroups.length - 1) {
+      this.loadGroup(this.currentGroupIndex + 1); // Cargar el siguiente grupo
+    }
+  }
+
+  // Manejar cambios en las respuestas
+  onAnswerChange(questionId: string, answer: string): void {
+    this.answeredQuestions[questionId] = answer; // Guardar la respuesta
+  }
+
+  // Calcular el número de pregunta correcto
+  getQuestionNumber(indexInGroup: number): number {
+    return (this.currentGroupIndex * this.groupSize) + (indexInGroup + 1);
+  }
+}
 
 
 
