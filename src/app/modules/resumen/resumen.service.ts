@@ -20,7 +20,7 @@ export class ResumenService {
     private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
 
     // Propiedades para almacenar datos compartidos
-    private typesData: { [key: string]: any[] } = {};
+    private typesData: { [key: string]: any[] } = {}; 
     public typeStrategyIdentifications: any[] = [];
     public isDataLoaded: BehaviorSubject<boolean> =
         new BehaviorSubject<boolean>(false);

@@ -50,17 +50,27 @@ export class InboxComponent implements OnInit {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
     this.fullName = localStorage.getItem('accessName') || 'Usuario';
-
-    console.log ('este es el nombre que trae', this.fullName)
-
+    console.log('Fullname inbox', this.fullName);
+  
     // Definir botones dinámicamente según el rol
-    this.buttons = [
-      {
-        icon: 'heroicons_outline:pencil-square',
-        color: 'primary',
-        action: (row: any) => this.editRow(row),
-      },
-    ];
+    if (this.cargo === 'evaluador') {
+        this.buttons = [
+          {
+            icon: 'feather:check-square',
+            color: 'primary', 
+            action: (row: any) => this.evaluatePractice(row), 
+          },
+        ]
+    } else{
+      this.buttons = [
+        {
+          icon: 'heroicons_outline:pencil-square',
+          color: 'primary',
+          action: (row: any) => this.editRow(row),
+        },
+      ];
+    }
+    
   
     // Agregar el botón de validación solo para validador y administrador
     if (['validador', 'administrador'].includes(this.cargo)) {
@@ -80,18 +90,21 @@ export class InboxComponent implements OnInit {
   
 
   loadData(filters?: any): void {
-
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad"].includes(this.cargo)) {
+ 
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         sAMAccountName: this.fullName,
         ...filters, // Agrega los filtros si están definidos
-
+ 
       };
       
+      console.log('datos cargados:', filters)
 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
+          console.log('Cuerpo de la petición:', requestBody);
+ 
           console.log('Cuerpo de la petición:', requestBody);
 
           let response = dataRes.data;
@@ -116,10 +129,15 @@ export class InboxComponent implements OnInit {
       );
     }
     else {
-
+ 
     }
   }
-
+  
+  evaluatePractice(row:any):void{
+    if(this.cargo === 'evaluador'){
+      this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
+    }
+  }
 
   editRow(row: any): void {
     // Condición de prueba
@@ -178,11 +196,23 @@ export class InboxComponent implements OnInit {
         }
     );
 }
-
   pageLoad(): void {
     window.location.reload()
   }
 
+  // ======================== Logica que muestra el modal en la vista ======================== //
+
+  //  openCaracterizationModal(row: any): void {
+  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+  //      width: '500px',
+  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
+  //    });
+
+  //    dialogRef.afterClosed().subscribe((result) => {
+  //      console.log('Modal cerrado con:', result);
+  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
+  //    });
+  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 

@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador'], module: '' }
             },
         ]
     },
@@ -209,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'seguimiento'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'seguimiento', 'evaluador'], module: '' }
             },
         ]
     },
@@ -255,7 +255,6 @@ export const appRoutes: Route[] = [
             },
         ]
     },
-
     {
         path: '',
         canActivate: [AuthGuard],
@@ -280,9 +279,9 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'committee', loadChildren: () =>
-                import('app/modules/committee/committee.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+            {path: 'evaluation-questionnaire', loadChildren: () =>
+                import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
+                data: { requiredRoles: ['evaluador'], module: '' }
             },
         ]
     }
