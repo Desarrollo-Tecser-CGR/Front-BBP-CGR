@@ -1,33 +1,35 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import {
-    FormsModule,
-    ReactiveFormsModule,
-    UntypedFormBuilder,
-    UntypedFormGroup,
-    Validators
+import {FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatOptionModule } from '@angular/material/core';
+import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { CommonModule } from '@angular/common';
-import { ResumenService } from './resumen.service';
-import { MatMenuModule } from '@angular/material/menu';
-import Swal from 'sweetalert2';
 import { RouterModule, Routes } from '@angular/router';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { debounceTime, distinctUntilChanged, map, Observable, switchMap } from 'rxjs';
+import Swal from 'sweetalert2';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
+import { DialogOverviewExampleDialog } from '../common/general-modal/general-modal.component';
+import { ResumenService } from './resumen.service';
+import { GenericTableComponent } from '../common/generic-table/generic-table.component';
+import { DataServices } from '../resumen-edit/resumen-edit.service';
+import { Router } from '@angular/router';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 
 // Definición de rutas
 const routes: Routes = [
     { path: 'characterization', component: CharacterizationComponent },
-    { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
+    { path: '', redirectTo: '/users', pathMatch: 'full' }, // Ruta por defecto
 ];
 
 @Component({
@@ -54,28 +56,82 @@ const routes: Routes = [
         RouterModule,
         MatIconModule,
         MatMenuModule,
-        RouterModule
-
+        RouterModule, 
+        DialogOverviewExampleDialog,
+        GenericTableComponent,
+        MatAutocompleteModule,
     ],
     providers: [MatDatepickerModule],
 })
 export class ResumenComponent implements OnInit {
+    roles: string[] = [];
+    rol: string = '';
+
+    fechaDiligenciamiento: string = this.formatDate(new Date());
     horizontalStepperForm: UntypedFormGroup;
     selectedFiles: File[] = [];
     isLoading: boolean = true;
     progress: number = 0;
     isModalOpen: boolean = false;
-    @Input() Id: number;
+    buttonText: string = 'Acción';
+    // cargo: string;
+    cargo: string = ''; 
+    isCaracterizationComplete: boolean = false;
+    selectedUserFromModal: any = null;
+    isDisabled: boolean = true;
+    identityId: null=null;
+    typeStrategyOptions: any[] = [];
+    typePracticeOptions: any[] = [];
+    typologyOptions: any[] = [];
+    levelGoodPracticeOptions: any[] = [];
+    objectiveMainPracticeOptions: any[] = [];
+    expectedImpactOptions: any[] = [];
+    stagesMethodologyOptions: any[] = [];
+    durationImplementationOptions: any[] = [];
+    typeMaterialProducedOptions: any[] = [];
+    supportReceivedOptions: any[] = [];
+    recognitionsNationalInternationalOptions: any[] = [];
+    controlObjectOptions: any[] = [];
+    taxonomyEventOptions: any[] = [];
+    typePerformanceOptions: any[] = [];
+    additionalInfoFromModal: string = '';
+    entidades: any[] = [];
+    filteredEntities$: Observable<any[]>; 
+    selectedUsersFromModal: any[] = [];
 
+    @Input() Id: number;
+    @Input() isEdit: boolean = false;
+    
+    data: any[] = [];
+    columns: { key: string; label: string }[] = [];
+    buttons = [
+        {
+            icon: 'heroicons_outline:arrow-down-tray',
+            color:'accent',
+            action: (row: any) => this.downloadFile(row),
+        },
+        {
+            icon: 'heroicons_outline:magnifying-glass-circle',
+            color:'primary',
+            action: (row: any) => this.visualizeFile(row),
+        }
+    ]
+    showButton: boolean;
+    fullName: string = '';
+    
     constructor(private _formBuilder: UntypedFormBuilder,
-        private resumenService: ResumenService) { }
+        private resumenService: ResumenService, private dialog: MatDialog,
+        private dataService: DataServices, private router: Router,
+        private notificationService: NotificationsService
+    ) { }
 
     toggleModal(): void {
         this.isModalOpen = !this.isModalOpen;
     }
 
     triggerFileInput(): void {
-        const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
+        const fileInput =
+            document.querySelector<HTMLInputElement>('#fileInput');
         fileInput?.click();
     }
 
@@ -83,27 +139,51 @@ export class ResumenComponent implements OnInit {
         const input = event.target as HTMLInputElement;
         if (input.files) {
             this.selectedFiles = Array.from(input.files);
-            console.log('Archivo seleccionado:', this.selectedFiles);
         } else {
-            console.log('No se seleccionó ningún archivo.');
         }
     }
 
+    downloadFile(row: any):void{
+        this.dataService.downloadFile(row.id)
+        //Método para descargar un archivo
+    }
+
+    visualizeFile(row: any):void{
+        this.dataService.viewFile(row.id);
+        //Método para visualizar en el navegador un archivo
+    }
+
+
+    sendNotification(resumeId:number): void {
+        const fullName = localStorage.getItem('accessName') || 'Usuario';
+        console.log('Username',fullName);
+        const progreso = this.calculateProgress();
+        const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
+
+        this.notificationService.sendNotification(resumeId, fullName, 1);
+        console.log(mensaje);
+    
+    }
+
     submitForm(): void {
-        if (this.horizontalStepperForm.valid) {
-            // Definir los campos multiseleccionables
+        this.fullName = localStorage.getItem('accessName') || 'Usuario';
+
+        const isFormValid = this.checkFormValidity(this.horizontalStepperForm);
+
+        if (isFormValid) {
+            // Procesar los valores del formulario
+
             const multiSelectFields = [
-                'apoyoRecibido',
-                'etapasMetodologia',
-                'impactoEsperado',
-                'taxonomiaEvento',
-                'tipoMaterialProducido',
+                'supportReceived',
+                'stagesMethodology',
+                'expectedImpact',
+                'taxonomyEvent',
+                'typeMaterialProduced',
             ];
 
-            // Obtener los valores del formulario
             const formValues = this.horizontalStepperForm.getRawValue();
 
-            // Transformar los campos multiseleccionables en cadenas separadas por comas
+            // Transformar los campos multiseleccionables
             multiSelectFields.forEach((field) => {
                 Object.keys(formValues).forEach((step) => {
                     if (
@@ -111,106 +191,357 @@ export class ResumenComponent implements OnInit {
                         formValues[step][field] &&
                         Array.isArray(formValues[step][field])
                     ) {
-                        formValues[step][field] = formValues[step][field].join(',');
+                        formValues[step][field] =
+                            formValues[step][field].join(',');
                     }
                 });
             });
 
-            // Aplana el objeto si es necesario y envía los datos
+            // Aplanar los datos
             const flattenedValues = this.flattenObject(formValues);
+ 
+            // Comentario que se guarde en trasability
+            flattenedValues.comentarioUsuario = this.additionalInfoFromModal || '';
 
-            this.resumenService.sendFormDataAsJson(flattenedValues).subscribe(
-                (response) => {
-                    // Mostrar alerta de éxito usando SweetAlert2
-                    Swal.fire({
-                        title: '¡Formulario Enviado!',
-                        text: 'Tu formulario ha sido enviado con éxito.',
-                        icon: 'success',
-                        confirmButtonText: 'Aceptar',
-                    }).then(() => {
-                        // Redirigir a otra página o vista después de un segundo
-                        window.location.href = './example';
-                    });
-                },
-                (error) => {
-                    // Mostrar alerta de error usando SweetAlert2
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Hubo un problema al enviar el formulario. Intenta nuevamente.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                    });
+            // Transformar valores vacíos a null 
+            Object.keys(flattenedValues).forEach((key) => {
+                if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
+                    flattenedValues[key] = null;
                 }
-            );
+
+            });            
+            
+            // Verificar el rol
+            const roles = localStorage.getItem('accessRoles');
+            const currentRole = roles ? JSON.parse(roles)[0].toLowerCase(): 'registro'; // Obtener el rol actual
+
+            // Lógica para decidir si se crea o se actualiza
+            if (this.isEdit && this.Id) {
+                // Verificar si el flujo está en "validación" y el rol es "validador"
+                if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
+                    const nuevoEstadoFlujo = 'caracterizada'; // Cambiar estado de flujo
+                    flattenedValues.estadoFlujo = nuevoEstadoFlujo;
+            
+                    // Funcionalidad para enviar datos adicionales (accesName)
+                    this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
+                    this.notificationService.sendNotification(this.Id, this.fullName, 2)
+                    return; // Salir después de manejar el flujo
+                }
+                // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
+                if (currentRole === 'caracterizador') {
+                    flattenedValues.estadoFlujo = 'evaluacion'; // Cambiar estado de flujo
+                    // console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
 
 
+
+                    // Obtener usuario guardado en localStorage (si existe)
+                    const storedUser = localStorage.getItem('selectedUser');
+                    const selectedUser = storedUser ? JSON.parse(storedUser) : null;
+                    // Extraer solo el userName del primer usuario en la lista
+                    const selectedUserName = selectedUser.length > 0 ? selectedUser[0].userName : 'error-sin-usuario';
+                    // Extraer el cargo del usuario validando si realmente existe
+                    let selectedUserCargo = '';
+                    if (selectedUser && Array.isArray(selectedUser) && selectedUser.length > 0) {
+                        const user = selectedUser[0];  // Tomar el primer usuario
+                        console.log('Usuario recuperado:', user);
+
+                        if (user.cargo) {
+                            selectedUserCargo = user.cargo.trim().toLowerCase(); // Extraer cargo
+                        } else {
+                            console.warn('El usuario no tiene un cargo asignado.');
+                        }
+                    } else {
+                        console.warn('No se encontró un usuario válido en localStorage.');
+                    }
+
+                    console.log('Usuario recuperado de localStorage:', selectedUser);
+                    console.log('UserName extraído:', selectedUserName);
+                    console.log('Cargo extraído:', selectedUserCargo);
+
+                    // Determinar el estado de flujo basado en el cargo
+                    if (selectedUserCargo === 'evaluador') {
+                        console.log('Cambiando estado a evaluación');
+                        flattenedValues.estadoFlujo = 'evaluacion';
+                    } else if (selectedUserCargo === 'jefeunidad') {
+                        flattenedValues.estadoFlujo = 'caracterizada_JU';
+                    } else {
+                        flattenedValues.estadoFlujo = 'caracterizada_JU';
+                    }
+                
+                // Agrega logs de depuración
+                console.log('Estado de flujo final:', flattenedValues.estadoFlujo);
+
+
+                // Preparar datos para el PATCH
+                const patchData = {
+                    actualizaciones: { 
+                        estadoFlujo: flattenedValues.estadoFlujo 
+                    },
+                    sAMAccountName: selectedUserName,
+                    estadoFlujo: flattenedValues.estadoFlujo,
+                    comentarioUsuario: this.additionalInfoFromModal || '',
+                };
+                
+                // Llamar al servicio de actualización con PATCH
+                this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                    (response) => {
+                        Swal.fire({
+                            title: '¡Actualización Exitosa!',
+                            text: 'El formulario ha sido actualizado.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                        }).then(() => {
+                            window.location.href = './example';
+                        });
+                    },
+                    (error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                        });
+                    }
+                );
+                
+                // Enviar notificación
+                this.notificationService.sendNotification(this.Id, this.fullName, 6);
+                
+                console.log(`Estado de flujo actualizado: ${flattenedValues.estadoFlujo}`);
+                    return;
+                 
+
+
+                }
+                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
+                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+
+                    this.notificationService.sendNotification(this.Id, this.fullName, 6)
+                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+
+                }
+
+                
+                delete flattenedValues.fechaDiligenciamiento;
+                // Llamar al servicio de actualización
+                this.resumenService
+                    .updateDataAsJson(this.Id, flattenedValues)
+                    .subscribe(
+                        (response) => {
+                            Swal.fire({
+                                title: '¡Actualización Exitosa!',
+                                text: 'El formulario ha sido actualizado.',
+                                icon: 'success',
+                                confirmButtonText: 'Aceptar',
+                            }).then(() => {
+                            window.location.href = './example';
+                            });
+                        },
+                        (error) => {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar',
+                            });
+                        }
+                    );
+            } else {
+                // Verificar y actualizar el estadoFlujo antes de crear los datos
+                if (flattenedValues.estadoFlujo === 'candidata') {
+                    flattenedValues.estadoFlujo = 'candidata'; 
+                }
+                // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
+
+                 // Obtener el nombre del usuario desde el localStorage
+                 const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
+ 
+                 // Llamar al servicio de creación
+                 this.resumenService.sendFormDataAsJson(flattenedValues, sAMAccountName).subscribe(
+                     (response) => {
+                         Swal.fire({
+                             title: '¡Formulario Enviado!',
+                             text: 'Tu formulario ha sido enviado con éxito.',
+                             icon: 'success',
+                             confirmButtonText: 'Aceptar',
+                         }).then(() => {
+                             this.isDisabled = false;
+                             this.sendNotification(response.data.id);
+                         });
+                         this.identityId = response.data.id;
+                         console.log('Id de la hv en creacion:', response.data.id);
+                     },
+                     (error) => {
+                         Swal.fire({
+                             title: 'Error',
+                             text: 'No se pudo enviar el formulario. Intenta nuevamente.',
+                             icon: 'error',
+                             confirmButtonText: 'Aceptar',
+                         });
+                         console.log('Datos enviados al servidor:', flattenedValues);
+
+                        }
+                    );
+            }
         } else {
-            console.warn('Formulario no válido');
         }
     }
 
     ngOnInit(): void {
-        console.log('Id Practica ' + this.Id);
+        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
+        this.rol = this.roles[0]
 
+
+        this.dataService.getFileByIdResumen(this.Id).subscribe(
+            (response)=>{
+                this.data = response;
+            },
+            (e) =>{
+            } 
+        )
+
+        // Logica de agregar campos seleccionables
+        this.entityOptions = [
+            { id: 1, name: 'Contraloría General de la República' },
+            { id: 2, name: 'Registraduría Nacional del Estado Civil' },
+            { id: 3, name: 'Ministerio de Hacienda' },
+        ];
+
+        //this.data = this.dataService.getDataFiles();
+        this.columns = this.dataService.getColumns();
+        // Obtener el rol desde localStorage
+        const roles = localStorage.getItem('accessRoles');
+        this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+
+        // Configurar el texto del botón basado en el rol
+        if (this.cargo === 'validador') {
+            this.buttonText = 'Caracterización';
+        } else if (this.cargo === 'caracterizador') {
+            this.buttonText = 'Evaluación';
+        } else {
+            this.buttonText = 'Acción';
+        }
+
+         // Lógica adicional para manejar la visibilidad del botón (nuevo)
+        this.showButton = this.cargo !== 'jefeUnidad';
         this.horizontalStepperForm = this._formBuilder.group({
             step1: this._formBuilder.group({
-                fechaDiligenciamiento: ['', new Date()],
-                nombreEntidad: ['', Validators.required],
-                nombreDependenciaArea: ['', Validators.required],
-            }),
+                fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
+                entityCgr: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+                nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
+            }),  
             step2: this._formBuilder.group({
-                nombre: ['', [Validators.required, Validators.maxLength(50)]],
-                cargo: ['', [Validators.required, Validators.maxLength(50)]],
-                correo: ['', [Validators.required, Validators.email]],
-                contacto: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+                nombre: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                cargo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
+                correo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.email]],
+                contacto: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.pattern('^[0-9]{10}$')],],
             }),
             step3: this._formBuilder.group({
-                tipoEstrategiaIdentificacion: [''],
-                tipoPractica: [''],
+                typeStrategyIdentification: [{ value: '', disabled: this.cargo === 'validador' }],
+                typePractice: [{ value: '', disabled: this.cargo === 'validador' }],
                 codigoPractica: [{ value: '', disabled: true }],
-                tipologia: [{ value: '' }],
-                estadoFlujo: [{ value: 'Candidata', disabled: true }],
-                nivelBuenaPractica: [''],
-                nombreDescriptivoBuenaPractica: ['', Validators.maxLength(100)],
-                propositoPractica: ['', Validators.maxLength(300)],
-                objetivoPrincipalPractica: [''],
+                typology: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                estadoFlujo: [{ value: 'candidata', disabled: true || this.cargo === 'validador' }],
+                levelGoodPractice: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                nombreDescriptivoBuenaPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(100)],
+                propositoPractica: [{ value: '', disabled: true || this.cargo === 'validador' }, Validators.maxLength(300)],
+                objectiveMainPractice: [{ value: '', disabled: true || this.cargo === 'validador' }]
             }),
             step4: this._formBuilder.group({
-                impactoEsperado: [''],
-                metodologiaUsada: ['', [Validators.maxLength(500)]],
-                duracionImplementacion: [''],
-                etapasMetodologia: [''],
-                periodoDesarrolloInicio: [''],
-                periodoDesarrolloFin: [''],
+                expectedImpact: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                metodologiaUsada: [{ value: '', disabled: true || this.cargo === 'validador' }, [Validators.maxLength(500)]],
+                durationImplementation: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                stagesMethodology: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                periodoDesarrolloInicio: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                periodoDesarrolloFin: [{ value: '', disabled: true || this.cargo === 'validador' }],
             }),
             step5: this._formBuilder.group({
-                tipoMaterialProducido: [''],
-                apoyoRecibido: [''],
-                reconocimientosNacionalesInternacionales: [''],
-                objetoControl: [''],
-                taxonomiaEvento: [''],
-                tipoActuacion: [''],
-                descripcionResultados: [''],
+                typeMaterialProduced: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                supportReceived: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                recognitionsNationalInternational: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                controlObject: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                taxonomyEvent: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                typePerformance: [{ value: '', disabled: true || this.cargo === 'validador' }],
+                descripcionResultados: [{ value: '', disabled: true || this.cargo === 'validador' }],
             }),
             step6: this._formBuilder.group({
-                documentoActuacion: [Validators.required],
+                documentoActuacion: [{ value: '', disabled: true || this.cargo === 'validador'  },Validators.required],
             }),
         });
         this.horizontalStepperForm.valueChanges.subscribe(() => {
             this.progress = this.calculateProgress();
-            console.log('Progreso actualizado:', this.progress);
+        });
+        this.resumenService.fetchAllTypes().subscribe(() => {
+            this.typeStrategyOptions = this.resumenService.getTypeByKey(
+                'typeStrategyIdentifications'
+            );
+            this.typePracticeOptions =
+                this.resumenService.getTypeByKey('typePractices');
+            this.typologyOptions =
+                this.resumenService.getTypeByKey('typologies');
+            this.levelGoodPracticeOptions =
+                this.resumenService.getTypeByKey('levelGoodPractice');
+            this.objectiveMainPracticeOptions =
+                this.resumenService.getTypeByKey('objectiveMainPractices');
+            this.expectedImpactOptions =
+                this.resumenService.getTypeByKey('expectedImpacts');
+            this.stagesMethodologyOptions =
+                this.resumenService.getTypeByKey('stagesMethodologys');
+            this.durationImplementationOptions =
+                this.resumenService.getTypeByKey('durationImplementations');
+            this.typeMaterialProducedOptions = this.resumenService.getTypeByKey(
+                'typeMaterialProduceds'
+            );
+            this.supportReceivedOptions =
+                this.resumenService.getTypeByKey('supportReceiveds');
+            this.recognitionsNationalInternationalOptions =
+                this.resumenService.getTypeByKey(
+                    'recognitionsNationalInternationals'
+                );
+            this.controlObjectOptions =
+                this.resumenService.getTypeByKey('controlObjects');
+            this.taxonomyEventOptions =
+                this.resumenService.getTypeByKey('taxonomyEvents');
+            this.typePerformanceOptions =
+                this.resumenService.getTypeByKey('typePerformances');
+            this.horizontalStepperForm.get('step4.periodoDesarrolloInicio')?.valueChanges.subscribe(() => {
+                this.validateFechas();});
+            this.horizontalStepperForm.get('step4.periodoDesarrolloFin')?.valueChanges.subscribe(() => {
+                this.validateFechas();});
         });
 
         this.progress = this.calculateProgress();
         this.resumenService.getDataAsJson(this.Id.toString()).subscribe({
             next: (response) => {
-                console.log('Datos recibidos:', response);
+
+                // Transformar el expectedImpact si viene como array de objetos
+                const expectedImpactIds = response.expectedImpact
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const stagesMethodologyIds = response.stagesMethodology
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];    
+
+                    const typeMaterialProducedIds = response.typeMaterialProduced
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const supportReceivedIds = response.supportReceived
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
+                    const taxonomyEventIds = response.taxonomyEvent
+                    ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
+                    : [];
+
 
                 // Asignar los datos al formulario usando patchValue
                 this.horizontalStepperForm.patchValue({
                     step1: {
                         fechaDiligenciamiento: response.fechaDiligenciamiento || '',
-                        nombreEntidad: response.nombreEntidad || '',
+                        entityCgr: response.entityCgr.id || '',
                         nombreDependenciaArea: response.nombreDependenciaArea || '',
                     },
                     step2: {
@@ -220,63 +551,149 @@ export class ResumenComponent implements OnInit {
                         contacto: response.contacto || '',
                     },
                     step3: {
-                        tipoEstrategiaIdentificacion: response.tipoEstrategiaIdentificacion || '',
-                        tipoPractica: response.tipoPractica || '',
+                        typeStrategyIdentification:
+                            response.typeStrategyIdentification?.id || '',
+                        typePractice: response.typePractice?.id || '',
                         codigoPractica: response.codigoPractica || '',
-                        tipologia: response.tipologia || '',
+                        typology: response.typology?.id || '',
                         estadoFlujo: response.estadoFlujo || 'Candidata',
-                        nivelBuenaPractica: response.nivelBuenaPractica || '',
-                        nombreDescriptivoBuenaPractica: response.nombreDescriptivoBuenaPractica || '',
+                        levelGoodPractice: response.levelGoodPractice?.id || '',
+                        nombreDescriptivoBuenaPractica:
+                            response.nombreDescriptivoBuenaPractica || '',
                         propositoPractica: response.propositoPractica || '',
-                        objetivoPrincipalPractica: response.objetivoPrincipalPractica || '',
+                        objectiveMainPractice:
+                            response.objectiveMainPractice?.id || '',
                     },
                     step4: {
-                        impactoEsperado: response.impactoEsperado || '',
+                        expectedImpact: expectedImpactIds,
                         metodologiaUsada: response.metodologiaUsada || '',
-                        duracionImplementacion: response.duracionImplementacion || '',
-                        etapasMetodologia: response.etapasMetodologia || '',
+                        durationImplementation: response.durationImplementation?.id || '',
+                        stagesMethodology: stagesMethodologyIds,
                         periodoDesarrolloInicio: response.periodoDesarrolloInicio || '',
                         periodoDesarrolloFin: response.periodoDesarrolloFin || '',
                     },
                     step5: {
-                        tipoMaterialProducido: response.tipoMaterialProducido || '',
-                        apoyoRecibido: response.apoyoRecibido || '',
-                        reconocimientosNacionalesInternacionales: response.reconocimientosNacionalesInternacionales || '',
-                        objetoControl: response.objetoControl || '',
-                        taxonomiaEvento: response.taxonomiaEvento || '',
-                        tipoActuacion: response.tipoActuacion || '',
-                        descripcionResultados: response.descripcionResultados || '',
+                        typeMaterialProduced: typeMaterialProducedIds,
+                        supportReceived: supportReceivedIds,
+                        recognitionsNationalInternational: response.recognitionsNationalInternational?.id || '',
+                        controlObject: response.controlObject?.id || '',
+                        taxonomyEvent: taxonomyEventIds,
+                        typePerformance: response.typePerformance?.id || '',
+                        descripcionResultados:
+                            response.descripcionResultados || '',
                     },
                     step6: {
                         documentoActuacion: response.documentoActuacion || '',
                     },
                 });
+                if (this.cargo === 'caracterizador'|| this.cargo === 'jefeUnidad') {
+                    const typePracticeValue = response.typePractice?.id || '';
+                    this.onPracticaChange({ value: typePracticeValue });
+                }
             },
             error: (err) => {
-                console.error('Error al obtener los datos:', err);
             },
             complete: () => {
-                console.log('Datos cargados en el formulario');
             },
         });
-
-        //si el id es diferente de undefined
-        //llamo al endpoint
-        //captura la respuestra
-        //asigno los valores de la respuesta a los campos del formulario
-
     }
+    private setupAutocomplete(): void {
+        const entityCgrControl = this.horizontalStepperForm.get('step1.entityCgr');
+        if (entityCgrControl) {
+            this.filteredEntities$ = entityCgrControl.valueChanges.pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((query: string) =>
+                    this.resumenService.fetchEntities(query).pipe(
+                        map((response: any) => response.data || [])
+                    )
+                )
+            );
+        }
+    }
+    onEntitySelected(entity: any): void {
+        const entityCgrControl = this.horizontalStepperForm.get('step1.entityCgr');
+        if (entityCgrControl) {
+            entityCgrControl.setValue(entity.name); 
+        }
+    }
+
     onPracticaChange(event: any): void {
         const selectedValue = event.value;
         const step3Form = this.horizontalStepperForm.get('step3');
+        const step4Form = this.horizontalStepperForm.get('step4');
+        const step5Form = this.horizontalStepperForm.get('step5');
+        const propositoPracticaControl = step3Form?.get('propositoPractica');
 
-        if (selectedValue === 'BP') {
-            step3Form?.get('tipologia')?.enable();
+        if (selectedValue.toString() === '4') {
+            step3Form?.get('typology')?.enable();
+            step3Form?.get('levelGoodPractice')?.enable();
+            step3Form?.get('nombreDescriptivoBuenaPractica')?.enable();
+            propositoPracticaControl?.enable();
+            step3Form?.get('objectiveMainPractice')?.enable();
+            step4Form?.get('expectedImpact')?.enable();
+            step4Form?.get('metodologiaUsada')?.enable();
+            step4Form?.get('durationImplementation')?.enable();
+            step4Form?.get('stagesMethodology')?.enable();
+            step4Form?.get('durationImplementation')?.enable();
+            step4Form?.get('stagesMethodology')?.enable();
+            step4Form?.get('periodoDesarrolloInicio')?.enable();
+            step4Form?.get('periodoDesarrolloFin')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
+            step5Form?.get('typeMaterialProduced')?.enable();
+            step5Form?.get('supportReceived')?.enable();
+            step5Form?.get('recognitionsNationalInternational')?.enable();
+            step5Form?.get('controlObject')?.enable();
+            step5Form?.get('taxonomyEvent')?.enable();
+            step5Form?.get('typePerformance')?.enable();
+            step5Form?.get('descripcionResultados')?.enable();
             step3Form?.get('codigoPractica')?.setValue('BP-' + this.generateConsecutive());
+
+            propositoPracticaControl?.setValidators([
+                Validators.required,
+                Validators.maxLength(300),
+            ]);
         } else {
-            step3Form?.get('tipologia')?.disable();
-            step3Form?.get('codigoPractica')?.setValue('');
+            step3Form?.get('typology')?.disable();
+            step3Form?.get('levelGoodPractice')?.disable();
+            step3Form?.get('typology')?.disable();
+            step3Form?.get('levelGoodPractice')?.disable();
+            step3Form?.get('nombreDescriptivoBuenaPractica')?.disable();
+            propositoPracticaControl?.disable();
+            step3Form?.get('objectiveMainPractice')?.disable();
+            step4Form?.get('expectedImpact')?.disable();
+            step4Form?.get('metodologiaUsada')?.disable();
+            step4Form?.get('durationImplementation')?.disable();
+            step4Form?.get('stagesMethodology')?.disable();
+            step4Form?.get('durationImplementation')?.disable();
+            step4Form?.get('stagesMethodology')?.disable();
+            step4Form?.get('periodoDesarrolloInicio')?.disable();
+            step4Form?.get('periodoDesarrolloFin')?.disable();
+            step5Form?.get('typeMaterialProduced')?.disable();
+            step5Form?.get('supportReceived')?.disable();
+            step5Form
+                ?.get('recognitionsNationalInternational')
+                ?.disable();
+            step5Form?.get('controlObject')?.disable();
+            step5Form?.get('taxonomyEvent')?.disable();
+            step5Form?.get('typePerformance')?.disable();
+            step5Form?.get('typeMaterialProduced')?.disable();
+            step5Form?.get('supportReceived')?.disable();
+            step5Form?.get('recognitionsNationalInternational')?.disable();
+            step5Form?.get('controlObject')?.disable();
+            step5Form?.get('taxonomyEvent')?.disable();
+            step5Form?.get('typePerformance')?.disable();
+            step5Form?.get('descripcionResultados')?.disable();
+            step3Form?.get('objetivoPrincipalPractica')?.setValue('');
+
+            propositoPracticaControl?.clearValidators();
         }
+        propositoPracticaControl?.updateValueAndValidity();
     }
 
     private generateConsecutive(): string {
@@ -286,7 +703,14 @@ export class ResumenComponent implements OnInit {
     onDateChange(event: any, stepName: string, controlName: string): void {
         const date = event.value;
         const formattedDate = this.formatDate(date);
-        this.horizontalStepperForm.get(`${stepName}.${controlName}`)?.setValue(formattedDate);
+    
+        const control = this.horizontalStepperForm.get(`${stepName}.${controlName}`);
+        control?.setValue(formattedDate);
+    
+        // Validación específica para las fechas de inicio y fin
+        if (controlName === 'periodoDesarrolloInicio' || controlName === 'periodoDesarrolloFin') {
+            this.validateFechas();
+        }
     }
 
     formatDate(date: Date): string {
@@ -296,54 +720,84 @@ export class ResumenComponent implements OnInit {
         return `${year}-${month}-${day}`;
     }
 
-    flattenObject(obj: any): any {
-        let result: any = {};
+    // aplanar datos a json / listas array 
+    flattenObject(input: any): any {
+        const output = {};
+        const multiselectFields = [
+            'expectedImpact',
+            'typeMaterialProduced',
+            'supportReceived',
+            'taxonomyEvent',
+            'stagesMethodology',
+        ];
 
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
-                    const temp = this.flattenObject(obj[key]);
-                    for (const subKey in temp) {
-                        if (temp.hasOwnProperty(subKey)) {
-                            if (subKey.startsWith('step')) {
-                                result[subKey.substring(subKey.indexOf('.') + 1)] = temp[subKey];
-                            } else {
-                                result[subKey] = temp[subKey];
-                            }
-                        }
+        for (const step in input) {
+            const stepData = input[step];
+            for (const key in stepData) {
+                if (multiselectFields.includes(key)) {
+                    if (
+                        typeof stepData[key] === 'string' &&
+                        stepData[key].includes(',')
+                    ) {
+                        // Convertir cadenas con comas a listas de números
+                        output[key] = stepData[key].split(',').map(Number);
+                    } else if (
+                        typeof stepData[key] === 'string' &&
+                        stepData[key] !== ''
+                    ) {
+                        // Convertir cadenas individuales a una lista con un solo número
+                        output[key] = [Number(stepData[key])];
+                    } else {
+                        // Si está vacío, enviar una lista vacía
+                        output[key] = [];
                     }
                 } else {
-                    result[key] = obj[key];
+                    // Mantener el resto de las propiedades sin cambios
+                    output[key] = stepData[key];
                 }
             }
         }
-        return result;
+
+        return output;
+
     }
-    submitDocumentoActuacion(): void {
-        console.log('Intentando enviar los documentos...');
+
+    onExpectedImpactChange(): void {
+    }
+
+    submitDocumentoActuacion(identityId:number): void {
 
         if (this.selectedFiles.length > 0) {
             const formData = new FormData();
 
-            this.selectedFiles.forEach((file) => {
-                formData.append('file', file, file.name);
-            });
+          this.selectedFiles.forEach((file) => {
+            // formData.append('files', file, file.name);
+            formData.append('files', file);
+          });
 
-            console.log('FormData construido:', formData);
 
             // Enviamos los archivos al servicio
-            this.resumenService.uploadFile(formData).subscribe(
+            this.resumenService.uploadFile(identityId,formData).subscribe(
                 (response) => {
-                    console.log('Documentos enviados con éxito:', response);
+                    Swal.fire({
+                        title: '¡Actualización Exitosa!',
+                        text: 'Documentos cargados correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                    })
                     // Limpiamos la selección tras el envío exitoso
                     this.selectedFiles = [];
                 },
                 (error) => {
-                    console.error('Error al enviar los documentos:', error);
+                    Swal.fire({
+                        title:  'Error',
+                        text: 'Error al cargar los documentos.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                    })
                 }
             );
         } else {
-            console.warn('No hay archivos seleccionados.');
         }
     }
 
@@ -357,38 +811,54 @@ export class ResumenComponent implements OnInit {
             this.selectedFiles = Array.from(event.dataTransfer.files);
         }
     }
+
+
+    private shouldExcludeControl(controlName: string): boolean {
+        const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
+        return excludedControls.includes(controlName);
+    }
+
     calculateProgress(): number {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
         let filledControls = 0;
-
+    
         formGroups.forEach((step) => {
             const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
             if (group) {
                 const controls = group.controls;
+    
+                 Object.entries(controls).forEach(([controlName, control]) => {
+                // Excluir controles específicos
+                if (this.shouldExcludeControl(controlName)) {
+                    return;
+                }
 
-                Object.values(controls).forEach((control) => {
-                    if (!control.disabled) {
-                        totalControls++;
-                        // Considerar válido si tiene un valor (aunque no sea obligatorio)
-                        if (control.value && control.value.toString().trim() !== '') {
-                            filledControls++;
+                // Incluir controles deshabilitados si el rol es "validador"
+                if (!control.disabled || this.isValidatorRole()) {
+                    totalControls++;
+                    // Contar como lleno si tiene un valor, aunque no sea obligatorio
+                    if (
+                        control.value &&
+                        control.value.toString().trim() !== ''
+                    ) {
+                        filledControls++;
                         }
                     }
                 });
             }
         });
-
+    
         // Evitar dividir por cero
         if (totalControls === 0) {
             return 0;
         }
-
+    
         // Calcular progreso
         const progressValue = Math.round((filledControls / totalControls) * 100);
-        console.log(`Total controles: ${totalControls}, Controles llenos: ${filledControls}, Progreso: ${progressValue}%`);
         return progressValue;
     }
+    
     get progressColor(): string {
         if (this.progress <= 30) {
             return 'red'; // 0% - 30%: Rojo
@@ -397,5 +867,185 @@ export class ResumenComponent implements OnInit {
         } else {
             return 'green'; // 63% - 100%: Verde
         }
+    }
+
+    
+    /**
+     * Verifica si el rol actual es "validador".
+     */
+    private isValidatorRole(): boolean {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        return currentRole === 'validador';
+    }
+
+
+
+// ======================== Logica envio de datos estructurados por PATCH ======================== //
+private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: string): void {
+    const patchData = {
+        actualizaciones: {
+            estadoFlujo, // Actualizar estado de flujo
+        },
+        sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario
+        estadoFlujo,
+        comentarioUsuario: this.additionalInfoFromModal || '', // Comentario adicional desde el modal
+    };
+
+    // Llamar al servicio de actualización
+    this.resumenService.updateDataAsJson(id, patchData).subscribe(
+        (response) => {
+            Swal.fire({
+                title: '¡Actualización Exitosa!',
+                text: successMessage,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                window.location.href = './example';
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+
+}
+
+
+// ======================== Logica multiselect entidad momentaneo ======================== //
+    entityOptions = [
+        { id: 1, name: 'Contraloría General de la República' },
+        { id: 2, name: 'Registraduría Nacional del Estado Civil' },
+    ];
+
+// ======================== Método para verificar validez del formulario (ignora campos deshabilitados) ======================== //
+    checkFormValidity(form: FormGroup): boolean {
+        let isValid = true;
+
+        Object.keys(form.controls).forEach((step) => {
+            const group = form.get(step) as FormGroup;
+            if (group) {
+                Object.keys(group.controls).forEach((control) => {
+                    const formControl = group.get(control);
+                    if (formControl && formControl.enabled && formControl.invalid) {
+                        isValid = false;
+                    }
+                });
+            }
+        });
+
+        return isValid;
+    }
+
+// ======================== Logica que valida las fechas ========================= //
+    validateFechas(): void {
+        const fechaInicioControl = this.horizontalStepperForm.get('step4.periodoDesarrolloInicio');
+        const fechaFinControl = this.horizontalStepperForm.get('step4.periodoDesarrolloFin');
+
+        if (!fechaInicioControl || !fechaFinControl) {
+            return;
+        }
+
+        const fechaInicio = new Date(fechaInicioControl.value);
+        const fechaFin = new Date(fechaFinControl.value);
+
+        // Validar que fecha de fin no sea anterior a la de inicio
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            fechaFinControl.setErrors({ fechaFinAnterior: true });
+        } else {
+            fechaFinControl.setErrors(null);
+        }
+    }
+
+// ======================== Logica que cambia el estado de la practica a desestimar ======================== //
+    desestimarPractica(): void {
+        if (!this.Id) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+            return;
+        }
+
+        const updatedData = { estadoFlujo: 'desestimada' };
+        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
+            (response) => {
+                Swal.fire({
+                    title: '¡Práctica Desestimada!',
+                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            },
+            (error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                });
+            }
+        );
+    }
+
+// ======================== Logica que muestra el modal en la vista ======================== //
+    openCaracterizationModal(): void {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+        
+        const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+            width: '500px',
+            data: { 
+                role: currentRole,
+                selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado (para selección única)
+                selectedUsers: this.selectedUsersFromModal, // Pasar usuarios seleccionados (para selección múltiple)
+                additionalInfo: this.additionalInfoFromModal // Pasar información adicional
+            },
+        });
+        
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                // Guardar los datos seleccionados al cerrar el modal
+                this.selectedUserFromModal = result.selectedUser || null;
+                this.selectedUsersFromModal = result.selectedUsers || []; // Asegúrate de que esta propiedad exista y se maneje correctamente
+                this.additionalInfoFromModal = result.additionalInfo || '';
+
+                if (this.selectedUsersFromModal) {
+                    // Guardar en localStorage como JSON
+                    localStorage.setItem('selectedUser', JSON.stringify(this.selectedUsersFromModal));
+                } else {
+                    localStorage.removeItem('selectedUser'); // Limpiar si no hay usuario seleccionado
+                }
+
+                 console.log('Usuarios seleccionados:', this.selectedUsersFromModal); // Verifica que todos los usuarios estén aquí
+                 console.log('Información adicional:', this.additionalInfoFromModal);
+            } else {
+            }
+        });
+    }
+
+    canProceed(): boolean {
+        const roles = localStorage.getItem('accessRoles');
+        const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+    
+        if (currentRole === 'validador') {
+            // Para "validador", verificar si hay un usuario seleccionado (selección única)
+            return !!this.selectedUserFromModal; // Asegura que selectedUserFromModal no sea null o undefined
+        } else if (currentRole === 'caracterizador') {
+            // Para "caracterizador", verificar si hay usuarios seleccionados (selección múltiple)
+            return this.selectedUsersFromModal && this.selectedUsersFromModal.length > 0;
+        }
+    
+        // Para otros roles, permite avanzar sin restricciones
+        return true;
     }
 }

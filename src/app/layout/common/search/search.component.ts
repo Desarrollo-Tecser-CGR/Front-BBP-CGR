@@ -1,6 +1,8 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { GlobalConstants } from 'app/core/constants/GlobalConstants';
+
 import {
     Component,
     ElementRef,
@@ -32,7 +34,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
+import { RouterLink,  Router, RouterModule  } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations/public-api';
 import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
 import { AdvancedSearchModalComponent } from '../advanced-search-modal/advanced-search-modal.component';
@@ -58,6 +60,7 @@ import { MatDialog } from '@angular/material/dialog';
         MatFormFieldModule,
         MatInputModule,
         NgClass,
+        RouterModule
     ],
     providers: [
         {
@@ -88,7 +91,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
         private _elementRef: ElementRef,
         private _httpClient: HttpClient,
         private _renderer2: Renderer2,
-        private _dialog: MatDialog
+        private _dialog: MatDialog,
+        private router: Router,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -156,35 +160,36 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        // Subscribe to the search field value changes
+
         this.searchControl.valueChanges
             .pipe(
                 debounceTime(this.debounce),
                 takeUntil(this._unsubscribeAll),
                 map((value) => {
-                    // Set the resultSets to null if there is no value or
-                    // the length of the value is smaller than the minLength
-                    // so the autocomplete panel can be closed
+                    // Set the resultSets to null if no value or too short
                     if (!value || value.length < this.minLength) {
                         this.resultSets = null;
                     }
-
-                    // Continue
+    
                     return value;
                 }),
-                // Filter out undefined/null/false statements and also
-                // filter out the values that are smaller than minLength
+                // Filter out values that don't meet the minLength
                 filter((value) => value && value.length >= this.minLength)
             )
             .subscribe((value) => {
+                const endpoint = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`;
+    
+                // Llamada GET con parámetros en la URL
                 this._httpClient
-                    .post('api/common/search', { query: value })
+                    .get(endpoint, { params: { query: value } }) // Pasa el valor como parámetro
                     .subscribe((resultSets: any) => {
-                        // Store the result sets
+                        
+                        // Guarda los resultados
                         this.resultSets = resultSets;
-
-                        // Execute the event
+    
+                        // Emite el evento con los resultados
                         this.search.next(resultSets);
+                    }, error => {
                     });
             });
     }
@@ -257,20 +262,24 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
+
     openAdvancedSearch(): void {
-        const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
-            width: '600px',
-            data: {
-                // Puedes pasar parámetros iniciales aquí si es necesario
-            },
-        });
+        this.router.navigate(['/inbox']).then(() => {
+            const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
+                width: '600px',
+                data: {
+                    // Puedes pasar parámetros iniciales aquí si es necesario
+                },
+            });
     
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                // Maneja los datos retornados del modal
-                this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
-                this.search.emit(result); // Emitir el resultado avanzado
-            }
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                    // Maneja los datos retornados del modal
+                    this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
+                    this.search.emit(result); // Emitir el resultado avanzado
+                }
+            });
         });
-    }    
+    }
+    
 }

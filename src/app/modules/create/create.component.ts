@@ -145,7 +145,8 @@ export class CreateComponent {
         // Build question object
         const questionsObject = this.formEntries.reduce((acc, entry) => {
             acc[entry.question] = entry.subQuestions && entry.subQuestions.length > 0 
-                ? { subQuestions: entry.subQuestions } 
+                ? { type: entry.type, // Incluir el tipo de criterio
+                    subQuestions: entry.subQuestions } 
                 : entry.type;
             return acc;
         }, {} as Record<string, any>);
@@ -160,7 +161,6 @@ export class CreateComponent {
         // Send Data 
         this.createService.saveFormData(formData).subscribe(
             (response) => {
-                console.log('Formulario guardado con éxito:', response);
                 // Show Alert
                 Swal.fire({
                     title: '¡Formulario Guardado!',
@@ -176,7 +176,6 @@ export class CreateComponent {
                 });
             },
             (error) => {
-                console.error('Error al guardar el formulario:', error);
                 Swal.fire({
                     title: 'Error',
                     text: `Hubo un problema al guardar el formulario: ${error.error?.message || 'Error desconocido'}`,

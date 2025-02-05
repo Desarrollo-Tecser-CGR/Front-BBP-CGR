@@ -7,8 +7,6 @@ import { catchError, map, Observable, of, ReplaySubject, switchMap, tap, throwEr
 import { user as userData } from 'app/mock-api/common/user/data';
 import { Rol } from '../user/rol.types';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
-import { CONFIG } from '../../config/config';
-
 
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +14,7 @@ export class AuthService {
     private _authenticated: boolean = false;
     private _httpClient = inject(HttpClient);
     private _userService = inject(UserService);
-    private apiUrl = `${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}auth/login`;
 
     private _user: any = userData;
     private _roles: ReplaySubject<Rol[]> = new ReplaySubject<Rol[]>(1);
@@ -50,12 +48,19 @@ export class AuthService {
         return localStorage.getItem('accessToken') ?? '';
     }
 
-    set accessNombre(token: string) {
-        localStorage.setItem('accessNombre', token);
+    set accessName(token: string) {
+        localStorage.setItem('accessName', token);
     }
 
-    get accessNombre(): string {
-        return localStorage.getItem('accessNombre') ?? '';
+    get accessName(): string {
+        return localStorage.getItem('accessName') ?? '';
+    }
+    set accessId(token: string) {
+        localStorage.setItem('accessId', token);
+    }
+
+    get accessId(): string {
+        return localStorage.getItem('accessId') ?? '';
     }
 
     /**
@@ -82,7 +87,7 @@ export class AuthService {
      * @param email
      */
     forgotPassword(email: string): Observable<any> {
-        return this._httpClient.post('api/auth/forgot-password', email);
+        return this._httpClient.post('api/auth/register-users', email);
     }
 
     /**
@@ -129,20 +134,20 @@ export class AuthService {
         };
 
 
-        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
+        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/login`, auth).pipe(
 
 
-        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/loginActiveDirectory`, auth).pipe(
+        // return this._httpClient.post(`${GlobalConstants.API_BASE_URL}auth/login`, auth).pipe(
 
-        return this._httpClient.post(`${CONFIG.apiHost}/api/v1/auth/loginActiveDirectory`, auth).pipe(
+
+        return this._httpClient.post(`${GlobalConstants.API_BASE_URL}/api/v1/auth/login`, auth).pipe(
 
 
             switchMap((response: any) => {
-                console.log(response);
 
                 // Store the access token in the local storage
                 this.accessToken = response.user.token;
-                this.accessNombre = credentials.sAMAccountName;
+                this.accessName = credentials.sAMAccountName;
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
@@ -156,39 +161,7 @@ export class AuthService {
                 this._roles.next(listCargo);
                 this.accessRoles = listCargo;
 
-                // if(auth.sAMAccountName == 'bbp.cgr') {
-
-                //     return this.getRoles().pipe(
-                //         map((roles) => {
-                //             console.log(roles);
-
-                //             this.accessRoles = roles;
-                //             // Devuelve un objeto que contiene el token y los roles
-                //             return {
-                //                 token: response.user.token,
-                //                 roles: roles,
-                //             };
-                //         })
-                //     );
-                // }
-
-                // if(auth.sAMAccountName == 'user2') {
-
-                //     return this.getRolesDos().pipe(
-                //         map((roles) => {
-                //             console.log(roles);
-
-                //             this.accessRoles = roles;
-                //             // Devuelve un objeto que contiene el token y los roles
-                //             return {
-                //                 token: response.user.token,
-                //                 roles: roles,
-                //             };
-                //         })
-                //     );
-                // }
-
-                // Return a new observable with the response
+              
                 return of(response);
             })
         );

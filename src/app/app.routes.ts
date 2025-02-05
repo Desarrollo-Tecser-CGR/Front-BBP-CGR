@@ -32,7 +32,7 @@ export const appRoutes: Route[] = [
         },
         children: [
             {path: 'confirmation-required', loadChildren: () => import('app/modules/auth/confirmation-required/confirmation-required.routes')},
-            {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.routes')},
+            {path: 'register-users', loadChildren: () => import('app/modules/auth/register-users/register-users.routes')},
             {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/sign-in/sign-in.routes')},
             {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
@@ -82,7 +82,24 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador','administrador', 'natural'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'evaluador'], module: '' }
+            },
+        ]
+    },
+
+    // Caracterization routes
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'assignRole', loadChildren: () =>
+                import('app/modules/assignRole/assignRole.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
     },
@@ -99,10 +116,11 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'caracterization', loadChildren: () =>
                 import('app/modules/caracterization/caracterization.routes'),
-                data: { requiredRoles: ['validador','administrador'], module: '' }
+                data: { requiredRoles: ['caracterizador','administrador', 'jefeUnidad'], module: '' }
             },
         ]
     },
+
     // Catalog  routes
     {
         path: '',
@@ -130,7 +148,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'assessment', loadChildren: () =>
                 import('app/modules/assessment/assessment.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'evaluador'], module: '' }
             },
         ]
     },
@@ -176,7 +194,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen', loadChildren: () =>
                 import('app/modules/resumen/resumen.routes'),
-                data: { requiredRoles: ['administrador', 'natural'], module: '' }
+                data: { requiredRoles: ['administrador', 'registro'], module: '' }
             },
         ]
     },
@@ -191,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador'], module: '' }
             },
         ]
     },
@@ -233,7 +251,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'create', loadChildren: () =>
                 import('app/modules/create/create.routes'),
-                data: { requiredRoles: ['validador','administrador'], module: '' }
+                data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
     },
@@ -249,7 +267,22 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen-edit', loadChildren: () =>
                 import('app/modules/resumen-edit/resumen-edit.routes'),
-                data: { requiredRoles: ['validador','administrador'], module: '' }
+                data: { requiredRoles: ['validador','administrador', 'caracterizador', 'jefeUnidad'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
             },
         ]
     }

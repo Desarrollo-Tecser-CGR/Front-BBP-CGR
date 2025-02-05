@@ -1,41 +1,49 @@
 <div class="container">
-    <h1>Seguimiento</h1>
-</div>
-<button class="floating-button" mat-icon-button [matMenuTriggerFor]="menu">
-    <mat-icon svgIcon="heroicons_outline:clipboard-document-list" class="large-icon"></mat-icon>
-</button>
+    <h1>Gestor de accesos</h1>
+    <div class="table-container">
+        <h5>Usuarios</h5>
+        <p>Total: {{ dataSource.data.length }}</p>
 
-<mat-menu #menu="matMenu" class="custom-menu">
-    <button mat-menu-item>
-        <mat-icon class="internos">account_circle</mat-icon>
-        <span class="internos">Usuarios Prueba</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">supervisor_account</mat-icon>
-        <span class="internos">Roles y permisos</span>
-    </button>
-    <button mat-menu-item [routerLink]="'/options/characterization'">
-        <mat-icon class="internos">settings</mat-icon>
-        <span class="internos">Criterios de caracterización</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">list</mat-icon>
-        <span class="internos">Criterios por catalogar</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">check_circle</mat-icon>
-        <span class="internos">Criterios de evaluación</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon class="internos">visibility</mat-icon>
-        <span class="internos">Criterios de seguimiento</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon svgIcon="heroicons_outline:arrows-up-down" class="internos"></mat-icon>
-        <span class="internos">Criterios de publicación</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon svgIcon="heroicons_outline:arrow-trending-up" class="internos"></mat-icon>
-        <span class="internos">Workflow</span>
-    </button>
-</mat-menu>
+        <button class="crear">
+            <mat-icon svgIcon="feather:plus-circle"></mat-icon>
+            <span><a (click)="navegar()">Activar Usuario</a></span>
+        </button>
+        <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource" class="mat-table">
+                <!-- Columnas -->
+                <!-- <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef> Id </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.id }} </td>
+                </ng-container> -->
+
+                <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.nombre }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="sesion">
+                    <th mat-header-cell *matHeaderCellDef> Último inicio de sesión </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.sesion }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="rol">
+                    <th mat-header-cell *matHeaderCellDef> Rol </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.rol }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef> Estado </th>
+                    <td mat-cell *matCellDef="let element" style="text-decoration: none;"> {{ element.estado }} </td>
+                </ng-container>
+
+                <!-- Fila de encabezado -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <!-- Filas de datos -->
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            <!-- Paginador -->
+            <mat-paginator [pageSize]="3" [pageSizeOptions]="[3, 5, 10]" showFirstLastButtons></mat-paginator>
+        </div>
+    </div>
+</div>

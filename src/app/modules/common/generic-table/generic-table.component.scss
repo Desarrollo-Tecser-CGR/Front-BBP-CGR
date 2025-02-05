@@ -1,0 +1,21 @@
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: absolute;
+  z-index: 10;
+  background-color: white;
+  box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 15px;
+}
+
+.action-cell {
+  position: relative; /* Esto asegura que la mini pestaña se posicione con relación al botón */
+}
+
+mat-paginator {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}

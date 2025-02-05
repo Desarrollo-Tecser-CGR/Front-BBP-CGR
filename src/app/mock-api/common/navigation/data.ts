@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'natural']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico', 'evaluador']
     },
     {
         id   : 'resumen',
@@ -16,7 +16,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:clipboard-document-list',
         link : '/resumen',
-        roles: ['administrador', 'natural']
+        roles: ['administrador', 'registro']
     },
     {
         id   : 'caracterization',
@@ -24,8 +24,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:newspaper',
         link : '/caracterization',
-        roles: ['administrador', 'validador']
-
+        roles: ['administrador' , 'caracterizador', 'jefeUnidad']
     },
     {
         id   : 'catalog',
@@ -41,11 +40,11 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:queue-list',
         link : '/assessment',
-        roles: ['administrador']
+        roles: ['administrador', 'evaluador']
     },
     {
         id   : 'follow',
-        title: 'Seguimiento',
+        title: 'Gestión de usuarios',
         type : 'basic',
         icon : 'heroicons_outline:presentation-chart-line',
         link : '/follow',
@@ -65,7 +64,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador']
+        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador']
     },
     {
         id   : 'create',
@@ -73,8 +72,16 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:newspaper',
         link : '/create',
-        roles: ['administrador', 'validador']
+        roles: ['administrador']
 
+    },
+    {
+        id   : 'committee',
+        title: 'Comite',
+        type : 'basic',
+        icon : 'heroicons_outline:queue-list',
+        link : '/committee',
+        roles: ['administrador', 'comiteTecnico']
     }
 ];
 export const compactNavigation: FuseNavigationItem[] = [

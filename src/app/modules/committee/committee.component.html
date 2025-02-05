@@ -1,0 +1,16 @@
+<div class="container">
+    <h1>Comité</h1>
+    
+    <div class="cards-container" *ngIf="cards && cards.length > 0; else noData">
+        <div class="card" *ngFor="let card of cards" [ngStyle]="{'border-left': '5px solid ' + card.color}">
+            <h2>{{ card.name }}</h2> <!--  Muestra el nombre al inicio -->
+            <p>{{ card.title }} - {{ card.description }}</p>
+            <span class="value">{{ card.value }}</span>
+            <mat-icon class="icon-container">add</mat-icon> <!--  Ícono de más -->
+        </div>
+    </div>
+
+    <ng-template #noData>
+        <p>No hay datos disponibles</p>
+    </ng-template>
+</div>

@@ -1,83 +1,192 @@
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
 import { InboxService } from './inbox.service';
-import { rol } from 'app/mock-api/common/rol/data';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
+import { FilterService } from 'app/layout/common/advanced-search-modal/FilterService';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
 
 @Component({
-    selector: 'app-inbox',
-    standalone: true,
-    templateUrl: './inbox.component.html',
-    styleUrls: ['./inbox.component.scss'], // Corrección: Usar styleUrls
-    imports: [GenericTableComponent, MatDatepickerModule], // Corrección: Mover MatDatepickerModule a imports
+  selector: 'app-inbox',
+  standalone: true,
+  templateUrl: './inbox.component.html',
+  styleUrls: ['./inbox.component.scss'],
+  imports: [
+    GenericTableComponent,
+    MatDatepickerModule,
+    MatButtonModule,
+    MatIconModule
+  ],
 })
 export class InboxComponent implements OnInit {
-    data: any[] = []; // Datos para la tabla genérica
-    columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
-    buttons = [
-        {
-            label: 'Edit',
-            color: 'primary',
-            action: (row: any) => this.editRow(row),
+  data: any[] = []; // Datos para la tabla genérica
+  columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
+  cargo: string;
+  fullName: string;
+  buttons = [
+    {
+      // label: 'Edit',
+      icon: 'heroicons_outline:pencil-square',
+      color: 'primary',
+      action: (row: any) => this.editRow(row),
+    },
+    {
+      // label: 'Validate',
+      icon: 'heroicons_outline:document-check',
+      color: 'accent',
+      action: (row: any) => this.validateRow(row),
+    },
+    // 
+  ]; // Botones dinámicos
+  private _router: any;
+
+  constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router, private notificationsService: NotificationsService) { } // , private dialog: MatDialog
+
+  ngOnInit(): void {
+    const roles = localStorage.getItem('accessRoles');
+    this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+    this.fullName = localStorage.getItem('accessName') || 'Usuario';
+
+    console.log ('este es el nombre que trae', this.fullName)
+
+    // Definir botones dinámicamente según el rol
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:pencil-square',
+        color: 'primary',
+        action: (row: any) => this.editRow(row),
+      },
+    ];
+  
+    // Agregar el botón de validación solo para validador y administrador
+    if (['validador', 'administrador'].includes(this.cargo)) {
+      this.buttons.push({
+        icon: 'heroicons_outline:document-check',
+        color: 'accent',
+        action: (row: any) => this.validateRow(row),
+      });
+    }
+    this.filterService.filter$.subscribe((filters) => {
+      if (filters) {
+        this.loadData(filters); // Siempre carga datos con los filtros emitidos
+      }
+    });
+    this.loadData();
+  }
+  
+
+  loadData(filters?: any): void {
+
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador'].includes(this.cargo)) {
+      const requestBody = {
+        rol: this.cargo,
+        sAMAccountName: this.fullName,
+        ...filters, // Agrega los filtros si están definidos
+
+      };
+      
+
+      this.inboxService.getDataAsJson(requestBody).subscribe(
+        (dataRes) => {
+          console.log('Cuerpo de la petición:', requestBody);
+
+          let response = dataRes.data;
+          if (response.length > 0) {
+            // Extraer las columnas dinámicamente de la primera fila
+            this.columns = Object.keys(response[0]).map((key) => ({
+              key: key,
+              label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+            }));
+          }
+          this.data = response; // Asignar los datos de la API
         },
-        {
-            label: 'Delete',
-            color: 'warn',
-            action: (row: any) => this.deleteRow(row),
+        (error) => {
+          Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+          // Manejo del error
+        }
+      );
+    }
+    else {
+
+    }
+  }
+
+
+  editRow(row: any): void {
+    // Condición de prueba
+    if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
+        Swal.fire({
+            title: 'Acción no permitida',
+            text: 'No puedes editar este registro porque no está en estado de validación.',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar',
+        });
+        return;
+    }
+    this.router.navigateByUrl('/resumen-edit/' + row.id);
+    // Lógica para editar una fila
+  }
+
+  deleteRow(row: any): void {
+    // Lógica para eliminar una fila
+  }
+
+  validateRow(row: any): void {
+    const requestBody = { rol: this.cargo, id: row.id }; // Cuerpo de la solicitud
+    const accessName = localStorage.getItem('accessName'); // Obtener el accessName del localStorage
+
+    if (!accessName) {
+        return; // Finaliza si no hay accessName
+    }
+
+    // Llamar al endpoint con el accessName
+    this.inboxService.setValidateStatus(requestBody, accessName).subscribe(
+        (response) => {
+            if (response.length > 0) {
+                this.columns = Object.keys(response[0]).map((key) => ({
+                    key: key,
+                    label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+                }));
+            }
+            this.data = response;
+
+            Swal.fire({
+                title: '¡Registro Actualizado!',
+                text: 'El registro ha sido actualizado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                this.loadData(); // Recargar los datos después de la operación
+            });
         },
-    ]; // Botones dinámicos
-
-    constructor(
-        private inboxService: InboxService,
-        private _router: Router
-    ) { }
-
-    ngOnInit(): void {
-        const roles = localStorage.getItem('accessRoles');
-        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
-
-        if (cargo === 'administrador') {
-            const requestBody = { rol: cargo }; // Cuerpo de la solicitud
-            this.inboxService.getDataAsJson(requestBody).subscribe(
-                (response) => {
-                    if (response.length > 0) {
-                        // Extraer las columnas dinámicamente de la primera fila
-                        this.columns = Object.keys(response[0]).map((key) => ({
-                            key: key,
-                            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
-                        }));
-                    }
-                    this.data = response; // Asignar los datos de la API
-                    console.log('API Response:', this.data); // Verificar los datos devueltos
-                    console.log('API columns:', this.columns); // Verificar los datos devueltos
-                },
-                (error) => {
-                    console.error('Error al cargar los datos:', error);
-                    // Manejo del error
-                }
-            );
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al actualizar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
         }
-        else {
-
-        }
-
-    }
-
-    editRow(row: any): void {
-        console.log('Edit row:', row);
-        this._router.navigateByUrl('/resumen-edit/' + row.id);
-
-    }
-
-    deleteRow(row: any): void {
-        console.log('Delete row:', row);
-        // Lógica para eliminar una fila
-    }
-
-    private formatLabel(key: string): string {
-        // Formatear etiquetas (opcional: transformar "user_name" a "User Name")
-        return key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-    }
+    );
 }
 
+  pageLoad(): void {
+    window.location.reload()
+  }
+
+  private formatLabel(key: string): string {
+    key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    // Convertir la primera letra de cada palabra en mayúscula
+    return key.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+}

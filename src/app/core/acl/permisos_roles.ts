@@ -1,6 +1,10 @@
 export const PERMISOSROLES = {
     roles: {
-        Natural  :  'natural',
-        Validador:  'validador'
+        registro  :  'registro',
+        Validador:  'validador',
+        Caracterizador:  'caracterizador',
+        jefeUnida:  'jefeUnidad',
+        evaluador:  'evaluador',
+        comiteTecnico: 'comiteTecnico'
     }
 };

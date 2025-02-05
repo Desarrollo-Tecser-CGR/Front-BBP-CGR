@@ -1,170 +1,236 @@
-import { HttpClient } from '@angular/common/http';
+import { Notification } from './notifications.types';
+import { notifications } from './../../../mock-api/common/notifications/data';
+import { ResumenService } from './../../../modules/resumen/resumen.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Notification } from 'app/layout/common/notifications/notifications.types';
-import { map, Observable, ReplaySubject, switchMap, take, tap } from 'rxjs';
+import { CONFIG } from 'app/config/config';
+import { user } from 'app/mock-api/common/user/data';
+import { BehaviorSubject, catchError, forkJoin, map, Observable, ReplaySubject, switchMap, take, tap, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
-    private _notifications: ReplaySubject<Notification[]> = new ReplaySubject<
-        Notification[]
-    >(1);
+    private apiUrl = `${CONFIG.apiHost}/api/v1/notification`;
 
-    /**
-     * Constructor
-     */
-    constructor(private _httpClient: HttpClient) {}
+    public _notifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Accessors
-    // -----------------------------------------------------------------------------------------------------
+    constructor(private _httpClient: HttpClient) { }
 
     /**
      * Getter for notifications
      */
-    get notifications$(): Observable<Notification[]> {
+    get notifications$(){
         return this._notifications.asObservable();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Get all notifications
-     */
-    getAll(): Observable<Notification[]> {
-        return this._httpClient
-            .get<Notification[]>('api/common/notifications')
-            .pipe(
-                tap((notifications) => {
-                    this._notifications.next(notifications);
-                })
-            );
+    setNotifications(notification: Notification[]):void{
+        this._notifications.next(notification);
     }
 
-    /**
-     * Create a notification
-     *
-     * @param notification
-     */
-    create(notification: Notification): Observable<Notification> {
-        return this.notifications$.pipe(
-            take(1),
-            switchMap((notifications) =>
-                this._httpClient
-                    .post<Notification>('api/common/notifications', {
-                        notification,
-                    })
-                    .pipe(
-                        map((newNotification) => {
-                            // Update the notifications with the new notification
-                            this._notifications.next([
-                                ...notifications,
-                                newNotification,
-                            ]);
+    create(notification: any): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        return this._httpClient.post(this.apiUrl, notification).pipe(
+            map((response: any) => {
+                return response;
+            }),
 
-                            // Return the new notification from observable
-                            return newNotification;
-                        })
-                    )
-            )
+            catchError((e)=>{
+                console.log('Error al obtener los datos:', e);
+                 return throwError(e);
+            })
+        );
+    }
+    formatDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        console.log('Formatted Date:', formattedDate); 
+        return formattedDate;
+    }
+    sendNotification(resumeId: number, user:string, typeId:number): void {
+        let _title: String = '';
+        switch (typeId) {
+            case 1:
+                _title = `Nuevo registro Hoja de vida # ${resumeId}`;
+                break;
+            case 2:
+                _title = `Practica # ${resumeId} validada`;
+                break;
+            case 3:
+                _title = `Nueva practica asignada # ${resumeId}`;
+                break;
+            case 4:
+                _title = `Solicitud de apoyo en caracterización`;
+                break;
+            case 5:
+                _title = `Solicitud de apoyo en evaluación`;
+                break;
+            case 6:
+                _title = `Practica # ${resumeId} caracterizada`;
+                break;
+            case 7:
+                _title = `Practica # ${resumeId} evaluada`;
+                break;
+            case 8:
+                _title = `Respuesta a solicitud de apoyo`;
+                break;
+        
+            default:
+                break;
+        }
+        const mensaje = ``;
+        const notification : Notification = {
+            icon: "heroicons_outline:document-check",
+            title: `${_title}`,
+            description: mensaje,
+            time: this.formatDate(new Date()),
+            expanded: true,
+            enabled: true,
+            readOnly: false,
+            sAMAccountName: user,
+            notificationType: typeId,
+        }
+        const data = {
+                ...notification,
+                userDetails:{
+                    sAMAccountName: user,
+                    resumeId: resumeId
+                    },
+        };
+        this.add(data).subscribe(() => {
+        console.log('Notificación enviada:', data);
+        });
+    }
+    
+
+    getNotificationByUser(userName: any): Observable<any[]>{
+        return this._httpClient.get(`${this.apiUrl}/${userName}`).pipe(
+            map((response:any)=>{
+                const data = response.data;
+                return data;
+            }),
+            catchError((e)=>{
+                return throwError(e);
+            })
         );
     }
 
-    /**
-     * Update the notification
-     *
-     * @param id
-     * @param notification
-     */
-    update(id: string, notification: Notification): Observable<Notification> {
-        return this.notifications$.pipe(
-            take(1),
-            switchMap((notifications) =>
-                this._httpClient
-                    .patch<Notification>('api/common/notifications', {
-                        id,
-                        notification,
-                    })
-                    .pipe(
-                        map((updatedNotification: Notification) => {
-                            // Find the index of the updated notification
-                            const index = notifications.findIndex(
-                                (item) => item.id === id
-                            );
+    getAll(): Observable<any[]>{
+        return this._httpClient.get<Notification[]>(`${this.apiUrl}`).pipe(
+            map((response:any)=>{
 
-                            // Update the notification
-                            notifications[index] = updatedNotification;
+                const data = response.data;
+                const currentNotifications = this._notifications.getValue();
+                const updateNotifications = [...currentNotifications, ...data]
+                this._notifications.next(updateNotifications);
+                return data;
+            }),
+            catchError((e) => {
+                return throwError(e);
+            })
+        );
+    };
+    getByType(typeId: number): Observable<any[]>{
+        return this._httpClient.get<Notification[]>(`${this.apiUrl}/byTypeId/${typeId}`).pipe(
+            map((response:any)=>{
+                const data = response.data;
+                const currentNotifications = this._notifications.getValue();
+                const updateNotifications = [...currentNotifications, ...data];
+                this._notifications.next(updateNotifications);
+                return data;
+            }),
+            catchError((e)=>{
+                return throwError(e);
+            })
+        );
+    };
 
-                            // Update the notifications
-                            this._notifications.next(notifications);
 
-                            // Return the updated notification
-                            return updatedNotification;
-                        })
-                    )
-            )
+    update(id: string): Observable<void> {
+        const currentNotifications = this._notifications.getValue();
+        const requests = currentNotifications.map((notification) =>
+            this._httpClient.patch<void>(`${this.apiUrl}/editReadOnly/${id}`, '')
+        );
+
+        return forkJoin(requests).pipe(
+            tap(() => {
+                currentNotifications.forEach((notification) => (notification.readOnly = true));
+                this._notifications.next(currentNotifications);
+            }),
+            map(() => undefined),
+            catchError((e) => {
+                return throwError(() =>
+                    new Error('No se pudieron marcar las notificaciones como leídas. Intente nuevamente más tarde.')
+                );
+            })
         );
     }
-
     /**
      * Delete the notification
      *
-     * @param id
      */
-    delete(id: string): Observable<boolean> {
-        return this.notifications$.pipe(
-            take(1),
-            switchMap((notifications) =>
-                this._httpClient
-                    .delete<boolean>('api/common/notifications', {
-                        params: { id },
-                    })
-                    .pipe(
-                        map((isDeleted: boolean) => {
-                            // Find the index of the deleted notification
-                            const index = notifications.findIndex(
-                                (item) => item.id === id
-                            );
+    deleteNotification(id: string): Observable<void> {
+        return this._httpClient.patch<void>(`${this.apiUrl}/edit/${id}`,'').pipe(
+            map(()=>{
+                const currentNotifications = this._notifications.getValue();
+                console.log('Estado antes de eliminar:', currentNotifications);
+                
+                const updatedNotifications = currentNotifications.filter(
+                    (_notification) => _notification.id !== id
+                );
 
-                            // Delete the notification
-                            notifications.splice(index, 1);
-
-                            // Update the notifications
-                            this._notifications.next(notifications);
-
-                            // Return the deleted status
-                            return isDeleted;
-                        })
-                    )
-            )
+                this._notifications.next(updatedNotifications);
+                console.log('Estado actual de notificaciones:', this._notifications.getValue());
+            }),
+            catchError((e)=>{
+                console.error('No se pudo obtener la notificación', e);
+                return throwError(()=> new Error('No se pudo obtener la notificación. Intente nuevamente más tarde.'))
+            })
         );
-    }
+    };
 
     /**
      * Mark all notifications as read
      */
-    markAllAsRead(): Observable<boolean> {
-        return this.notifications$.pipe(
-            take(1),
-            switchMap((notifications) =>
-                this._httpClient
-                    .get<boolean>('api/common/notifications/mark-all-as-read')
-                    .pipe(
-                        map((isUpdated: boolean) => {
-                            // Go through all notifications and set them as read
-                            notifications.forEach((notification, index) => {
-                                notifications[index].read = true;
-                            });
-
-                            // Update the notifications
-                            this._notifications.next(notifications);
-
-                            // Return the updated status
-                            return isUpdated;
-                        })
-                    )
-            )
-        );
+    markAllAsRead(): Observable<void> {
+        const currentNotifications = this._notifications.getValue();
+        currentNotifications.forEach((notification) => (notification.readOnly = true));
+        this._notifications.next(currentNotifications);
+        return new Observable((observer) => {
+            observer.next();
+            observer.complete();
+        })
     }
+
+    /**
+     * METODO PARA UTILIZAR LAS NOTIFICACIONES EN UN SISTEMA
+     */
+    private _saveNotifications(notifications: Notification[]): void {
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+    }
+
+
+    add(data: any): Observable<void> {
+        console.log('Notificación creada:', data); // Verifica la notificación antes de agregarla
+        return this._httpClient.post<any>(this.apiUrl, data).pipe(
+            map((newNotification)=>{
+
+                const currentNotifications = this._notifications.getValue();
+                currentNotifications.push(newNotification);
+                // const updatedNotifications = [...currentNotifications, newNotification];
+
+                this._notifications.next(currentNotifications);
+                console.log('Estado actual de notificaciones:', this._notifications.getValue()); // Revisa el estado actualizado
+
+                this._saveNotifications(currentNotifications);
+            }),
+            catchError((e) => {
+                return throwError(() => e)
+            })
+        )
+
+    };
 }

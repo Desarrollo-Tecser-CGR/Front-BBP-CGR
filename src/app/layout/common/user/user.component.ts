@@ -35,6 +35,7 @@ export class UserComponent implements OnInit, OnDestroy {
     user: User = {
         fullName: '', // Inicialización con valores predeterminados
         cargo: '',
+        id: ''
     };
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -57,18 +58,16 @@ export class UserComponent implements OnInit, OnDestroy {
      */
     ngOnInit(): void {
         // Recuperar datos desde el localStorage
-        const fullName = localStorage.getItem('accessNombre') || 'Usuario';
+        const fullName = localStorage.getItem('accessName') || 'Usuario';
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
-
-
-        console.log(fullName);
-        console.log(cargo);
+        const id = localStorage.getItem('accessId');
 
         // Inicializar `this.user` con datos del Local Storage
         this.user = {
             fullName: fullName,
             cargo: cargo,
+            id: id
         };
 
         // Marcar para detección de cambios
