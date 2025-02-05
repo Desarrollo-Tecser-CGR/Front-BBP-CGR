@@ -81,7 +81,7 @@ export class InboxComponent implements OnInit {
 
   loadData(filters?: any): void {
 
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad"].includes(this.cargo)) {
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         sAMAccountName: this.fullName,

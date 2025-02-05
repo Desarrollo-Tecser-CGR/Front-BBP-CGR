@@ -3,6 +3,8 @@ export const PERMISOSROLES = {
         registro  :  'registro',
         Validador:  'validador',
         Caracterizador:  'caracterizador',
-        jefeUnida:  'jefeUnidad'
+        jefeUnida:  'jefeUnidad',
+        evaluador:  'evaluador',
+        comiteTecnico: 'comiteTecnico'
     }
 };

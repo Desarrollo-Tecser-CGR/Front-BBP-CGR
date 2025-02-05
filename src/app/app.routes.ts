@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'evaluador'], module: '' }
             },
         ]
     },
@@ -148,7 +148,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'assessment', loadChildren: () =>
                 import('app/modules/assessment/assessment.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'evaluador'], module: '' }
             },
         ]
     },
@@ -209,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador'], module: '' }
             },
         ]
     },
@@ -282,7 +282,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'committee', loadChildren: () =>
                 import('app/modules/committee/committee.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
             },
         ]
     }

@@ -199,10 +199,10 @@ export class ResumenComponent implements OnInit {
             // Aplanar los datos
             const flattenedValues = this.flattenObject(formValues);
  
-            // Agregar el comentario (information adicional) aquí
+            // Comentario que se guarde en trasability
             flattenedValues.comentarioUsuario = this.additionalInfoFromModal || '';
 
-            // Transformar valores vacíos a null
+            // Transformar valores vacíos a null 
             Object.keys(flattenedValues).forEach((key) => {
                 if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
                     flattenedValues[key] = null;
@@ -217,18 +217,17 @@ export class ResumenComponent implements OnInit {
             if (this.isEdit && this.Id) {
                 // Verificar si el flujo está en "validación" y el rol es "validador"
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
-                    const nuevoEstadoFlujo = 'caracterizada'; // Estado actualizado
+                    const nuevoEstadoFlujo = 'caracterizada'; // Cambiar estado de flujo
                     flattenedValues.estadoFlujo = nuevoEstadoFlujo;
             
-                    // Usar la función para manejar la actualización
+                    // Funcionalidad para enviar datos adicionales (accesName)
                     this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
                     this.notificationService.sendNotification(this.Id, this.fullName, 2)
                     return; // Salir después de manejar el flujo
-
                 }
                 // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
                 if (currentRole === 'caracterizador') {
-                    flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
+                    flattenedValues.estadoFlujo = 'evaluacion'; // Cambiar estado de flujo
                     // console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
 
 
@@ -237,45 +236,75 @@ export class ResumenComponent implements OnInit {
                     const selectedUser = storedUser ? JSON.parse(storedUser) : null;
                     // Extraer solo el userName del primer usuario en la lista
                     const selectedUserName = selectedUser.length > 0 ? selectedUser[0].userName : 'error-sin-usuario';
+                    // Extraer el cargo del usuario validando si realmente existe
+                    let selectedUserCargo = '';
+                    if (selectedUser && Array.isArray(selectedUser) && selectedUser.length > 0) {
+                        const user = selectedUser[0];  // Tomar el primer usuario
+                        console.log('Usuario recuperado:', user);
 
-                    // console.log('Usuario recuperado de localStorage:', selectedUser);
-                    // console.log('UserName extraído:', selectedUserName);
-                    // console.log('Usuario recuperado de localStorage:', selectedUser);
-                     // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
-                     const patchData = {
-                        actualizaciones: {
-                            estadoFlujo: 'caracterizada_JU', // Actualizar estado de flujo
-                        },
-                        sAMAccountName: selectedUserName, // Usuario seleccionado desde el modal
-                        estadoFlujo: 'caracterizada_JU', // Estado de flujo actualizado
-                        comentarioUsuario: this.additionalInfoFromModal || '', // Información adicional desde el modal
-                    };
-
-                    // Llamar al servicio de actualización con PATCH
-                    this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
-                        (response) => {
-                            // Mostrar mensaje de éxito
-                            Swal.fire({
-                                title: '¡Actualización Exitosa!',
-                                text: 'El formulario ha sido actualizado.',
-                                icon: 'success',
-                                confirmButtonText: 'Aceptar',
-                            }).then(() => {
-                                window.location.href = './example'; // Redirigir después de la actualización
-                            });
-                        },
-                        (error) => {
-                            // En caso de error
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
-                                icon: 'error',
-                                confirmButtonText: 'Aceptar',
-                            });
+                        if (user.cargo) {
+                            selectedUserCargo = user.cargo.trim().toLowerCase(); // Extraer cargo
+                        } else {
+                            console.warn('El usuario no tiene un cargo asignado.');
                         }
-                    );
-                    console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
-                    this.notificationService.sendNotification(this.Id, this.fullName, 6);
+                    } else {
+                        console.warn('No se encontró un usuario válido en localStorage.');
+                    }
+
+                    console.log('Usuario recuperado de localStorage:', selectedUser);
+                    console.log('UserName extraído:', selectedUserName);
+                    console.log('Cargo extraído:', selectedUserCargo);
+
+                    // Determinar el estado de flujo basado en el cargo
+                    if (selectedUserCargo === 'evaluador') {
+                        console.log('Cambiando estado a evaluación');
+                        flattenedValues.estadoFlujo = 'evaluacion';
+                    } else if (selectedUserCargo === 'jefeunidad') {
+                        flattenedValues.estadoFlujo = 'caracterizada_JU';
+                    } else {
+                        flattenedValues.estadoFlujo = 'caracterizada_JU';
+                    }
+                
+                // Agrega logs de depuración
+                console.log('Estado de flujo final:', flattenedValues.estadoFlujo);
+
+
+                // Preparar datos para el PATCH
+                const patchData = {
+                    actualizaciones: { 
+                        estadoFlujo: flattenedValues.estadoFlujo 
+                    },
+                    sAMAccountName: selectedUserName,
+                    estadoFlujo: flattenedValues.estadoFlujo,
+                    comentarioUsuario: this.additionalInfoFromModal || '',
+                };
+                
+                // Llamar al servicio de actualización con PATCH
+                this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                    (response) => {
+                        Swal.fire({
+                            title: '¡Actualización Exitosa!',
+                            text: 'El formulario ha sido actualizado.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                        }).then(() => {
+                            window.location.href = './example';
+                        });
+                    },
+                    (error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar',
+                        });
+                    }
+                );
+                
+                // Enviar notificación
+                this.notificationService.sendNotification(this.Id, this.fullName, 6);
+                
+                console.log(`Estado de flujo actualizado: ${flattenedValues.estadoFlujo}`);
                     return;
                  
 
@@ -289,6 +318,8 @@ export class ResumenComponent implements OnInit {
                     console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
 
                 }
+
+                
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
                 this.resumenService
@@ -988,8 +1019,8 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
                     localStorage.removeItem('selectedUser'); // Limpiar si no hay usuario seleccionado
                 }
 
-                // console.log('Usuarios seleccionados:', this.selectedUsersFromModal); // Verifica que todos los usuarios estén aquí
-                // console.log('Información adicional:', this.additionalInfoFromModal);
+                 console.log('Usuarios seleccionados:', this.selectedUsersFromModal); // Verifica que todos los usuarios estén aquí
+                 console.log('Información adicional:', this.additionalInfoFromModal);
             } else {
             }
         });
