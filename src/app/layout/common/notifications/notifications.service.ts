@@ -105,6 +105,7 @@ export class NotificationsService {
         });
     }
     
+
     getNotificationByUser(userName: any): Observable<any[]>{
         return this._httpClient.get(`${this.apiUrl}/${userName}`).pipe(
             map((response:any)=>{
@@ -122,14 +123,31 @@ export class NotificationsService {
             map((response:any)=>{
 
                 const data = response.data;
+                const currentNotifications = this._notifications.getValue();
+                const updateNotifications = [...currentNotifications, ...data]
+                this._notifications.next(updateNotifications);
                 return data;
             }),
             catchError((e) => {
                 return throwError(e);
             })
         );
-    }
-    
+    };
+    getByType(typeId: number): Observable<any[]>{
+        return this._httpClient.get<Notification[]>(`${this.apiUrl}/byTypeId/${typeId}`).pipe(
+            map((response:any)=>{
+                const data = response.data;
+                const currentNotifications = this._notifications.getValue();
+                const updateNotifications = [...currentNotifications, ...data];
+                this._notifications.next(updateNotifications);
+                return data;
+            }),
+            catchError((e)=>{
+                return throwError(e);
+            })
+        );
+    };
+
 
     update(id: string): Observable<void> {
         const currentNotifications = this._notifications.getValue();
