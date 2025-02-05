@@ -5,6 +5,7 @@ export const PERMISOSROLES = {
         Caracterizador:  'caracterizador',
         jefeUnida:  'jefeUnidad',
         seguimiento: 'seguimiento',
-        evaluador: 'evaluador'
+        evaluador: 'evaluador',
+        comiteTecnico: 'comiteTecnico'
     }
 };

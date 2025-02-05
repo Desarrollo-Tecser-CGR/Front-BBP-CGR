@@ -148,7 +148,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'assessment', loadChildren: () =>
                 import('app/modules/assessment/assessment.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'evaluador'], module: '' }
             },
         ]
     },
@@ -279,9 +279,9 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'evaluation-questionnaire', loadChildren: () =>
-                import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
-                data: { requiredRoles: ['evaluador'], module: '' }
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
     }

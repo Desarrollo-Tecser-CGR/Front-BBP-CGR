@@ -40,7 +40,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:queue-list',
         link : '/assessment',
-        roles: ['administrador']
+        roles: ['administrador', 'evaluador']
     },
     {
         id   : 'follow',
@@ -81,7 +81,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:queue-list',
         link : '/committee',
-        roles: ['administrador']
+        roles: ['administrador', 'comiteTecnico']
     }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
