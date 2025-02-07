@@ -20,5 +20,6 @@ export class InboxService {
     setValidateStatus(requestBody: { rol: string; id: number }, accessName: string): Observable<any[]> {
         const apiUrlWithAccessName = `${this.apiUrlSetStatus}/${accessName}`;
         return this.http.post<any[]>(apiUrlWithAccessName, requestBody);
-    }    
+    }
+
 }

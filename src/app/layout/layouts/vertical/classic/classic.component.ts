@@ -20,6 +20,7 @@ import { ShortcutsComponent } from 'app/layout/common/shortcuts/shortcuts.compon
 import { UserComponent } from 'app/layout/common/user/user.component';
 import { Subject, takeUntil } from 'rxjs';
 import { ButtonMenuComponent } from 'app/layout/common/buttonMenu/buttonMenu.component';
+import { EvaluationQuestionnaireComponent } from "../../../common/evaluation-questionnaire/evaluation-questionnaire.component";
 
 @Component({
     selector: 'classic-layout',
@@ -28,21 +29,21 @@ import { ButtonMenuComponent } from 'app/layout/common/buttonMenu/buttonMenu.com
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [
-        FuseLoadingBarComponent,
-        FuseVerticalNavigationComponent,
-        MatButtonModule,
-        MatIconModule,
-        LanguagesComponent,
-        FuseFullscreenComponent,
-        SearchComponent,
-        ShortcutsComponent,
-        MessagesComponent,
-        NotificationsComponent,
-        UserComponent,
-        RouterOutlet,
-        ButtonMenuComponent,
-        // QuickChatComponent,
-    ],
+    FuseLoadingBarComponent,
+    FuseVerticalNavigationComponent,
+    MatButtonModule,
+    MatIconModule,
+    LanguagesComponent,
+    FuseFullscreenComponent,
+    SearchComponent,
+    ShortcutsComponent,
+    MessagesComponent,
+    NotificationsComponent,
+    UserComponent,
+    RouterOutlet,
+    ButtonMenuComponent,
+    EvaluationQuestionnaireComponent
+],
 })
 export class ClassicLayoutComponent implements OnInit, OnDestroy {
     isScreenSmall: boolean;
@@ -103,10 +104,6 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
-
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * Toggle navigation

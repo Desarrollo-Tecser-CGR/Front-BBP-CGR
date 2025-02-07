@@ -20,7 +20,7 @@ export class ResumenService {
     private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
 
     // Propiedades para almacenar datos compartidos
-    private typesData: { [key: string]: any[] } = {};
+    private typesData: { [key: string]: any[] } = {}; 
     public typeStrategyIdentifications: any[] = [];
     public isDataLoaded: BehaviorSubject<boolean> =
         new BehaviorSubject<boolean>(false);
@@ -30,8 +30,7 @@ export class ResumenService {
 
     sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; // Concatenar el nombre al endpoint
-
+        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; 
         return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
             map((response: any) => {
 

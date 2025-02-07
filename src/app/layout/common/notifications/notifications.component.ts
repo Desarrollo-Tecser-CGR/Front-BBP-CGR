@@ -107,11 +107,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                     this._changeDetectorRef.markForCheck();
                 },
                 (error)=>{
-
-                    console.error('Error al obtener las notificaciones:',error)
                 }
-            )
-        }
+            );
+        };
     }
  
     /**

@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'evaluador'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador'], module: '' }
             },
         ]
     },
@@ -209,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento'], module: '' }
             },
         ]
     },
@@ -255,7 +255,6 @@ export const appRoutes: Route[] = [
             },
         ]
     },
-
     {
         path: '',
         canActivate: [AuthGuard],
@@ -282,7 +281,22 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'committee', loadChildren: () =>
                 import('app/modules/committee/committee.routes'),
-                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
+                data: { requiredRoles: ['administrador'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'diffusion', loadChildren: () =>
+                import('app/modules/diffusion/diffusion.routes'),
+                data: { requiredRoles: ['seguimiento'], module: '' }
             },
         ]
     },
