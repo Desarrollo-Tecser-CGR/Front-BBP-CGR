@@ -8,8 +8,8 @@
     <h1 class="">Criterios de evaluación de la buena práctica.</h1>
     <div class="max-w-3x">
       <div class="progress-indicator mb-4">
-        <div *ngFor="let question of allQuestions; let i = index" class="progress-step" [class.active]="i === currentQuestionIndex" [class.answered]="answeredQuestions[question.id]" (click)="goToQuestion(i)">
-          {{ i + 1 }}
+        <div *ngFor="let question of allQuestions; let i = index" class="progress-step" [class.active]="i === currentQuestionIndex" [class.answered]="answeredQuestions[question.id]"(click)="goToQuestion(i)">
+            {{ i + 1 }}
         </div>
       </div>
       <div *ngIf="currentGroup.length > 0">
@@ -23,21 +23,40 @@
               </svg>
             </button>  
           </div>
-          <h3>{{ question.question }}</h3>
-          <div *ngFor="let option of question.options" class="">
-            <label>
-              <input type="radio" [name]="'question' + question.id" [value]="option.option" [checked]="answeredQuestions[question.id] === option.option" (change)="onAnswerChange(question.id, option.option)">
-              {{ option.option }}
+          <h3>{{ question.questions.enunciado }}</h3>
+          <div *ngFor="let option of question.questions.answers" class="mb-2">
+            <label class="flex items-center space-x-2">
+              <input type="radio" 
+                     [name]="'question' + question.questions.id" 
+                     [value]="option.respuesta" 
+                     [checked]="answeredQuestions[question.questions.id] === option.respuesta" 
+                     (change)="onAnswerChange(question.questions.id, option.respuesta)">
+              {{ option.respuesta }}
             </label>
-          </div>
+          </div>          
           <div *ngIf="question.comment">
             <textarea placeholder="Escribe un comentario..."></textarea>
           </div>
         </div>
         <div class="navigation flex items-center justify-center">
-          <button class="p-3 bg-red-500 rounded-xl text-white w-22" (click)="previousGroup()" [disabled]="currentGroupIndex === 0">Volver</button>
-          <button class="p-3 bg-blue-600 rounded-xl text-white w-22" (click)="nextGroup()">Siguiente</button>
-        </div>
+          <div>
+            <button class="p-3 bg-red-500 rounded-xl text-white w-22" (click)="previousGroup()" [disabled]="currentGroupIndex === 0">Volver</button>
+            <button class="p-3 bg-blue-600 rounded-xl text-white w-22" (click)="nextGroup()">Siguiente</button>
+          </div>
+          <div>
+            <button [disabled]="!todasRespondidas"
+              [ngClass]="{
+                'bg-gray-400 cursor-not-allowed': !todasRespondidas,
+                'bg-blue-500 hover:bg-blue-600 cursor-pointer': todasRespondidas
+              }"
+              class="text-white p-3 w-36 rounded-xl transition duration-300 ease-in-out"
+              [title]="!todasRespondidas ? 'Debes responder todas las preguntas antes de enviar' : ''"
+              (click)="enviarFormulario()"
+              >
+              Enviar Evaluación
+            </button>
+          </div>
+        </div>   
       </div>
       <div *ngIf="currentGroup.length === 0">
         <p>No hay más preguntas.</p>

@@ -46,7 +46,13 @@ export class QuestionnaireService{
         {id:29, comment:false, question:'¿Las alianzas externas contribuyeron con recursos (financieros, técnicos, humanos) para la implementación de la práctica?',options:[{option:'Si'},{option:'No'}]},
         {id:30, comment:true, question:'¿La práctica resultó en una mayor cooperación entre diferentes niveles de gobierno (local, regional, nacional)?',options:[{option:'Si'},{option:'No'}]},
     ]
-    constructor(){}
+    
+    private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/admin/form`;
+    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question/static`;
+    private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
+    private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
+
+    constructor(private http:HttpClient){}
     
     getQuestionsGroups(groupSize:number = 2) : Observable<any[]>{
         const result = [];
@@ -54,5 +60,22 @@ export class QuestionnaireService{
             result.push(this.data.slice(i, i + groupSize));
         }
         return of(result);
-        }
     }
+
+    getQuestion():Observable<any>{
+        const url = `${this.apiUrlGet}`
+        return this.http.get<any>(url)
+    }
+
+    enviarCuestionario(fullName:string, roleFormId:number, enabled:number, idQuestions:any, idAnswers:any):Observable<any>{
+        const url = `${this.apiUrl}`
+        const params = {
+            fullName: fullName,
+            roleFormId: roleFormId,
+            enabled: enabled,
+            idQuestions: idQuestions,
+            idAnswers:idAnswers
+        }
+        return this.http.post<any>(url, {params})
+    }
+}
