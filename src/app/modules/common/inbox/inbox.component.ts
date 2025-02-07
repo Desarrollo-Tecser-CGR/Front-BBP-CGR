@@ -54,6 +54,18 @@ export class InboxComponent implements OnInit {
     console.log ('este es el nombre que trae', this.fullName)
 
     // Definir botones dinámicamente según el rol
+   
+    // Definir botones dinámicamente según el rol
+    if (this.cargo === 'comiteTecnico') {
+      this.buttons = [
+        {
+          icon: 'feather:check-square',
+          color: 'primary', 
+          action: (row: any) => this.openCommittee(row), 
+        },
+      ]
+  } 
+  else{
     this.buttons = [
       {
         icon: 'heroicons_outline:pencil-square',
@@ -61,6 +73,7 @@ export class InboxComponent implements OnInit {
         action: (row: any) => this.editRow(row),
       },
     ];
+  }
   
     // Agregar el botón de validación solo para validador y administrador
     if (['validador', 'administrador'].includes(this.cargo)) {
@@ -81,7 +94,7 @@ export class InboxComponent implements OnInit {
 
   loadData(filters?: any): void {
 
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador'].includes(this.cargo)) {
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'comiteTecnico'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         sAMAccountName: this.fullName,
@@ -178,6 +191,14 @@ export class InboxComponent implements OnInit {
         }
     );
 }
+
+  openCommittee(row: any): void {
+    if (row && row.id) {
+      this.router.navigate(['/committee', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
+    }
+  }
 
   pageLoad(): void {
     window.location.reload()

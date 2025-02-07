@@ -55,6 +55,8 @@ export class ResumenService {
     updateDataAsJson(id: number, formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         const url = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity/${id}`;
+        console.log('ID a actualizar:', id);
+        console.log('Datos a enviar:', formData);
         return this.http.patch(url, formData, { headers, responseType: 'text' as 'json' }); // Cambiar responseType a 'text'
     }
     

@@ -209,7 +209,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico'], module: '' }
             },
         ]
     },
@@ -285,5 +285,20 @@ export const appRoutes: Route[] = [
                 data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
             },
         ]
-    }
+    },
+    // {
+    //     path: '',
+    //     canActivate: [AuthGuard],
+    //     canActivateChild: [AuthGuard],
+    //     component: LayoutComponent,
+    //     resolve: {
+    //         initialData: initialDataResolver
+    //     },
+    //     children: [
+    //         {path: 'committee', loadChildren: () =>
+    //             import('app/modules/committee/committee.routes'),
+    //             data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
+    //         },
+    //     ]
+    // }
 ];

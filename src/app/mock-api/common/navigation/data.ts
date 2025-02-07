@@ -64,7 +64,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador']
+        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico']
     },
     {
         id   : 'create',
@@ -75,14 +75,6 @@ export const defaultNavigation: FuseNavigationItem[] = [
         roles: ['administrador']
 
     },
-    {
-        id   : 'committee',
-        title: 'Comite',
-        type : 'basic',
-        icon : 'heroicons_outline:queue-list',
-        link : '/committee',
-        roles: ['administrador', 'comiteTecnico']
-    }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {

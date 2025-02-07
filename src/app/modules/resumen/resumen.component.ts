@@ -25,6 +25,7 @@ import { GenericTableComponent } from '../common/generic-table/generic-table.com
 import { DataServices } from '../resumen-edit/resumen-edit.service';
 import { Router } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
+import { forkJoin } from 'rxjs';
 
 // Definición de rutas
 const routes: Routes = [
@@ -56,7 +57,7 @@ const routes: Routes = [
         RouterModule,
         MatIconModule,
         MatMenuModule,
-        RouterModule, 
+        RouterModule,
         DialogOverviewExampleDialog,
         GenericTableComponent,
         MatAutocompleteModule,
@@ -75,7 +76,7 @@ export class ResumenComponent implements OnInit {
     isModalOpen: boolean = false;
     buttonText: string = 'Acción';
     // cargo: string;
-    cargo: string = ''; 
+    cargo: string = '';
     isCaracterizationComplete: boolean = false;
     selectedUserFromModal: any = null;
     isDisabled: boolean = true;
@@ -96,12 +97,12 @@ export class ResumenComponent implements OnInit {
     typePerformanceOptions: any[] = [];
     additionalInfoFromModal: string = '';
     entidades: any[] = [];
-    filteredEntities$: Observable<any[]>; 
+    filteredEntities$: Observable<any[]>;
     selectedUsersFromModal: any[] = [];
 
     @Input() Id: number;
     @Input() isEdit: boolean = false;
-    
+
     data: any[] = [];
     columns: { key: string; label: string }[] = [];
     buttons = [
@@ -118,7 +119,7 @@ export class ResumenComponent implements OnInit {
     ]
     showButton: boolean;
     fullName: string = '';
-    
+
     constructor(private _formBuilder: UntypedFormBuilder,
         private resumenService: ResumenService, private dialog: MatDialog,
         private dataService: DataServices, private router: Router,
@@ -162,7 +163,7 @@ export class ResumenComponent implements OnInit {
 
         this.notificationService.sendNotification(resumeId, fullName, 1);
         console.log(mensaje);
-    
+
     }
 
     submitForm(): void {
@@ -198,128 +199,253 @@ export class ResumenComponent implements OnInit {
 
             // Aplanar los datos
             const flattenedValues = this.flattenObject(formValues);
- 
+
             // Comentario que se guarde en trasability
             flattenedValues.comentarioUsuario = this.additionalInfoFromModal || '';
 
-            // Transformar valores vacíos a null 
+            // Transformar valores vacíos a null
             Object.keys(flattenedValues).forEach((key) => {
                 if (flattenedValues[key] === '' || flattenedValues[key] === undefined) {
                     flattenedValues[key] = null;
                 }
-            });            
-            
+            });
+
             // Verificar el rol
             const roles = localStorage.getItem('accessRoles');
             const currentRole = roles ? JSON.parse(roles)[0].toLowerCase(): 'registro'; // Obtener el rol actual
 
             // Lógica para decidir si se crea o se actualiza
             if (this.isEdit && this.Id) {
+
+
+
+
                 // Verificar si el flujo está en "validación" y el rol es "validador"
                 if (flattenedValues.estadoFlujo === 'validacion' && currentRole === 'validador') {
                     const nuevoEstadoFlujo = 'caracterizada'; // Cambiar estado de flujo
                     flattenedValues.estadoFlujo = nuevoEstadoFlujo;
-            
+
                     // Funcionalidad para enviar datos adicionales (accesName)
                     this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
                     this.notificationService.sendNotification(this.Id, this.fullName, 2)
                     return; // Salir después de manejar el flujo
                 }
-                // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
-                if (currentRole === 'caracterizador') {
-                    flattenedValues.estadoFlujo = 'evaluacion'; // Cambiar estado de flujo
-                    // console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
 
 
-                    // Obtener usuario guardado en localStorage (si existe)
-                    const storedUser = localStorage.getItem('selectedUser');
-                    const selectedUser = storedUser ? JSON.parse(storedUser) : null;
-                    // Extraer solo el userName del primer usuario en la lista
-                    const selectedUserName = selectedUser.length > 0 ? selectedUser[0].userName : 'error-sin-usuario';
-                    // Extraer el cargo del usuario validando si realmente existe
-                    let selectedUserCargo = '';
-                    if (selectedUser && Array.isArray(selectedUser) && selectedUser.length > 0) {
-                        const user = selectedUser[0];  // Tomar el primer usuario
-                        console.log('Usuario recuperado:', user);
-
-                        if (user.cargo) {
-                            selectedUserCargo = user.cargo.trim().toLowerCase(); // Extraer cargo
-                        } else {
-                            console.warn('El usuario no tiene un cargo asignado.');
-                        }
-                    } else {
-                        console.warn('No se encontró un usuario válido en localStorage.');
-                    }
-
-                    console.log('Usuario recuperado de localStorage:', selectedUser);
-                    console.log('UserName extraído:', selectedUserName);
-                    console.log('Cargo extraído:', selectedUserCargo);
-
-                    // Determinar el estado de flujo basado en el cargo
-                    if (selectedUserCargo === 'evaluador') {
-                        console.log('Cambiando estado a evaluación');
-                        flattenedValues.estadoFlujo = 'evaluacion';
-                    } else if (selectedUserCargo === 'jefeunidad') {
-                        flattenedValues.estadoFlujo = 'caracterizada_JU';
-                    } else {
-                        flattenedValues.estadoFlujo = 'caracterizada_JU';
-                    }
-                
-                // Agrega logs de depuración
-                console.log('Estado de flujo final:', flattenedValues.estadoFlujo);
 
 
-                // Preparar datos para el PATCH
-                const patchData = {
-                    actualizaciones: { 
-                        estadoFlujo: flattenedValues.estadoFlujo 
-                    },
-                    sAMAccountName: selectedUserName,
-                    estadoFlujo: flattenedValues.estadoFlujo,
-                    comentarioUsuario: this.additionalInfoFromModal || '',
-                };
-                
-                // Llamar al servicio de actualización con PATCH
-                this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
-                    (response) => {
-                        Swal.fire({
-                            title: '¡Actualización Exitosa!',
-                            text: 'El formulario ha sido actualizado.',
-                            icon: 'success',
-                            confirmButtonText: 'Aceptar',
-                        }).then(() => {
-                            window.location.href = './example';
-                        });
-                    },
-                    (error) => {
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
-                            icon: 'error',
-                            confirmButtonText: 'Aceptar',
-                        });
-                    }
-                );
-                
-                // Enviar notificación
-                this.notificationService.sendNotification(this.Id, this.fullName, 6);
-                
-                console.log(`Estado de flujo actualizado: ${flattenedValues.estadoFlujo}`);
+               // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
+               if (currentRole === 'caracterizador') {
+                // Obtener usuarios guardados en localStorage (pueden ser múltiples evaluadores)
+                const storedUser = localStorage.getItem('selectedUser');
+                const selectedUsers = storedUser ? JSON.parse(storedUser) : null;
+
+                if (!selectedUsers || !Array.isArray(selectedUsers) || selectedUsers.length === 0) {
+                    console.warn(' No se encontraron usuarios seleccionados.');
                     return;
-                 
-
-
                 }
+
+                // Determinar si hay evaluadores o jefes de unidad
+                const evaluadores = selectedUsers.filter(user => user.cargo && user.cargo.trim().toLowerCase() === 'evaluador');
+                const jefesUnidad = selectedUsers.filter(user => user.cargo && user.cargo.trim().toLowerCase() === 'jefeunidad');
+
+                console.log(' Evaluadores seleccionados:', evaluadores);
+                console.log(' Jefe de Unidad seleccionado:', jefesUnidad);
+
+                if (evaluadores.length > 0) {
+                    console.log('Cambiando estado a evaluación');
+                    flattenedValues.estadoFlujo = 'evaluacion';
+
+                    // Preparar y enviar el PATCH para cada evaluador
+                    const patchRequests = evaluadores.map(evaluador => {
+                        const patchData = {
+                            actualizaciones: {
+                                estadoFlujo: 'evaluacion'
+                            },
+                            sAMAccountName: evaluador.userName,
+                            estadoFlujo: 'evaluacion',
+                            comentarioUsuario: this.additionalInfoFromModal || '',
+                        };
+
+                        console.log(' Enviando actualización para evaluador:', evaluador.userName);
+                        return this.resumenService.updateDataAsJson(this.Id, patchData);
+                    });
+
+                    // Enviar todas las solicitudes en paralelo con forkJoin
+                    forkJoin(patchRequests).subscribe(
+                        (responses) => {
+                            Swal.fire({
+                                title: '¡Actualización Exitosa!',
+                                text: 'El formulario ha sido asignado a los evaluadores.',
+                                icon: 'success',
+                                confirmButtonText: 'Aceptar',
+                            }).then(() => {
+                                window.location.href = './example';
+                            });
+                        },
+                        (error) => {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo asignar la práctica a los evaluadores.',
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar',
+                            });
+                        }
+                    );
+
+                    // Enviar notificación a cada evaluador
+                    evaluadores.forEach(evaluador => {
+                        this.notificationService.sendNotification(this.Id, evaluador.userName, 6);
+                    });
+
+                    } else if (jefesUnidad.length > 0) {
+                        console.log('Cambiando estado a caracterizada_JU');
+                        flattenedValues.estadoFlujo = 'caracterizada_JU';
+
+                        // Si hay jefeUnidad, solo se envía una vez
+                        const jefe = jefesUnidad[0]; // Tomamos solo el primero
+
+                        // Obtenemos todos los valores del formulario
+                        const formValues = this.horizontalStepperForm.getRawValue();
+
+                        // Creamos el objeto de datos a enviar
+                        const patchData = {
+                        actualizaciones: {
+                            entityCgr: formValues.step1.entityCgr || null,
+                            nombreDependenciaArea: formValues.step1.nombreDependenciaArea || null,
+                            nombre: formValues.step2.nombre || '',
+                            cargo: formValues.step2.cargo || '',
+                            correo: formValues.step2.correo || '',
+                            contacto: formValues.step2.contacto || '',
+                            typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
+                            typePractice: formValues.step3.typePractice || null,
+                            typology: formValues.step3.typology || null,
+                            estadoFlujo: 'caracterizada_JU',  // Este se mantiene estático como 'caracterizada'
+                            levelGoodPractice: formValues.step3.levelGoodPractice || null,
+                            nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
+                            propositoPractica: formValues.step3.propositoPractica || '',
+                            objectiveMainPractice: formValues.step3.objectiveMainPractice || null,
+                            expectedImpact: formValues.step4.expectedImpact || [],  // Puede ser un array vacío si no hay valor
+                            metodologiaUsada: formValues.step4.metodologiaUsada || '',
+                            durationImplementation: formValues.step4.durationImplementation || null,
+                            stagesMethodology: formValues.step4.stagesMethodology || [],
+                            periodoDesarrolloInicio: formValues.step4.periodoDesarrolloInicio || '',
+                            periodoDesarrolloFin: formValues.step4.periodoDesarrolloFin || '',
+                            typeMaterialProduced: formValues.step5.typeMaterialProduced || [],
+                            supportReceived: formValues.step5.supportReceived || [],
+                            recognitionsNationalInternational: formValues.step5.recognitionsNationalInternational || null,
+                            controlObject: formValues.step5.controlObject || null,
+                            taxonomyEvent: formValues.step5.taxonomyEvent || [],
+                            typePerformance: formValues.step5.typePerformance || null,
+                            documentoActuacion: formValues.step6.documentoActuacion || '',
+                            descripcionResultados: formValues.step5.descripcionResultados || ''
+                        },
+                        sAMAccountName: jefe.userName,  // Mantener el usuario seleccionado
+                        estadoFlujo: 'caracterizada_JU',  // Este es el valor estático que debe enviarse
+                        comentarioUsuario: this.additionalInfoFromModal || '',  // Mantener el comentario
+                        };
+
+                        console.log(patchData);
+                        //     actualizaciones: {
+                        //         ...this.horizontalStepperForm.getRawValue(), // Enviar todos los datos del formulario
+                        //         // estadoFlujo: 'caracterizada_JU' // Sobreescribir el estado de flujo
+                        //     },
+                        //     sAMAccountName: jefe.userName, // Mantener el usuario seleccionado
+                        //     estadoFlujo: 'caracterizada_JU', // Mantener el estado también fuera de `actualizaciones`
+                        //     comentarioUsuario: this.additionalInfoFromModal || '', // Mantener el comentario
+                        // };
+                        console.log(" Datos a enviar:", JSON.stringify(patchData, null, 2));
+
+                        console.log('Enviando actualización para Jefe de Unidad:', jefe.userName);
+
+                        this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                            (response) => {
+                                Swal.fire({
+                                    title: '¡Actualización Exitosa!',
+                                    text: 'El formulario ha sido asignado al Jefe de Unidad.',
+                                    icon: 'success',
+                                    confirmButtonText: 'Aceptar',
+                                }).then(() => {
+                                    window.location.href = './example';
+                                });
+                            },
+                            (error) => {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'No se pudo asignar la práctica al Jefe de Unidad.',
+                                    icon: 'error',
+                                    confirmButtonText: 'Aceptar',
+                                });
+                            }
+                        );
+
+                        // Enviar notificación al Jefe de Unidad
+                        this.notificationService.sendNotification(this.Id, jefe.userName, 6);
+                    }
+
+                    console.log(`Estado de flujo actualizado: ${flattenedValues.estadoFlujo}`);
+                    return;
+                }
+
+
+
+
+            //    if (currentRole === 'caracterizador') {
+            //         flattenedValues.estadoFlujo = 'caracterizada_JU'; // Cambiar estado de flujo directamente
+            //         console.log('Estado de flujo actualizado para caracterizador (cambiado a caracterizada_JU):', flattenedValues.estadoFlujo);
+            //     }
+
+
                 // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
-                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
-                    flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+                // if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                //     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
+                //     console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+                //     // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
+                //     const patchData = {
+                //         actualizaciones: {
+                //             estadoFlujo: 'caracterizada_JU', // Actualizar estado de flujo
+                //         },
+                //         sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario seleccionado desde el modal
+                //         estadoFlujo: 'caracterizada_JU', // Estado de flujo actualizado
+                //         comentarioUsuario: this.additionalInfoFromModal || '', // Información adicional desde el modal
+                //     };
+                //     // Llamar al servicio de actualización con PATCH
+                //     this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                //         (response) => {
+                //             console.log('Respuesta del servidor:', response);
+                //             // Mostrar mensaje de éxito
+                //             Swal.fire({
+                //                 title: '¡Actualización Exitosa!',
+                //                 text: 'El formulario ha sido actualizado.',
+                //                 icon: 'success',
+                //                 confirmButtonText: 'Aceptar',
+                //             }).then(() => {
+                //                 window.location.href = './example'; // Redirigir después de la actualización
+                //             });
+                //         },
+                //         (error) => {
+                //             // En caso de error
+                //             Swal.fire({
+                //                 title: 'Error',
+                //                 text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
+                //                 icon: 'error',
+                //                 confirmButtonText: 'Aceptar',
+                //             });
+                //         }
+                //     );
+                //     return;
 
-                    this.notificationService.sendNotification(this.Id, this.fullName, 6)
-                    console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
+                // }
+                // Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
+                // if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                //     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
 
-                }
+                //     this.notificationService.sendNotification(this.Id, this.fullName, 6)
+                //     console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
 
-                
+                // }
+
+
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
                 this.resumenService
@@ -347,13 +473,13 @@ export class ResumenComponent implements OnInit {
             } else {
                 // Verificar y actualizar el estadoFlujo antes de crear los datos
                 if (flattenedValues.estadoFlujo === 'candidata') {
-                    flattenedValues.estadoFlujo = 'candidata'; 
+                    flattenedValues.estadoFlujo = 'candidata';
                 }
                 // Verificar si el rol es caracterizador y cambiar el estado de flujo a caracterizada_JU
 
                  // Obtener el nombre del usuario desde el localStorage
                  const sAMAccountName = localStorage.getItem('accessName') || 'defaultUser';
- 
+
                  // Llamar al servicio de creación
                  this.resumenService.sendFormDataAsJson(flattenedValues, sAMAccountName).subscribe(
                      (response) => {
@@ -395,7 +521,7 @@ export class ResumenComponent implements OnInit {
                 this.data = response;
             },
             (e) =>{
-            } 
+            }
         )
 
         // Logica de agregar campos seleccionables
@@ -427,7 +553,7 @@ export class ResumenComponent implements OnInit {
                 fechaDiligenciamiento: [{ value: '', disabled: this.cargo === 'validador' }],
                 entityCgr: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
                 nombreDependenciaArea: [{ value: '', disabled: this.cargo === 'validador' }, Validators.required],
-            }),  
+            }),
             step2: this._formBuilder.group({
                 nombre: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
                 cargo: [{ value: '', disabled: this.cargo === 'validador' }, [Validators.required, Validators.maxLength(50)]],
@@ -519,7 +645,7 @@ export class ResumenComponent implements OnInit {
 
                     const stagesMethodologyIds = response.stagesMethodology
                     ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
-                    : [];    
+                    : [];
 
                     const typeMaterialProducedIds = response.typeMaterialProduced
                     ? response.expectedImpact.map((item: any) => item.id) // Extraer solo los IDs
@@ -611,7 +737,7 @@ export class ResumenComponent implements OnInit {
     onEntitySelected(entity: any): void {
         const entityCgrControl = this.horizontalStepperForm.get('step1.entityCgr');
         if (entityCgrControl) {
-            entityCgrControl.setValue(entity.name); 
+            entityCgrControl.setValue(entity.name);
         }
     }
 
@@ -700,10 +826,10 @@ export class ResumenComponent implements OnInit {
     onDateChange(event: any, stepName: string, controlName: string): void {
         const date = event.value;
         const formattedDate = this.formatDate(date);
-    
+
         const control = this.horizontalStepperForm.get(`${stepName}.${controlName}`);
         control?.setValue(formattedDate);
-    
+
         // Validación específica para las fechas de inicio y fin
         if (controlName === 'periodoDesarrolloInicio' || controlName === 'periodoDesarrolloFin') {
             this.validateFechas();
@@ -717,7 +843,7 @@ export class ResumenComponent implements OnInit {
         return `${year}-${month}-${day}`;
     }
 
-    // aplanar datos a json / listas array 
+    // aplanar datos a json / listas array
     flattenObject(input: any): any {
         const output = {};
         const multiselectFields = [
@@ -812,17 +938,17 @@ export class ResumenComponent implements OnInit {
         const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
         return excludedControls.includes(controlName);
     }
-    
+
     calculateProgress(): number {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
         let filledControls = 0;
-    
+
         formGroups.forEach((step) => {
             const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
             if (group) {
                 const controls = group.controls;
-    
+
                  Object.entries(controls).forEach(([controlName, control]) => {
                 // Excluir controles específicos
                 if (this.shouldExcludeControl(controlName)) {
@@ -843,17 +969,17 @@ export class ResumenComponent implements OnInit {
                 });
             }
         });
-    
+
         // Evitar dividir por cero
         if (totalControls === 0) {
             return 0;
         }
-    
+
         // Calcular progreso
         const progressValue = Math.round((filledControls / totalControls) * 100);
         return progressValue;
     }
-    
+
     get progressColor(): string {
         if (this.progress <= 30) {
             return 'red'; // 0% - 30%: Rojo
@@ -863,7 +989,7 @@ export class ResumenComponent implements OnInit {
             return 'green'; // 63% - 100%: Verde
         }
     }
-    
+
     /**
      * Verifica si el rol actual es "validador".
      */
@@ -976,7 +1102,7 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
                     icon: 'success',
                     confirmButtonText: 'Aceptar',
                 }).then(() => {
-                    window.location.reload(); 
+                    window.location.reload();
                 });
             },
             (error) => {
@@ -994,17 +1120,17 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
     openCaracterizationModal(): void {
         const roles = localStorage.getItem('accessRoles');
         const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
-        
+
         const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
             width: '500px',
-            data: { 
+            data: {
                 role: currentRole,
                 selectedUser: this.selectedUserFromModal, // Pasar usuario seleccionado (para selección única)
                 selectedUsers: this.selectedUsersFromModal, // Pasar usuarios seleccionados (para selección múltiple)
                 additionalInfo: this.additionalInfoFromModal // Pasar información adicional
             },
         });
-        
+
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 // Guardar los datos seleccionados al cerrar el modal
@@ -1029,7 +1155,7 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
     canProceed(): boolean {
         const roles = localStorage.getItem('accessRoles');
         const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
-    
+
         if (currentRole === 'validador') {
             // Para "validador", verificar si hay un usuario seleccionado (selección única)
             return !!this.selectedUserFromModal; // Asegura que selectedUserFromModal no sea null o undefined
@@ -1037,7 +1163,7 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
             // Para "caracterizador", verificar si hay usuarios seleccionados (selección múltiple)
             return this.selectedUsersFromModal && this.selectedUsersFromModal.length > 0;
         }
-    
+
         // Para otros roles, permite avanzar sin restricciones
         return true;
     }
