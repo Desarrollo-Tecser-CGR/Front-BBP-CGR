@@ -40,6 +40,7 @@ export class AuditComponent {
   @Input () Id:number;
   identityId : number;
   groups: any[] = [];
+  indicators:any[]=[];
   constructor(
     private resumenService:ResumenService,
     private auditService: AuditService
@@ -112,9 +113,25 @@ export class AuditComponent {
           confirmButtonText: 'Aceptar',
         })
       }
-    );      console.log('Grupos:', this.groups)
+    );      
+    console.log('Grupos:', this.groups)
       // llamar las auditorias por la hoja de vida
-
+      if (this.Id) {
+        this.auditService.getAuditsByResume(this.Id).subscribe(
+          (response) => {
+            this.auditorias = response || [];
+            this.displayedColumns = ['id', 'auditCode', 'startDate', 'endDate', 'groupId', 'state']; // Agregados los nuevos campos
+          },
+          (error) => {
+            Swal.fire({
+              title: 'Error',
+              text: 'Error al obtener auditorías.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar',
+            });
+          }
+        );
+      }
     }
 
 }

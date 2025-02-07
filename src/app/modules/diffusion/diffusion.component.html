@@ -1,14 +1,14 @@
 <div class="w-full">
     <mat-tab-group>
         <mat-tab label="Buena Practica">
-            <div>
+            <div class="h-80 overflow-y-auto border border-gray-300 rounded-lg p-2 mat-elevation-z6">
                 <app-resume-table [Id]="id"></app-resume-table>
             </div>
-            <div>
+            <div class="my-4">
                 <mat-divider></mat-divider>
                 <h1 class="divider-text">Programar Auditoria</h1>
             </div>
-            <div>
+            <div class="p-4 bg-white rounded-lg mat-elevation-z4">
                 <app-email-audit></app-email-audit>
             </div>
         </mat-tab>
