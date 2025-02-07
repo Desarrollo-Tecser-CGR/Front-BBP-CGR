@@ -284,5 +284,20 @@ export const appRoutes: Route[] = [
                 data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'diffusion', loadChildren: () =>
+                import('app/modules/diffusion/diffusion.routes'),
+                data: { requiredRoles: ['seguimiento'], module: '' }
+            },
+        ]
     }
 ];

@@ -1,1 +1,19 @@
-<p>diffusion works!</p>
+<div class="w-full">
+    <mat-tab-group>
+        <mat-tab label="Buena Practica">
+            <div>
+                <app-resume-table [Id]="id"></app-resume-table>
+            </div>
+            <div>
+                <mat-divider></mat-divider>
+                <h1 class="divider-text">Programar Auditoria</h1>
+            </div>
+            <div>
+                <app-email-audit></app-email-audit>
+            </div>
+        </mat-tab>
+        <mat-tab label="Auditoria"> 
+            <app-audit [Id]="id"></app-audit>
+        </mat-tab>
+    </mat-tab-group>    
+</div>

@@ -1,0 +1,68 @@
+<!-- barra -->
+ <div>
+    <div class="grid grid-cols-2 gap-2 min-w-0">
+        <div class="flex flex-col items-start p-4 bg-white shadow-md rounded-lg">
+            <h1 class="text-xl font-semibold text-gray-800 mb-2">Grupos</h1>
+            <mat-divider class="w-full mb-4 "></mat-divider>
+            <ng-container *ngFor="let group of groups">
+                <mat-checkbox [checked]>
+                    {{group.name}}
+                </mat-checkbox>
+            </ng-container>
+        </div>
+        <div class="flex flex-col items-center p-4 bg-white shadow-md rounded-lg">
+            <h1 class="text-xl font-semibold text-gray-800 mb-2">Progreso</h1>
+            <mat-progress-spinner
+                class="example-margin"
+                [color]="'primary'"
+                [mode]="'determinate'"
+                [strokeWidth]="10"
+                [value]="100">
+            </mat-progress-spinner>
+            <p>Indicadores de progreso</p>
+            <ng-container>
+                <mat-checkbox>
+
+                </mat-checkbox>
+            </ng-container>
+        </div>
+    </div>
+    
+ </div>
+ <!-- tabla de auditorias -->
+  <div class="p-4">
+    <h1>Auditorias</h1>
+    <table mat-table [dataSource]="auditorias" class="w-full">
+        <ng-continer matColumnDef="id">
+            <th>Id</th>
+            <td>3</td>
+        </ng-continer>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+  
+<!-- submit archivos---->
+<div class="file-upload-container">
+    <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+        <i class="upload-icon">☁️</i>
+        <button type="button" (click)="fileInput.click()">Escoger archivos</button>
+        <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
+            accept=".jpeg,.png,.csv,.pdf" multiple />
+        <p>Escoja sus archivos o arrastre y suelte aquí</p>
+        <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
+    </div>
+    <!-- Lista de archivos seleccionados -->
+    <div *ngIf="selectedFiles.length > 0" class="file-info">
+        <p><strong>Archivos seleccionados:</strong></p>
+        <ul>
+            <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
+                number: '1.0-2' }} KB)</li>
+        </ul>
+    </div>
+    <!-- Botón Enviar Documento -->
+    <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
+        (click)="submitDocumentoActuacion(identityId)">
+        Carga de archivos
+    </button>
+</div>

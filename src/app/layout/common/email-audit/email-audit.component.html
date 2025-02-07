@@ -1,0 +1,81 @@
+<div>
+        <mat-card class="p-4">
+            <div class="flex flex-col gap-4">
+                  <mat-form-field appearance="outline">
+                      <mat-label>Asunto</mat-label>
+                      <input matInput type="text" placeholder="Ingrese el asunto" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                      <mat-label>Remitente</mat-label>
+                        <mat-chip-listbox (change)="getSelectedUsers" class="mt-4">
+                          <mat-chip *ngFor="let user of selectUsers">
+                            {{user.email}}
+                          </mat-chip>
+                          <input matInput type="email" placeholder="Ingrese el remitente" />
+                        </mat-chip-listbox>
+                  </mat-form-field>
+                  <div class="grid grid-cols-2">
+                    <div>
+                      <mat-form-field appearance="fill" class="w-full">
+                        <mat-label class="text-gray-700">Grupo</mat-label>
+                        <mat-select
+                          [(ngModel)]="selectedGroup"
+                          (selectionChange)="onGroupSelected()"
+                          class="bg-white rounded-lg shadow-sm"
+                        >
+                          <mat-option *ngFor="let group of groups" [value]="group">
+                            {{ group.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                      <div>
+                        <mat-card *ngIf="selectedGroup" class="mt-4 bg-white shadow-md rounded-lg">
+                          <mat-card-header class="bg-gray-100 p-4 rounded-t-lg">
+                            <mat-card-title class="text-xl font-semibold text-gray-800">
+                              Usuarios de {{ selectedGroup.name }}
+                            </mat-card-title>
+                          </mat-card-header>
+                          <mat-card-content class="p-4">
+                            <div *ngFor="let user of selectedGroup.users" class="mb-2">
+                              <mat-checkbox [(ngModel)]="user.selected" (change)="getSelectedUsers()" class="text-gray-700">
+                                {{ user.name }}
+                                <p>{{ user.email }}</p>
+                              </mat-checkbox>
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+                      </div>
+                  </div>
+              <div>
+                  <mat-label>Periodicidad</mat-label>
+                  <div class="grid grid-cols-2 gap-4">
+                      <mat-form-field appearance="outline">
+                          <mat-label>Fecha de inicio</mat-label>
+                          <input matInput [matDatepicker]="picker" placeholder="Seleccione la fecha inicio" />
+                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Fecha fin</mat-label>
+                          <input matInput [matDatepicker]="picker2" placeholder="Seleccione la fecha fin" />
+                          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                          <mat-datepicker #picker2></mat-datepicker>
+                        </mat-form-field>
+                  </div>
+              </div>
+            </div>
+        
+            <mat-form-field appearance="outline" class="w-full mt-4">
+              <mat-label>Mensaje</mat-label>
+              <textarea matInput placeholder="Escriba su mensaje"></textarea>
+            </mat-form-field>
+        
+            <div class="flex justify-end mt-4">
+              <button mat-raised-button color="primary">
+                <mat-icon>send</mat-icon>
+                Enviar
+              </button>
+            </div>
+          </mat-card>
+  </div>

@@ -61,7 +61,17 @@ export class InboxComponent implements OnInit {
             action: (row: any) => this.evaluatePractice(row), 
           },
         ]
-    } else{
+    } 
+    if (this.cargo === 'seguimiento') {
+      this.buttons = [
+        {
+          icon:'heroicons_outline:users',
+          color: 'primary',
+          action: (row: any)=> this.auditPractice(row),
+        },
+      ]
+    }
+    else{
       this.buttons = [
         {
           icon: 'heroicons_outline:pencil-square',
@@ -132,7 +142,11 @@ export class InboxComponent implements OnInit {
  
     }
   }
-  
+  auditPractice(row:any):void{
+    if(this.cargo === 'seguimiento'){
+      this.router.navigateByUrl('/diffusion/' + row.id)
+    }
+  }
   evaluatePractice(row:any):void{
     if(this.cargo === 'evaluador'){
       this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
