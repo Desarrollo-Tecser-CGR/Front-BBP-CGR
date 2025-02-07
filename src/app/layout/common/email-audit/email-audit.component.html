@@ -1,81 +1,91 @@
-<div>
-        <mat-card class="p-4">
-            <div class="flex flex-col gap-4">
-                  <mat-form-field appearance="outline">
-                      <mat-label>Asunto</mat-label>
-                      <input matInput type="text" placeholder="Ingrese el asunto" />
-                  </mat-form-field>
-                  <mat-form-field appearance="outline">
-                      <mat-label>Remitente</mat-label>
-                        <mat-chip-listbox (change)="getSelectedUsers" class="mt-4">
-                          <mat-chip *ngFor="let user of selectUsers">
-                            {{user.email}}
-                          </mat-chip>
-                          <input matInput type="email" placeholder="Ingrese el remitente" />
-                        </mat-chip-listbox>
-                  </mat-form-field>
-                  <div class="grid grid-cols-2">
-                    <div>
-                      <mat-form-field appearance="fill" class="w-full">
-                        <mat-label class="text-gray-700">Grupo</mat-label>
-                        <mat-select
-                          [(ngModel)]="selectedGroup"
-                          (selectionChange)="onGroupSelected()"
-                          class="bg-white rounded-lg shadow-sm"
-                        >
-                          <mat-option *ngFor="let group of groups" [value]="group">
-                            {{ group.name }}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-                      <div>
-                        <mat-card *ngIf="selectedGroup" class="mt-4 bg-white shadow-md rounded-lg">
-                          <mat-card-header class="bg-gray-100 p-4 rounded-t-lg">
-                            <mat-card-title class="text-xl font-semibold text-gray-800">
-                              Usuarios de {{ selectedGroup.name }}
-                            </mat-card-title>
-                          </mat-card-header>
-                          <mat-card-content class="p-4">
-                            <div *ngFor="let user of selectedGroup.users" class="mb-2">
-                              <mat-checkbox [(ngModel)]="user.selected" (change)="getSelectedUsers()" class="text-gray-700">
-                                {{ user.name }}
-                                <p>{{ user.email }}</p>
-                              </mat-checkbox>
-                            </div>
-                          </mat-card-content>
-                        </mat-card>
-                      </div>
-                  </div>
-              <div>
-                  <mat-label>Periodicidad</mat-label>
-                  <div class="grid grid-cols-2 gap-4">
-                      <mat-form-field appearance="outline">
-                          <mat-label>Fecha de inicio</mat-label>
-                          <input matInput [matDatepicker]="picker" placeholder="Seleccione la fecha inicio" />
-                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                          <mat-datepicker #picker></mat-datepicker>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline">
-                          <mat-label>Fecha fin</mat-label>
-                          <input matInput [matDatepicker]="picker2" placeholder="Seleccione la fecha fin" />
-                          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-                          <mat-datepicker #picker2></mat-datepicker>
-                        </mat-form-field>
-                  </div>
-              </div>
+<div class="text-blue-800">
+  <mat-card class="p-6 bg-white shadow-lg">
+    <div class="flex flex-col gap-2">
+      
+      <!-- Asunto -->
+      <mat-form-field  class="w-full">
+        <mat-label>Asunto</mat-label>
+        <input matInput type="text" placeholder="Ingrese el asunto" class="text-lg" />
+      </mat-form-field>
+
+      <!-- Remitente -->
+      <mat-form-field class="w-full">
+        <mat-label>Remitente</mat-label>
+        <div class="flex flex-col gap-2">
+          <mat-chip-listbox *ngIf="selectUsers" (change)="getSelectedUsers()" class="mt-2 bg-gray-50 border rounded-lg">
+            <mat-chip *ngFor="let user of selectUsers" class="bg-blue-100 text-blue-700">
+              {{user.email}}
+            </mat-chip>
+          </mat-chip-listbox>
+          <input matInput type="email" placeholder="Ingrese el remitente" class="text-lg" />
+        </div>
+      </mat-form-field>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field class="w-full">
+          <mat-label>Grupo</mat-label>
+          <mat-select
+            [(ngModel)]="selectedGroup"
+            (selectionChange)="onGroupSelected()"
+            class="bg-gray-50 rounded-lg shadow-sm"
+          >
+            <mat-option *ngFor="let group of groups" [value]="group">
+              {{ group.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Usuarios del Grupo -->
+        <mat-card *ngIf="selectedGroup" class="bg-white shadow-md rounded-lg border border-gray-300">
+          <mat-card-header class="bg-gray-200 p-4 rounded-t-lg">
+            <mat-card-title class="text-lg font-semibold text-gray-800">
+              Usuarios de {{ selectedGroup.name }}
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-4">
+            <div *ngFor="let user of selectedGroup.users" class="mb-2">
+              <mat-checkbox [(ngModel)]="user.selected" (change)="getSelectedUsers()" class="text-gray-800">
+                {{ user.name }}
+                <p class="text-sm text-gray-600">{{ user.email }}</p>
+              </mat-checkbox>
             </div>
-        
-            <mat-form-field appearance="outline" class="w-full mt-4">
-              <mat-label>Mensaje</mat-label>
-              <textarea matInput placeholder="Escriba su mensaje"></textarea>
-            </mat-form-field>
-        
-            <div class="flex justify-end mt-4">
-              <button mat-raised-button color="primary">
-                <mat-icon>send</mat-icon>
-                Enviar
-              </button>
-            </div>
-          </mat-card>
-  </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Periodicidad -->
+      <div>
+        <mat-label class="text-lg font-semibold text-gray-700 py-8">Periodicidad</mat-label>
+        <div class="grid grid-cols-2 gap-4">
+          <mat-form-field  class="w-full">
+            <mat-label>Fecha de inicio</mat-label>
+            <input matInput [matDatepicker]="picker" placeholder="Seleccione la fecha inicio" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          
+          <mat-form-field  class="w-full">
+            <mat-label>Fecha fin</mat-label>
+            <input matInput [matDatepicker]="picker2" placeholder="Seleccione la fecha fin" />
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje -->
+    <mat-form-field class="w-full mt-6">
+      <mat-label>Mensaje</mat-label>
+      <textarea matInput placeholder="Escriba su mensaje" class="text-lg"></textarea>
+    </mat-form-field>
+
+    <!-- Botón de Enviar -->
+    <div class="flex justify-end mt-6">
+      <button mat-flat-button color="primary" class="text-lg font-semibold px-6 py-3">
+        <mat-icon>send</mat-icon>
+        Enviar
+      </button>
+    </div>
+  </mat-card>
+</div>
