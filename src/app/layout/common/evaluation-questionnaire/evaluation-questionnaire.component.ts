@@ -1,14 +1,13 @@
-import { catchError, of, throwError, map } from 'rxjs';
+import { catchError, of, throwError, map, Observable } from 'rxjs';
 import { Component, OnInit, Input, ViewEncapsulation, Renderer2, importProvidersFrom } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { RouterModule, Routes } from '@angular/router';
+import { Router, RouterModule, Routes } from '@angular/router';
 import { MatButtonModule} from '@angular/material/button';
 import { MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { ResumenService } from 'app/modules/resumen/resumen.service';
 import Swal from 'sweetalert2';
-import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import {FormBuilder, FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators,FormArray, Form, FormControl
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -21,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { QuestionnaireService } from './evaluation-questionnaire.service';
-import { NgForOf } from '@angular/common'; 
+import { CommonModule, NgForOf } from '@angular/common'; 
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -45,107 +44,161 @@ import { NgForOf } from '@angular/common';
         ReactiveFormsModule,
         MatCheckbox,
         NgForOf,
-          
+        CommonModule
   ],
   templateUrl: './evaluation-questionnaire.component.html',
   styleUrl: './evaluation-questionnaire.component.scss'
 })
 
-export class EvaluationQuestionnaireComponent{
+export class EvaluationQuestionnaireComponent implements OnInit{
   id: string = '';
   data: any = {};
   questions: any[] = [];
   verticalStepperForm: FormGroup;
 
-  constructor(
-      private resumenService: ResumenService,
-      private route: ActivatedRoute,
-      private fb: FormBuilder,
-      private questionnaireService: QuestionnaireService
-  ) {
-      this.verticalStepperForm = this.fb.group({
-          questionGroups: this.fb.array([])
-      });
-  }
+  questionsGroups$: Observable<any[]>;
+  currentGroupIndex: number = 0; // Índice del grupo actual
+  currentGroup: any[] = []; // Preguntas del grupo actual
+  allGroups: any[] = []; // Lista de todos los grupos de preguntas
+  allQuestions: any[] = []; // Lista de todas las preguntas (aplanadas)
+  answeredQuestions: { [key: string]: string } = {}; // Respuestas guardadas
+  currentQuestionIndex: number = 0; // Índice de la pregunta actual
+  groupSize: number = 2; // Número de preguntas por grupo
 
+  constructor(
+    private resumenService: ResumenService,
+    private route: ActivatedRoute,
+    private fb: FormBuilder,
+    private questionnaireService: QuestionnaireService,
+    private router:Router
+  ) {
+    this.verticalStepperForm = this.fb.group({
+      questionGroups: this.fb.array([]),
+    });
+  }
 
   ngOnInit(): void {
-      this.id = this.route.snapshot.paramMap.get('id');
-      this.resumenService.getDataAsJson(this.id).subscribe(
-          (response) => {
-              this.data = response;
-              console.log('Práctica:', this.data);
-          },
-          (error) => {
-              Swal.fire({
-                  title: 'Error',
-                  text: `No se pudo abrir la práctica. ${error}`,
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-              });
-          }
-      );
-
-      // Obtener preguntas
-      this.questionnaireService.getQuestionsGroups().pipe(
-          catchError((error) => {
-              Swal.fire({
-                  title: 'Error',
-                  text: `No se pudo abrir el cuestionario. ${error.message}`,
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-              });
-              return of([]);
-          })
-      ).subscribe((groups) => {
-          if (!groups || groups.length === 0) {
-              console.warn('No se recibieron grupos de preguntas.');
-              return;
-          }
-          this.questions = groups;
-          console.log('Preguntas', this.questions);
-          this.populateForm();
-      });
-  }
-  get questionsArray(): FormArray {
-    return this.verticalStepperForm.get('questionGroups') as FormArray;
+    this.getQuestions();
   }
 
-  populateForm():void {
-    this.questions.forEach((group, groupIndex)=>{
-        const groupFromArray = this.fb.array([]);
-        group.forEach((question:any)=>{
-            const optionsFormArray = this.fb.array([]);
-            question.options.map(()=> this.fb.control(false));
-            });
-            const questionFormGroup = this.fb.group({
-                question:  this.questions
-            })
-            this.questionsArray.push(groupFromArray);
-        });
-    };
+  getQuestions() {
+    this.questionnaireService.getQuestion().subscribe(groups => {
+      // Asegurar que cada pregunta tenga una estructura correcta con respuesta inicializada
+      this.allQuestions = groups.data.map((q: any) => ({
+        ...q, // Copiamos todos los datos de la pregunta
+        respuesta: '', // Agregamos un campo para almacenar la respuesta del usuario
+      }));
+  
+      // Inicializar el objeto de seguimiento de respuestas
+      this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
+        acc[q.questions.id] = false; // Usamos el id dentro de `questions` si está anidado
+        return acc;
+      }, {} as { [key: string]: boolean });
+  
+      // Agrupar preguntas en conjuntos del tamaño deseado
+      this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
+  
+      this.loadGroup(this.currentGroupIndex);
+    });
   }
-  // getQuestions(index: number): FormArray {
-  //   return this.verticalStepperForm.get(`step${index + 1}.questions`) as FormArray;
-  // }
+
+  chunkArray(arr: any[], size: number): any[][] {
+    if (!arr || size <= 0) return []; // Evita divisiones por 0 o valores inválidos
+    const result = Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+      arr.slice(i * size, i * size + size)
+    );
+    return result;
+  }  
+
+  // Cargar un grupo específico
+  loadGroup(index: number): void {
+    if (index >= 0 && index < this.allGroups.length) {
+      this.currentGroup = this.allGroups[index]; 
+      this.currentGroupIndex = index; 
+    } else {
+      console.error("Índice de grupo fuera de rango");
+    }
+  }  
+
+  // Navegar a una pregunta específica
+  goToQuestion(index: number): void {
+    if (index >= 0 && index < this.allQuestions.length) {
+      this.currentQuestionIndex = index; // Actualizar el índice de la pregunta actual
+      const groupIndex = Math.floor(index / this.groupSize); // Calcular el grupo correspondiente
+      this.loadGroup(groupIndex); // Cargar el grupo correspondiente
+    }
+  }
+
+  // Navegar al grupo anterior
+  previousGroup(): void {
+    if (this.currentGroupIndex > 0) {
+      this.loadGroup(this.currentGroupIndex - 1); // Cargar el grupo anterior
+    }
+  }
+
+  // Navegar al siguiente grupo
+  nextGroup(): void {
+    if (this.currentGroupIndex < this.allGroups.length - 1) {
+      this.currentGroupIndex++; // Asegurar que el índice se actualice correctamente
+      this.loadGroup(this.currentGroupIndex); // Cargar el grupo actualizado
+    }
+  }
+
+  // Manejar cambios en las respuestas
+  onAnswerChange(questionId: number, selectedOption: string) {
+    this.answeredQuestions[questionId] = selectedOption;
   
-  // checkFormValidity(form: FormGroup): boolean {
-  //   let isValid = true;
+    // Buscar la pregunta y actualizar su campo 'respuesta'
+    const question = this.allQuestions.find(q => q.id === questionId);
+    if (question) {
+      question.respuesta = selectedOption;
+    }
   
-  //   Object.keys(form.controls).forEach((step) => {
-  //     const group = form.get(step) as FormGroup;
-  //     if (group) {
-  //       Object.keys(group.controls).forEach((control) => {
-  //         const formControl = group.get(control);
-  //         if (formControl && formControl.enabled && formControl.invalid) {
-  //           isValid = false;
-  //         }
-  //       });
-  //     }
-  //   });
-  
-  //   return isValid;
-  // }
+    console.log('Respuestas almacenadas:', this.answeredQuestions);
+  }  
+
+  // Calcular el número de pregunta correcto
+  getQuestionNumber(indexInGroup: number): number {
+    return (this.currentGroupIndex * this.groupSize) + (indexInGroup + 1);
+  }
+
+  get todasRespondidas(): boolean {
+    return Object.values(this.answeredQuestions).every(value => value);
+  }
+
+  enviarFormulario(){
+    const forName = "Formulario de seguimiento"
+    const formularioId = 11
+
+    const idQuestions = this.allQuestions.map(q => q.id);  // Extraer los IDs de las preguntas
+    const idAnswers = this.allQuestions.map(q => q.respuesta); // Extraer las respuestas seleccionadas
+
+    console.log(idQuestions)
+    console.log(idAnswers)
+    setTimeout(() => {
+      this.alert();
+    }, 3000);
+    // this.questionnaireService.enviarCuestionario(forName, formularioId, 1,idQuestions, idAnswers).subscribe(
+    //   response => {
+    //     console.log('Cuestionario enviado con éxito', response);
+    //   }, error => {
+    //     console.error('Error al enviar el cuestionario', error)
+    //   }
+    // )
+  }
+
+  alert(){
+    Swal.fire({
+      icon: 'success',
+      title: 'Registro Exitoso',
+      text: `El Formulario se ah enviado exitosamente`,
+      showConfirmButton: false,
+      timer: 2000
+    }).then(() => {
+      window.location.href = './example';
+    })
+  }
+}
 
 
 
