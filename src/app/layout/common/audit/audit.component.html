@@ -17,14 +17,14 @@
                 [color]="'primary'"
                 [mode]="'determinate'"
                 [strokeWidth]="10"
-                [value]="100">
+                [value]="80">
             </mat-progress-spinner>
-            <p>Indicadores de progreso</p>
-            <ng-container>
-                <mat-checkbox>
+            <p class="text-lg p-4 flex-end">Indicador de progreso 80%</p>
+            <!-- <ng-container>
+                <mat-checkbox *ngFor="let indicator of indicators">
 
                 </mat-checkbox>
-            </ng-container>
+            </ng-container>  -->
         </div>
     </div>
     
@@ -33,13 +33,46 @@
   <div class="p-4">
     <h1>Auditorias</h1>
     <table mat-table [dataSource]="auditorias" class="w-full">
-        <ng-continer matColumnDef="id">
-            <th>Id</th>
-            <td>3</td>
-        </ng-continer>
+        <!-- Columna ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef> ID </th>
+          <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
+        </ng-container>
+   
+        <!-- Columna Código de Auditoría -->
+        <ng-container matColumnDef="auditCode">
+          <th mat-header-cell *matHeaderCellDef> Código de Auditoría </th>
+          <td mat-cell *matCellDef="let element"> {{ element.auditCode }} </td>
+        </ng-container>
+   
+        <!-- Columna Fecha Inicio -->
+        <ng-container matColumnDef="startDate">
+          <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+          <td mat-cell *matCellDef="let element"> {{ element.startDate }} </td>
+        </ng-container>
+   
+        <!-- Columna Fecha Fin -->
+        <ng-container matColumnDef="endDate">
+          <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+          <td mat-cell *matCellDef="let element"> {{ element.endDate }} </td>
+        </ng-container>
+   
+        <!-- Columna Grupo -->
+        <ng-container matColumnDef="groupId">
+          <th mat-header-cell *matHeaderCellDef> Grupo </th>
+          <td mat-cell *matCellDef="let element"> {{ element.groupName }} </td>
+        </ng-container>
+   
+        <!-- Columna Estado -->
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef> Estado </th>
+          <td mat-cell *matCellDef="let element"> {{ element.state ? 'Activo' : 'Inactivo' }} </td>
+        </ng-container>
+   
+        <!-- Encabezado y filas -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
+      </table>
   </div>
   
 <!-- submit archivos---->

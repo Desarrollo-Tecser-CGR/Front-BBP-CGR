@@ -19,7 +19,7 @@ export class AuditService{
         {id:5, name:'PNVCF',users:[{name:'user5'},{name:'user5'},{name:'user5'},{name:'user5'}]}
     ]
     indicators = [
-        
+        {color:'', indicator:''}
     ]
 
     // getGroups():Observable<any>{
