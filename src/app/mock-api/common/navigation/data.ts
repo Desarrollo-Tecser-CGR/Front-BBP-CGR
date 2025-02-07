@@ -66,6 +66,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/inbox',
         roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento', 'comiteTecnico']
     },
+    // {
+    //     id   : 'comiteTecnico',
+    //     title: 'comiteTecnico',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:inbox',
+    //     link : '/comiteTecnico',
+    //     roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento', 'comiteTecnico']
+    // },
     {
         id   : 'create',
         title: 'Creación de Formularios',

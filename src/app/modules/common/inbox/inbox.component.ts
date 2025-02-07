@@ -54,42 +54,48 @@ export class InboxComponent implements OnInit {
   
     // Definir botones dinámicamente según el rol
 
-  if (this.cargo === 'comiteTecnico') {
+ switch (this.cargo) {
+  case 'evaluador':
     this.buttons = [
       {
         icon: 'feather:check-square',
-        color: 'primary', 
-        action: (row: any) => this.openCommittee(row), 
+        color: 'primary',
+        action: (row: any) => this.evaluatePractice(row),
       },
-    ]
-  }   
-  if (this.cargo === 'evaluador') {
-        this.buttons = [
-          {
-            icon: 'feather:check-square',
-            color: 'primary', 
-            action: (row: any) => this.evaluatePractice(row), 
-          },
-        ]
-    } 
-    if (this.cargo === 'seguimiento') {
-      this.buttons = [
-        {
-          icon:'heroicons_outline:users',
-          color: 'primary',
-          action: (row: any)=> this.auditPractice(row),
-        },
-      ]
-    }
-    else{
-      this.buttons = [
-        {
-          icon: 'heroicons_outline:pencil-square',
-          color: 'primary',
-          action: (row: any) => this.editRow(row),
-        },
-      ];
-    }
+    ];
+    break;
+
+  case 'comiteTecnico':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.openCommittee(row),
+      },
+    ];
+    break;
+
+  case 'seguimiento':
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:users',
+        color: 'primary',
+        action: (row: any) => this.auditPractice(row),
+      },
+    ];
+    break;
+
+  default:
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:pencil-square',
+        color: 'primary',
+        action: (row: any) => this.editRow(row),
+      },
+    ];
+    break;
+}
+
     
 
   
@@ -234,19 +240,6 @@ export class InboxComponent implements OnInit {
     window.location.reload()
   }
 
-  // ======================== Logica que muestra el modal en la vista ======================== //
-
-  //  openCaracterizationModal(row: any): void {
-  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-  //      width: '500px',
-  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
-  //    });
-
-  //    dialogRef.afterClosed().subscribe((result) => {
-  //      console.log('Modal cerrado con:', result);
-  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
-  //    });
-  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 
