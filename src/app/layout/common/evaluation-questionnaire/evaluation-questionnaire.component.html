@@ -5,6 +5,11 @@
     </div>
   </div>
   <div class="flex-auto">
+    <select (change)="selectForm($event.target.value)">
+      <option *ngFor="let form of allForms; let i = index" [value]="i">
+        {{ form.formName || 'Formulario ' + (i + 1) }}
+      </option>
+    </select>
     <h1 class="">Criterios de evaluación de la buena práctica.</h1>
     <div class="max-w-3x">
       <div class="progress-indicator mb-4">
@@ -23,14 +28,14 @@
               </svg>
             </button>  
           </div>
-          <h3>{{ question.questions.enunciado }}</h3>
-          <div *ngFor="let option of question.questions.answers" class="mb-2">
+          <h3>{{ question.enunciado }}</h3>
+          <div *ngFor="let option of question.answers" class="mb-2">
             <label class="flex items-center space-x-2">
               <input type="radio" 
-                     [name]="'question' + question.questions.id" 
+                     [name]="'question' + question.id" 
                      [value]="option.respuesta" 
-                     [checked]="answeredQuestions[question.questions.id] === option.respuesta" 
-                     (change)="onAnswerChange(question.questions.id, option.respuesta)">
+                     [checked]="answeredQuestions[question.id] === option.respuesta" 
+                     (change)="onAnswerChange(question.id, option.respuesta)">
               {{ option.respuesta }}
             </label>
           </div>          
@@ -39,6 +44,19 @@
           </div>
         </div>
         <div class="navigation flex items-center justify-center">
+          <div>
+            <button [disabled]="!todasRespondidas"
+              [ngClass]="{
+                'bg-gray-400 cursor-not-allowed': !todasRespondidas,
+                'bg-blue-500 hover:bg-blue-600 cursor-pointer': todasRespondidas
+              }"
+              class="text-white p-3 w-40 rounded-xl transition duration-300 ease-in-out"
+              [title]="!todasRespondidas ? 'Debes responder todas las preguntas antes de enviar' : ''"
+              (click)="enviarFormulario(estimacionFalse)"
+              >
+              Practica desetimada
+            </button>
+          </div>
           <div>
             <button class="p-3 bg-red-500 rounded-xl text-white w-22" (click)="previousGroup()" [disabled]="currentGroupIndex === 0">Volver</button>
             <button class="p-3 bg-blue-600 rounded-xl text-white w-22" (click)="nextGroup()">Siguiente</button>
@@ -51,7 +69,7 @@
               }"
               class="text-white p-3 w-36 rounded-xl transition duration-300 ease-in-out"
               [title]="!todasRespondidas ? 'Debes responder todas las preguntas antes de enviar' : ''"
-              (click)="enviarFormulario()"
+              (click)="enviarFormulario(estimacionTrue)"
               >
               Enviar Evaluación
             </button>

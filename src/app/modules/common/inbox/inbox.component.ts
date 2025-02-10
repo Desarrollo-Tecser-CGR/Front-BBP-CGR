@@ -134,6 +134,7 @@ export class InboxComponent implements OnInit {
   evaluatePractice(row:any):void{
     if(this.cargo === 'evaluador'){
       this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
+      console.log('id en validacion', row.id);
     }
   }
 

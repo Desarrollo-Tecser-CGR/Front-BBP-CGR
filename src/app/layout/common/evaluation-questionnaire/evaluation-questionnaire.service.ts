@@ -47,8 +47,8 @@ export class QuestionnaireService{
         {id:30, comment:true, question:'¿La práctica resultó en una mayor cooperación entre diferentes niveles de gobierno (local, regional, nacional)?',options:[{option:'Si'},{option:'No'}]},
     ]
     
-    private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/admin/form`;
-    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question/static`;
+    private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/admin/record/list`;
+    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/11`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
 
@@ -67,15 +67,19 @@ export class QuestionnaireService{
         return this.http.get<any>(url)
     }
 
-    enviarCuestionario(fullName:string, roleFormId:number, enabled:number, idQuestions:any, idAnswers:any):Observable<any>{
+    enviarCuestionario(formEntity:number, user:number,questionAnswer:any, questionEntity
+        :any, identity:number, enabled:number, estimacion:string):Observable<any>{
         const url = `${this.apiUrl}`
         const params = {
-            fullName: fullName,
-            roleFormId: roleFormId,
+            formEntity:formEntity,
+            user:user,
+            questionAnswer:questionAnswer,
+            questionEntity:questionEntity,
+            identity:identity,
             enabled: enabled,
-            idQuestions: idQuestions,
-            idAnswers:idAnswers
+            estimacion:estimacion
         }
-        return this.http.post<any>(url, {params})
+        console.log(params)
+        return this.http.post<any>(url, params)
     }
 }

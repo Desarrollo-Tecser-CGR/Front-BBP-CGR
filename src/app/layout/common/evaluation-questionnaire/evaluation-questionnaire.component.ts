@@ -51,7 +51,7 @@ import { CommonModule, NgForOf } from '@angular/common';
 })
 
 export class EvaluationQuestionnaireComponent implements OnInit{
-  id: string = '';
+  id: any;
   data: any = {};
   questions: any[] = [];
   verticalStepperForm: FormGroup;
@@ -64,6 +64,12 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   answeredQuestions: { [key: string]: string } = {}; // Respuestas guardadas
   currentQuestionIndex: number = 0; // Índice de la pregunta actual
   groupSize: number = 2; // Número de preguntas por grupo
+  formularioId: number;
+
+  estimacionTrue:string = "enviada"
+  estimacionFalse: string = "malaPractica"
+
+  allForms: any[] = []
 
   constructor(
     private resumenService: ResumenService,
@@ -78,29 +84,40 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    this.id = this.route.snapshot.paramMap.get('id');
     this.getQuestions();
   }
 
   getQuestions() {
     this.questionnaireService.getQuestion().subscribe(groups => {
-      // Asegurar que cada pregunta tenga una estructura correcta con respuesta inicializada
-      this.allQuestions = groups.data.map((q: any) => ({
-        ...q, // Copiamos todos los datos de la pregunta
-        respuesta: '', // Agregamos un campo para almacenar la respuesta del usuario
-      }));
-  
-      // Inicializar el objeto de seguimiento de respuestas
-      this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
-        acc[q.questions.id] = false; // Usamos el id dentro de `questions` si está anidado
-        return acc;
-      }, {} as { [key: string]: boolean });
-  
-      // Agrupar preguntas en conjuntos del tamaño deseado
-      this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
-  
-      this.loadGroup(this.currentGroupIndex);
+      console.log(groups)
+      this.allForms = groups.data; // Guardamos todos los formularios
+      this.selectForm(0); // Inicializamos con el primer formulario (índice 0)
     });
   }
+
+  // Método para seleccionar un formulario por su índice en el array
+selectForm(index: number) {
+  const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
+  
+  this.formularioId = selectedForm.id; // Guardamos su ID
+  this.allQuestions = selectedForm.questions.map((q: any) => ({
+    ...q,
+    respuesta: '', // Inicializamos respuesta en vacío
+  }));
+
+  // Inicializar el objeto de seguimiento de respuestas
+  this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
+    acc[q.id] = false;
+    return acc;
+  }, {} as { [key: string]: boolean });
+
+  // Agrupar preguntas en conjuntos del tamaño deseado
+  this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
+
+  // Cargar el primer grupo de preguntas
+  this.loadGroup(this.currentGroupIndex);
+}
 
   chunkArray(arr: any[], size: number): any[][] {
     if (!arr || size <= 0) return []; // Evita divisiones por 0 o valores inválidos
@@ -153,8 +170,6 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     if (question) {
       question.respuesta = selectedOption;
     }
-  
-    console.log('Respuestas almacenadas:', this.answeredQuestions);
   }  
 
   // Calcular el número de pregunta correcto
@@ -166,25 +181,24 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     return Object.values(this.answeredQuestions).every(value => value);
   }
 
-  enviarFormulario(){
-    const forName = "Formulario de seguimiento"
-    const formularioId = 11
-
+  enviarFormulario(estimacion:any){
+    const userId: any = localStorage.getItem('Iduser')
     const idQuestions = this.allQuestions.map(q => q.id);  // Extraer los IDs de las preguntas
-    const idAnswers = this.allQuestions.map(q => q.respuesta); // Extraer las respuestas seleccionadas
+    const idAnswers = this.allQuestions.map(q => q.respuesta === "si" ? 1 : 2); // Extraer las respuestas seleccionadas
 
+    console.log(this.formularioId)
     console.log(idQuestions)
     console.log(idAnswers)
-    setTimeout(() => {
-      this.alert();
-    }, 3000);
-    // this.questionnaireService.enviarCuestionario(forName, formularioId, 1,idQuestions, idAnswers).subscribe(
-    //   response => {
-    //     console.log('Cuestionario enviado con éxito', response);
-    //   }, error => {
-    //     console.error('Error al enviar el cuestionario', error)
-    //   }
-    // )
+    // setTimeout(() => {
+    //   this.alert();
+    //}, 3000);
+    this.questionnaireService.enviarCuestionario(this.formularioId, userId, idAnswers, idQuestions,this.id, 1, estimacion).subscribe(
+      response => {
+        console.log('Cuestionario enviado con éxito', response);
+      }, error => {
+        console.error('Error al enviar el cuestionario', error)
+      }
+    )
   }
 
   alert(){
