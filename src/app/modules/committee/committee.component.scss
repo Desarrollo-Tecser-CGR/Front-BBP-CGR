@@ -1,44 +1,89 @@
-.container {
-    text-align: center;
-    width: 100%;
-}
-
-.cards-container {
-    display: flex;
-    flex-direction: column; /* Coloca los recuadros en columna */
-    align-items: center;
-    gap: 20px;
-    margin-top: 20px;
-    width: 100%;
-}
-
 .card {
-    background: white;
-    padding: 20px;
-    width: 90%; /* Ocupará el 90% del ancho de la pantalla */
-    max-width: 1200px; /*  Máximo ancho */
-    min-height: 80px; /*  Asegura que cada recuadro sea alto */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    text-align: left; /*  Alinear el texto a la izquierda */
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+.card h2 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.card p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.question {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.question h4 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.question ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.question ul li {
+    margin-bottom: 5px;
+}
+
+.scroll-container {
+    max-height: 300px; /* Ajusta el tamaño visible antes del scroll */
+    overflow-y: auto; /* Scroll solo si hay muchas respuestas */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+    background: #f9f9f9;
+}
+
+/* Cada respuesta dentro del scroll-container */
+.question-card {
+    border: 1px solid #ddd; /* Bordes suaves para cada respuesta */
+    padding: 10px;
+    margin-bottom: 10px; /* Espaciado entre respuestas */
+    border-radius: 5px;
+    background: #fff; /* Fondo blanco para resaltar */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+.user-info {
+    display: flex; /* Organiza los elementos en fila */
+    justify-content: space-between; /* Distribuye el espacio entre los elementos */
+    align-items: center; /* Alinea verticalmente */
+    flex-wrap: wrap; /* Permite que los elementos bajen de línea si la pantalla es pequeña */
+    padding: 10px;
+    background: #f1f1f1; /* Un fondo suave para resaltar */
+    border-radius: 5px;
+}
+
+/* Opcional: Si quieres que los textos tengan espacio uniforme */
+.user-info p {
+    flex: 1; /* Cada párrafo ocupa un espacio igual */
+    margin: 0 10px; /* Espaciado horizontal */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    overflow: hidden; /* Oculta texto largo */
+    text-overflow: ellipsis; /* Muestra "..." si el texto es muy largo */
+}
+
+.user-info, .additional-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.3s ease-in-out;
+    flex-wrap: wrap;
+    padding: 4px;
+    background: #f1f1f1;
+    border-radius: 5px;
+    margin-bottom: 8px; /* 🔹 Separación entre cuadros */
 }
 
-/*  Si la pantalla es más pequeña, ajusta el ancho */
-@media (max-width: 768px) {
-    .card {
-        width: 95%;
-    }
-}
-
-/*  Cambiar tamaño y color del icono */
-.icon-container {
-    display: flex;
-    align-items: center;
-    font-size: 30px;
-    cursor: pointer;
-    color: #444;
+.additional-info {
+    background: #e3e3e3; /* 🔹 Diferente color para distinguir */
 }

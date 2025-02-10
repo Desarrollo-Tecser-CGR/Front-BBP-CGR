@@ -7,7 +7,8 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
   providedIn: 'root'
 })
 export class CommitteeService {
-  private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/admin/record`; // URL base de la API
+  private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/admin/record`; //Api que trae los datos de evaluación
+  // private apiUrlGetIdentity = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`; //Api que trae los datos de resumen 2 datos 
 
   constructor(private http: HttpClient) {}
 

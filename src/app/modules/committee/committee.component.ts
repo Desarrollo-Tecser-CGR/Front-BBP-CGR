@@ -1,10 +1,10 @@
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CommitteeService } from './committee.service';
+import { ResumenService } from '../resumen/resumen.service';
 
 @Component({
     selector: 'committee',
@@ -15,54 +15,74 @@ import { CommitteeService } from './committee.service';
     imports: [
         CommonModule,
         MatIconModule,
-        MatTableModule,
         MatMenuModule,
         RouterModule
     ]
 })
 export class CommitteeComponent implements OnInit {
     id: string | null = null;
-    cards: any[] = [];
+    committeeData: any = {}; // Almacenar todos los datos
+    showAnswers: boolean = false;
 
-    // 🛠 Inyecta `CommitteeService` en el constructor
     constructor(
         private activatedRoute: ActivatedRoute,
-        private committeeService: CommitteeService
+        private committeeService: CommitteeService,
+        private resumenService: ResumenService
     ) {}
 
     ngOnInit(): void {
-        // Captura el ID de la URL
         this.activatedRoute.params.subscribe(params => {
             this.id = params['id'];
             console.log('ID recibido en Committee:', this.id);
     
-            // Llamar al método del servicio para obtener los datos
             if (this.id) {
-                this.loadCommitteeData(Number(this.id)); // Convertir el ID a número
+                this.loadCommitteeData(Number(this.id));
+                this.loadResumenData(this.id); // 🔹 Llamamos a loadResumenData en lugar de getDataAsJson directamente
             }
         });
     }
+    
 
-    private loadCommitteeData(id: number): void {
+     // 🔹 Método para obtener los datos del comité
+     private loadCommitteeData(id: number): void {
         this.committeeService.getCommitteeData(id).subscribe(
             (response) => {
-                const committeeData = response.data; // Accedemos a la propiedad 'data' de la respuesta
-                console.log('Datos del comité:', committeeData);
-
-                // Transformar los datos para la vista
-                this.cards = committeeData.formEntity.questions.map((question: any) => ({
-                    name: question.enunciado,
-                    title: question.tipoPregunta,
-                    description: question.comentario,
-                    value: question.peso,
-                    color: 'blue'
-                }));
-
-                console.log('Datos transformados para mostrar en cards:', this.cards);
+                console.log('Datos del comité:', response.data);
+                this.committeeData = response.data;
             },
             (error) => {
                 console.error('Error al obtener los datos:', error);
             }
         );
+    }
+
+    // 🔹 Método para obtener estadoFlujo y codigoPractica
+    private loadResumenData(id: string): void {
+        console.log('Cargando datos de resumen para ID:', id);
+    
+        this.resumenService.getDataAsJson(id).subscribe(
+            (response) => {
+                console.log('Datos de resumen recibidos:', response);
+    
+                if (response) {
+                    // Mezclar los datos con los existentes sin sobrescribir
+                    this.committeeData = {
+                        ...this.committeeData, // Mantener los datos actuales
+                        estadoFlujo: response.estadoFlujo,
+                        codigoPractica: response.codigoPractica
+                    };
+                } else {
+                    console.warn('La respuesta de resumen está vacía o no tiene datos.');
+                }
+            },
+            (error) => {
+                console.error('Error al obtener los datos de resumen:', error);
+            }
+        );
+    }    
+
+    // Método para alternar la visibilidad de las respuestas
+    toggleAnswers(): void {
+        this.showAnswers = !this.showAnswers;
     }
 }

@@ -1,17 +1,44 @@
 <div class="container">
     <h1>Comité</h1>
-  
-    <div class="cards-container" *ngIf="cards && cards.length > 0; else noData">
-      <div class="card" *ngFor="let card of cards" [ngStyle]="{'border-left': '5px solid ' + card.color}">
-        <h2>{{ card.name }}</h2> <!-- Muestra el nombre de la pregunta -->
-        <p>{{ card.title }} - {{ card.description }}</p> <!-- Muestra el tipo de pregunta y el comentario -->
-        <span class="value">{{ card.value }}</span> <!-- Muestra el peso -->
-        <mat-icon class="icon-container">add</mat-icon> <!-- Ícono de más -->
-      </div>
+
+    <!-- Tarjeta con la información -->
+    <div class="card" *ngIf="committeeData && committeeData.userId; else noData" 
+         [ngStyle]="{'border-left': '5px solid blue', 'padding': '20px', 'border-radius': '10px', 'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)'}">
+        
+        <h2>Información del Evaluador</h2>
+        
+        <!-- Datos del usuario -->
+        <div class="user-info">
+            <p><strong>Nombre de Usuario:</strong> {{ committeeData.userId.userName }}</p>
+            <p><strong>Email:</strong> {{ committeeData.userId.email }}</p>
+            <p><strong>Cargo:</strong> {{ committeeData.userId.cargo }}</p>
+        </div>
+        <!-- Datos adicionales en un nuevo cuadro -->
+        <div class="additional-info">
+            <p><strong>Estado de Flujo:</strong> {{ committeeData.estadoFlujo }}</p>
+            <p><strong>Código de la Práctica:</strong> {{ committeeData.codigoPractica }}</p>
+        </div>
+        <!-- Botón para expandir respuestas -->
+        <button (click)="toggleAnswers()" mat-icon-button>
+            <mat-icon>{{ showAnswers ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+
+        <!-- Contenedor con scroll para las respuestas -->
+        <div *ngIf="showAnswers" class="scroll-container">
+            <h3>Formulario: {{ committeeData.formEntity.formName }}</h3>
+
+            <div *ngFor="let question of committeeData.formEntity.questions" class="question-card">
+                <h4>{{ question.id }}. {{ question.enunciado }}</h4>
+                <p *ngIf="question.answer">
+                    Respuesta Seleccionada: 
+                    <strong>{{ question.answer.respuesta ? question.answer.respuesta : 'No hay respuesta seleccionada' }}</strong>
+                </p>
+                <p>Comentario: <strong>{{ question.comentario }}</strong></p>
+            </div>
+        </div>
     </div>
-  
+
     <ng-template #noData>
-      <p>No hay datos disponibles</p>
+        <p>No hay datos disponibles</p>
     </ng-template>
-  </div>
-  
+</div>

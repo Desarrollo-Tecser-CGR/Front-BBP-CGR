@@ -314,5 +314,20 @@ export const appRoutes: Route[] = [
                 data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
             },
         ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'evaluation-questionnaire', loadChildren: () =>
+                import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
+                data: { requiredRoles: ['evaluador'], module: '' }
+            },
+        ]
     }
 ];
