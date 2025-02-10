@@ -87,3 +87,19 @@
 .additional-info {
     background: #e3e3e3; /* 🔹 Diferente color para distinguir */
 }
+
+.styled-button {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    background-color: #1976D2 !important; /* Azul Material Design */
+    color: white !important; /* Texto blanco */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Pequeña sombra */
+    transition: background-color 0.3s ease;
+}
+
+.styled-button:hover {
+    background-color: #1565C0 !important; /* Azul más oscuro al pasar el mouse */
+}

@@ -14,10 +14,10 @@
             <p><strong>Cargo:</strong> {{ committeeData.userId.cargo }}</p>
         </div>
         <!-- Datos adicionales en un nuevo cuadro -->
-        <div class="additional-info">
+        <!-- <div class="additional-info">
             <p><strong>Estado de Flujo:</strong> {{ committeeData.estadoFlujo }}</p>
             <p><strong>Código de la Práctica:</strong> {{ committeeData.codigoPractica }}</p>
-        </div>
+        </div> -->
         <!-- Botón para expandir respuestas -->
         <button (click)="toggleAnswers()" mat-icon-button>
             <mat-icon>{{ showAnswers ? 'expand_less' : 'expand_more' }}</mat-icon>
@@ -41,4 +41,17 @@
     <ng-template #noData>
         <p>No hay datos disponibles</p>
     </ng-template>
+
+    <div class="mt-4 flex justify-end">
+        <button 
+            mat-raised-button 
+            color="primary" 
+            class="space-buttons"
+            (click)="cambiarEstadoDeFlujo()">
+            Realizar Seguimiento
+        </button>
+    </div>
+    
+    
+
 </div>
