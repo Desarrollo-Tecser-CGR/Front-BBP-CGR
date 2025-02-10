@@ -147,6 +147,7 @@ export class AuthService {
                 // Store the access token in the local storage
                 this.accessToken = response.user.token;
                 this.accessName = credentials.sAMAccountName;
+                localStorage.setItem('Iduser', response.id)
 
                 // Set the authenticated flag to true
                 this._authenticated = true;
