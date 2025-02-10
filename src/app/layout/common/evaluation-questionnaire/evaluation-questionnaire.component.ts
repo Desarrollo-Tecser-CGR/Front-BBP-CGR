@@ -195,6 +195,9 @@ selectForm(index: number) {
     this.questionnaireService.enviarCuestionario(this.formularioId, userId, idAnswers, idQuestions,this.id, 1, estimacion).subscribe(
       response => {
         console.log('Cuestionario enviado con éxito', response);
+        setTimeout(() => {
+          this.alert();
+        }, 3000);
       }, error => {
         console.error('Error al enviar el cuestionario', error)
       }

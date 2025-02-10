@@ -5,7 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 import { ResumenService } from '../resumen/resumen.service';
-import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuestionnaireService } from 'app/layout/common/evaluation-questionnaire/evaluation-questionnaire.service';
 import { PublicactionService } from 'app/modules/publication/publication.service';
 import { Observable } from 'rxjs';
@@ -31,7 +31,8 @@ const routes: Routes = [
         RouterModule,
         CommonModule,
         FormsModule,
-        MatIconModule
+        MatIconModule,
+        ReactiveFormsModule
     ]
 })
 export class PublicationComponent {
@@ -53,12 +54,93 @@ export class PublicationComponent {
   totalPagesArrayAllQuestions: number[] = [];
   totalPagesArrayCustomForm: number[] = [];
 
+  showModal = false;  // Controla la visibilidad del modal
+  questionForm: FormGroup;  // Formulario para la pregunta
+
+  showSaveModal = false; // Estado para mostrar el modal
+  saveForm: FormGroup; // Formulario Reactivo
+
   constructor(
     private resumenService: ResumenService,
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private publicationService: PublicactionService
-  ) {}
+  ) {
+    this.questionForm = this.fb.group({
+      enunciado: ['', Validators.required],
+      correctAnswer: ['', Validators.required]
+    });
+    this.saveForm = this.fb.group({
+      nombreCuestionario: ['', Validators.required] // Campo obligatorio
+    });
+  }
+
+  openSaveModal() {
+    this.showSaveModal = true;
+  }
+
+  closeSaveModal() {
+    this.showSaveModal = false;
+    this.saveForm.reset(); // Limpiar formulario al cerrar
+  }
+
+  submitForm() {
+    if (this.saveForm.valid) {
+      const nombreCuestionario = this.saveForm.value.nombreCuestionario;
+      
+      // Aquí podrías enviar el cuestionario a la base de datos o hacer lo que necesites
+      console.log('Guardando cuestionario:', nombreCuestionario);
+
+      this.closeSaveModal(); // Cerrar modal después de guardar
+    } else {
+      // Marcar el campo como tocado para que muestre el mensaje de error
+      this.saveForm.controls['nombreCuestionario'].markAsTouched();
+    }
+  }
+
+  // Abrir modal
+  openModal() {
+    this.showModal = true;
+  }
+
+  // Cerrar modal
+  closeModal() {
+    this.showModal = false;
+    this.questionForm.reset();
+  }
+
+  // Guardar pregunta y agregarla al formulario personalizado
+  saveQuestion() {
+  if (this.questionForm.valid) {
+    const newQuestionData = {
+      enunciado: this.questionForm.value.enunciado,
+      tipoPregunta: this.questionForm.value.tipoPregunta, // Asegúrate de tener este campo en el formulario
+      enabled: 1, // Se puede hacer dinámico si lo necesitas
+      peso: this.questionForm.value.peso, // Debe existir en el formulario
+      forms: null, // Si se usa, ajusta el valor correcto
+      answers: this.questionForm.value.answers // Asegúrate de que sea un array adecuado
+    };
+
+    this.publicationService.createQuestion(
+      newQuestionData.enunciado,
+      newQuestionData.tipoPregunta,
+      newQuestionData.enabled,
+      newQuestionData.peso,
+      newQuestionData.forms,
+      newQuestionData.answers
+    ).subscribe(
+      (response) => {
+        console.log('Pregunta guardada con éxito:', response);
+        this.customFormQuestions.push(response); // Agregar la respuesta del backend al array
+        this.updateTotalPagesArray();
+        this.closeModal();
+      },
+      (error) => {
+        console.error('Error al guardar la pregunta:', error);
+      }
+    );
+  }
+}
 
   ngOnInit(): void {
     this.getQuestions();

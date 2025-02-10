@@ -49,6 +49,7 @@ export class PublicactionService{
 
     private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/user/createUser`;
     private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question/static`;
+    private apiUrlPostQuestion = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
     
@@ -61,5 +62,19 @@ export class PublicactionService{
     getQuestion():Observable<any>{
         const url = `${this.apiUrlGet}`
         return this.http.get<any>(url)
+    }
+
+    createQuestion(enunciado:string, tipoPregunta:string, enabled:number, peso:number, forms:boolean, answers:any):Observable<any>{
+        const url = `${this.apiUrlPostQuestion}`
+        const params = {
+            enunciado: enunciado,
+            tipoPregunta: tipoPregunta,
+            enabled: enabled,
+            peso: peso,
+            forms: forms,
+            answers: answers
+        }
+
+        return this.http.post<any>(url, params)
     }
 }
