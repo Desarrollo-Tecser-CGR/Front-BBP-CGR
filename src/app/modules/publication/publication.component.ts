@@ -137,10 +137,9 @@ export class PublicationComponent {
       },
       (error) => {
         console.error('Error al guardar la pregunta:', error);
-      }
-    );
+      });
+    }
   }
-}
 
   ngOnInit(): void {
     this.getQuestions();
