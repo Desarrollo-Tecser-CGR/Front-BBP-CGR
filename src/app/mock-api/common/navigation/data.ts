@@ -34,14 +34,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/catalog',
         roles: ['administrador']
     },
-    {
-        id   : 'assessment',
-        title: 'Evaluación',
-        type : 'basic',
-        icon : 'heroicons_outline:queue-list',
-        link : '/assessment',
-        roles: ['administrador', 'evaluador']
-    },
+    // {
+    //     id   : 'assessment',
+    //     title: 'Evaluación',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:queue-list',
+    //     link : '/assessment',
+    //     roles: ['administrador', 'evaluador']
+    // },
     {
         id   : 'follow',
         title: 'Gestión de usuarios',
@@ -57,6 +57,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
         icon : 'heroicons_outline:megaphone',
         link : '/publication',
         roles: ['administrador']
+    },
+    {
+        id   : 'publication-questions',
+        title: 'Formulario de Evolucionador',
+        type : 'basic',
+        icon : 'heroicons_outline:megaphone',
+        link : '/publication-questions',
+        roles: ['administrador', 'evolucionador']
     },
     {
         id   : 'inbox',

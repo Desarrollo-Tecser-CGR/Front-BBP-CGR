@@ -182,6 +182,21 @@ export const appRoutes: Route[] = [
             },
         ]
     },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'publication-questions', loadChildren: () =>
+                import('app/modules/publication-questions/publication-questions.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
+            },
+        ]
+    },
     // Resumen common routes
     {
         path: '',
@@ -327,6 +342,21 @@ export const appRoutes: Route[] = [
             {path: 'evaluation-questionnaire', loadChildren: () =>
                 import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
                 data: { requiredRoles: ['evaluador'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'evolution-questionnaire', loadChildren: () =>
+                import('app/layout/common/evolution-questionnaire/evolution-questionnaire.component.routes'),
+                data: { requiredRoles: ['administrador', 'evaluador', 'evolucionador'], module: '' }
             },
         ]
     }

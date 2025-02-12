@@ -231,162 +231,37 @@ export class ResumenComponent implements OnInit {
                     return; // Salir después de manejar el flujo
                 }
 
-
-
-
-               // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
-               if (currentRole === 'caracterizador') {
-                // Obtener usuarios guardados en localStorage (pueden ser múltiples evaluadores)
+            // Lógica para cambiar el estado de flujo si el rol es 'caracterizador'
+            if (currentRole === 'caracterizador') {
                 const storedUser = localStorage.getItem('selectedUser');
                 const selectedUsers = storedUser ? JSON.parse(storedUser) : null;
-
+            
                 if (!selectedUsers || !Array.isArray(selectedUsers) || selectedUsers.length === 0) {
-                    console.warn(' No se encontraron usuarios seleccionados.');
+                    console.warn('No se encontraron usuarios seleccionados.');
                     return;
                 }
-
-                // Determinar si hay evaluadores o jefes de unidad
-                const evaluadores = selectedUsers.filter(user => user.cargo && user.cargo.trim().toLowerCase() === 'evaluador');
-                const jefesUnidad = selectedUsers.filter(user => user.cargo && user.cargo.trim().toLowerCase() === 'jefeunidad');
-
-                console.log(' Evaluadores seleccionados:', evaluadores);
-                console.log(' Jefe de Unidad seleccionado:', jefesUnidad);
-
+            
+                const evaluadores = selectedUsers.filter(user => user.cargo?.trim().toLowerCase() === 'evaluador');
+                const jefesUnidad = selectedUsers.filter(user => user.cargo?.trim().toLowerCase() === 'jefeunidad');
+            
+                console.log('Evaluadores seleccionados:', evaluadores);
+                console.log('Jefe de Unidad seleccionado:', jefesUnidad);
+            
+                const patchRequests = [];
+            
                 if (evaluadores.length > 0) {
-                    console.log('Cambiando estado a evaluación');
-                    flattenedValues.estadoFlujo = 'evaluacion';
-
-                    // Preparar y enviar el PATCH para cada evaluador
-                    const patchRequests = evaluadores.map(evaluador => {
-                        const patchData = {
-                            actualizaciones: {
-                                estadoFlujo: 'evaluacion'
-                            },
-                            sAMAccountName: evaluador.userName,
-                            estadoFlujo: 'evaluacion',
-                            comentarioUsuario: this.additionalInfoFromModal || '',
-                        };
-
-                        console.log(' Enviando actualización para evaluador:', evaluador.userName);
-                        return this.resumenService.updateDataAsJson(this.Id, patchData);
-                    });
-
-                    // Enviar todas las solicitudes en paralelo con forkJoin
-                    forkJoin(patchRequests).subscribe(
-                        (responses) => {
-                            Swal.fire({
-                                title: '¡Actualización Exitosa!',
-                                text: 'El formulario ha sido asignado a los evaluadores.',
-                                icon: 'success',
-                                confirmButtonText: 'Aceptar',
-                            }).then(() => {
-                                window.location.href = './example';
-                            });
-                        },
-                        (error) => {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'No se pudo asignar la práctica a los evaluadores.',
-                                icon: 'error',
-                                confirmButtonText: 'Aceptar',
-                            });
-                        }
-                    );
-
-                    // Enviar notificación a cada evaluador
-                    evaluadores.forEach(evaluador => {
-                        this.notificationService.sendNotification(this.Id, evaluador.userName, 6);
-                    });
-
-                    } else if (jefesUnidad.length > 0) {
-                        console.log('Cambiando estado a caracterizada_JU');
-                        flattenedValues.estadoFlujo = 'caracterizada_JU';
-
-                        // Si hay jefeUnidad, solo se envía una vez
-                        const jefe = jefesUnidad[0]; // Tomamos solo el primero
-
-                        // Obtenemos todos los valores del formulario
-                        const formValues = this.horizontalStepperForm.getRawValue();
-
-                        // Creamos el objeto de datos a enviar
-                        const patchData = {
-                        actualizaciones: {
-                            entityCgr: formValues.step1.entityCgr || null,
-                            nombreDependenciaArea: formValues.step1.nombreDependenciaArea || null,
-                            nombre: formValues.step2.nombre || '',
-                            cargo: formValues.step2.cargo || '',
-                            correo: formValues.step2.correo || '',
-                            contacto: formValues.step2.contacto || '',
-                            typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
-                            typePractice: formValues.step3.typePractice || null,
-                            typology: formValues.step3.typology || null,
-                            estadoFlujo: 'caracterizada_JU',  // Este se mantiene estático como 'caracterizada'
-                            levelGoodPractice: formValues.step3.levelGoodPractice || null,
-                            nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
-                            propositoPractica: formValues.step3.propositoPractica || '',
-                            objectiveMainPractice: formValues.step3.objectiveMainPractice || null,
-                            expectedImpact: formValues.step4.expectedImpact || [],  // Puede ser un array vacío si no hay valor
-                            metodologiaUsada: formValues.step4.metodologiaUsada || '',
-                            durationImplementation: formValues.step4.durationImplementation || null,
-                            stagesMethodology: formValues.step4.stagesMethodology || [],
-                            periodoDesarrolloInicio: formValues.step4.periodoDesarrolloInicio || '',
-                            periodoDesarrolloFin: formValues.step4.periodoDesarrolloFin || '',
-                            typeMaterialProduced: formValues.step5.typeMaterialProduced || [],
-                            supportReceived: formValues.step5.supportReceived || [],
-                            recognitionsNationalInternational: formValues.step5.recognitionsNationalInternational || null,
-                            controlObject: formValues.step5.controlObject || null,
-                            taxonomyEvent: formValues.step5.taxonomyEvent || [],
-                            typePerformance: formValues.step5.typePerformance || null,
-                            documentoActuacion: formValues.step6.documentoActuacion || '',
-                            descripcionResultados: formValues.step5.descripcionResultados || ''
-                        },
-                        sAMAccountName: jefe.userName,  // Mantener el usuario seleccionado
-                        estadoFlujo: 'caracterizada_JU',  // Este es el valor estático que debe enviarse
-                        comentarioUsuario: this.additionalInfoFromModal || '',  // Mantener el comentario
-                        };
-
-                        console.log(patchData);
-                        //     actualizaciones: {
-                        //         ...this.horizontalStepperForm.getRawValue(), // Enviar todos los datos del formulario
-                        //         // estadoFlujo: 'caracterizada_JU' // Sobreescribir el estado de flujo
-                        //     },
-                        //     sAMAccountName: jefe.userName, // Mantener el usuario seleccionado
-                        //     estadoFlujo: 'caracterizada_JU', // Mantener el estado también fuera de `actualizaciones`
-                        //     comentarioUsuario: this.additionalInfoFromModal || '', // Mantener el comentario
-                        // };
-                        console.log(" Datos a enviar:", JSON.stringify(patchData, null, 2));
-
-                        console.log('Enviando actualización para Jefe de Unidad:', jefe.userName);
-
-                        this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
-                            (response) => {
-                                Swal.fire({
-                                    title: '¡Actualización Exitosa!',
-                                    text: 'El formulario ha sido asignado al Jefe de Unidad.',
-                                    icon: 'success',
-                                    confirmButtonText: 'Aceptar',
-                                }).then(() => {
-                                    window.location.href = './example';
-                                });
-                            },
-                            (error) => {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'No se pudo asignar la práctica al Jefe de Unidad.',
-                                    icon: 'error',
-                                    confirmButtonText: 'Aceptar',
-                                });
-                            }
-                        );
-
-                        // Enviar notificación al Jefe de Unidad
-                        this.notificationService.sendNotification(this.Id, jefe.userName, 6);
-                    }
-
-                    console.log(`Estado de flujo actualizado: ${flattenedValues.estadoFlujo}`);
-                    return;
+                    patchRequests.push(this.handleEvaluadoresUpdate(evaluadores, flattenedValues));
                 }
-
+            
+                if (jefesUnidad.length > 0) {
+                    patchRequests.push(this.handleJefeUnidadUpdate(jefesUnidad[0], flattenedValues));
+                }
+            
+                if (patchRequests.length > 0) {
+                    return; // 📌 IMPORTANTE: Salir para evitar la llamada extra a updateDataAsJson
+                }
+            }
+            
 
 
 
@@ -999,7 +874,146 @@ export class ResumenComponent implements OnInit {
         return currentRole === 'validador';
     }
 
+// ======================== Logica envio de datos estructurados por PATCH de Evaluadores y Jefe Unidad seperados ======================== //
+// Función para manejar la actualización de evaluadores
+private handleEvaluadoresUpdate(evaluadores: any[], flattenedValues: any): void {
+    console.log('Cambiando estado a evaluación');
+    flattenedValues.estadoFlujo = 'evaluacion';
 
+    const formValues = this.horizontalStepperForm.getRawValue();
+
+    const patchRequests = evaluadores.map(evaluador => {
+        const patchData = {
+            actualizaciones: {
+                entityCgr: formValues.step1.entityCgr || null,
+                nombreDependenciaArea: formValues.step1.nombreDependenciaArea || null,
+                nombre: formValues.step2.nombre || '',
+                cargo: formValues.step2.cargo || '',
+                correo: formValues.step2.correo || '',
+                contacto: formValues.step2.contacto || '',
+                typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
+                typePractice: formValues.step3.typePractice || null,
+                typology: formValues.step3.typology || null,
+                estadoFlujo: 'evaluacion',
+                levelGoodPractice: formValues.step3.levelGoodPractice || null,
+                nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
+                propositoPractica: formValues.step3.propositoPractica || '',
+                objectiveMainPractice: formValues.step3.objectiveMainPractice || null,
+                expectedImpact: formValues.step4.expectedImpact || [],
+                metodologiaUsada: formValues.step4.metodologiaUsada || '',
+                durationImplementation: formValues.step4.durationImplementation || null,
+                stagesMethodology: formValues.step4.stagesMethodology || [],
+                periodoDesarrolloInicio: formValues.step4.periodoDesarrolloInicio || '',
+                periodoDesarrolloFin: formValues.step4.periodoDesarrolloFin || '',
+                typeMaterialProduced: formValues.step5.typeMaterialProduced || [],
+                supportReceived: formValues.step5.supportReceived || [],
+                recognitionsNationalInternational: formValues.step5.recognitionsNationalInternational || null,
+                controlObject: formValues.step5.controlObject || null,
+                taxonomyEvent: formValues.step5.taxonomyEvent || [],
+                typePerformance: formValues.step5.typePerformance || null,
+                documentoActuacion: formValues.step6.documentoActuacion || '',
+                descripcionResultados: formValues.step5.descripcionResultados || ''
+            },
+            sAMAccountName: evaluador.userName,
+            estadoFlujo: 'evaluacion',
+            comentarioUsuario: this.additionalInfoFromModal || '',
+        };
+
+        console.log('Enviando actualización para evaluador:', evaluador.userName);
+        return this.resumenService.updateDataAsJson(this.Id, patchData);
+    });
+
+    forkJoin(patchRequests).subscribe(
+        () => {
+            Swal.fire({
+                title: '¡Actualización Exitosa!',
+                text: 'El formulario ha sido asignado a los evaluadoress.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => window.location.href = './example');
+        },
+        () => {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo asignar la práctica a los evaluadores.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+
+    evaluadores.forEach(evaluador => {
+        this.notificationService.sendNotification(this.Id, evaluador.userName, 6);
+    });
+}
+
+
+// 📌 Función para manejar la actualización del Jefe de Unidad
+private handleJefeUnidadUpdate(jefe: any, flattenedValues: any): void {
+    console.log('Cambiando estado a caracterizada_JU');
+    flattenedValues.estadoFlujo = 'caracterizada_JU';
+
+    const formValues = this.horizontalStepperForm.getRawValue();
+
+    const patchData = {
+        actualizaciones: {
+            entityCgr: formValues.step1.entityCgr || null,
+            nombreDependenciaArea: formValues.step1.nombreDependenciaArea || null,
+            nombre: formValues.step2.nombre || '',
+            cargo: formValues.step2.cargo || '',
+            correo: formValues.step2.correo || '',
+            contacto: formValues.step2.contacto || '',
+            typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
+            typePractice: formValues.step3.typePractice || null,
+            typology: formValues.step3.typology || null,
+            estadoFlujo: 'caracterizada_JU',
+            levelGoodPractice: formValues.step3.levelGoodPractice || null,
+            nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
+            propositoPractica: formValues.step3.propositoPractica || '',
+            objectiveMainPractice: formValues.step3.objectiveMainPractice || null,
+            expectedImpact: formValues.step4.expectedImpact || [],
+            metodologiaUsada: formValues.step4.metodologiaUsada || '',
+            durationImplementation: formValues.step4.durationImplementation || null,
+            stagesMethodology: formValues.step4.stagesMethodology || [],
+            periodoDesarrolloInicio: formValues.step4.periodoDesarrolloInicio || '',
+            periodoDesarrolloFin: formValues.step4.periodoDesarrolloFin || '',
+            typeMaterialProduced: formValues.step5.typeMaterialProduced || [],
+            supportReceived: formValues.step5.supportReceived || [],
+            recognitionsNationalInternational: formValues.step5.recognitionsNationalInternational || null,
+            controlObject: formValues.step5.controlObject || null,
+            taxonomyEvent: formValues.step5.taxonomyEvent || [],
+            typePerformance: formValues.step5.typePerformance || null,
+            documentoActuacion: formValues.step6.documentoActuacion || '',
+            descripcionResultados: formValues.step5.descripcionResultados || ''
+        },
+        sAMAccountName: jefe.userName,
+        estadoFlujo: 'caracterizada_JU',
+        comentarioUsuario: this.additionalInfoFromModal || '',
+    };
+
+    console.log("Datos a enviar:", JSON.stringify(patchData, null, 2));
+
+    this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+        () => {
+            Swal.fire({
+                title: '¡Actualización Exitosa!',
+                text: 'El formulario ha sido asignado al Jefe de Unidad.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => window.location.href = './example');
+        },
+        () => {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo asignar la práctica al Jefe de Unidad.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+        }
+    );
+
+    this.notificationService.sendNotification(this.Id, jefe.userName, 6);
+}
 
 // ======================== Logica envio de datos estructurados por PATCH ======================== //
 private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: string): void {
@@ -1082,39 +1096,61 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
     }
 
 // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
-    desestimarPractica(): void {
-        if (!this.Id) {
+dismissPractice(): void {
+    if (!this.Id) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+        });
+        return;
+    }
+
+    const accessName = localStorage.getItem('accessName'); // Obtener el accessName desde el localStorage
+
+    if (!accessName) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No se encontró un usuario logueado. No se puede realizar la actualización.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+        });
+        return; // Finaliza si no hay accessName
+    }
+
+    const patchData = {
+        actualizaciones: {
+            estadoFlujo: 'descartada', // Actualizar el estado de flujo
+        },
+        sAMAccountName: accessName, // Usuario logueado como sAMAccountName
+        estadoFlujo: 'descartada', // Estado de flujo
+        comentarioUsuario: 'Comentario estándar', // Comentario fijo
+    };
+
+    // Llamar al servicio de actualización con el nuevo formato
+    this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+        (response) => {
+            Swal.fire({
+                title: '¡Práctica Desestimada!',
+                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                window.location.href = './example';
+            });
+        },
+        (error) => {
             Swal.fire({
                 title: 'Error',
-                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
+                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
-            return;
         }
+    );
+}
 
-        const updatedData = { estadoFlujo: 'desestimada' };
-        this.resumenService.updateStateWithPatch(this.Id, updatedData).subscribe(
-            (response) => {
-                Swal.fire({
-                    title: '¡Práctica Desestimada!',
-                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                }).then(() => {
-                    window.location.reload();
-                });
-            },
-            (error) => {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                });
-            }
-        );
-    }
 
 // ======================== Logica que muestra el modal en la vista ======================== //
     openCaracterizationModal(): void {

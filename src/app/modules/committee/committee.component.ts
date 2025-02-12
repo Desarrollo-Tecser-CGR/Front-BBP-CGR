@@ -142,6 +142,63 @@ export class CommitteeComponent implements OnInit {
         );
     }
     
+    // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
+    dismissPractice(): void {
+        if (!this.id) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+            return;
+        }
     
-}
+        const accessName = localStorage.getItem('accessName'); // Obtener el accessName desde el localStorage
+    
+        if (!accessName) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se encontró un usuario logueado. No se puede realizar la actualización.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+            return; // Finaliza si no hay accessName
+        }
+    
+        // Convertir el id a número
+        const idAsNumber = Number(this.id);
+    
+        const patchData = {
+            actualizaciones: {
+                estadoFlujo: 'descartada', // Actualizar el estado de flujo
+            },
+            sAMAccountName: accessName, // Usuario logueado como sAMAccountName
+            estadoFlujo: 'descartada', // Estado de flujo actualizado
+            comentarioUsuario: 'Comentario estándar', // Comentario fijo
+        };
+    
+        // Llamar al servicio de actualización con el nuevo formato
+        this.resumenService.updateDataAsJson(idAsNumber, patchData).subscribe(
+            (response) => {
+                Swal.fire({
+                    title: '¡Práctica Desestimada!',
+                    text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                }).then(() => {
+                    window.location.href = './example';
+                });
+            },
+            (error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                });
+            }
+        );
+    }    
+}    
 
