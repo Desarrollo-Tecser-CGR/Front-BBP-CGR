@@ -39,8 +39,6 @@ export class GenericTableComponent<T> implements OnInit, AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('ngOnChanges - data:', changes.data?.currentValue);
-    console.log('ngOnChanges - columns:', changes.columns?.currentValue);
 
     if (changes.data || changes.columns) {
       this.initializeTable();
@@ -49,13 +47,10 @@ export class GenericTableComponent<T> implements OnInit, AfterViewInit {
 
   initializeTable(): void {
     if (this.data.length > 0 && this.columns.length > 0) {
-      console.log('Initializing table with data:', this.data);
-      console.log('Initializing table with columns:', this.columns);
 
       this.displayedColumns = [...this.columns.map((col) => col.key), 'actions'];
       this.dataSource.data = this.data;
     } else {
-      console.warn('No data or columns provided to the table');
     }
   }
 

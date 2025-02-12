@@ -43,7 +43,6 @@ export class ExampleComponent implements OnInit  {
     rol: string = '';
     ngOnInit(): void {
          this.roles = JSON.parse(localStorage.getItem('accessRoles'));
-         this.rol = this.roles[0]
-        console.log("Rol en sesion: ", this.rol)  
+         this.rol = this.roles[0] 
     }
 }  

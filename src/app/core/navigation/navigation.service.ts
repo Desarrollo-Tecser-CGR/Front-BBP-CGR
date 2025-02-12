@@ -32,7 +32,6 @@ export class NavigationService {
     get(): Observable<Navigation> {
         return this._httpClient.get<Navigation>('api/common/navigation').pipe(
             tap((navigation) => {
-                console.log('Original Navigation:', navigation);
 
                 // Obtén los roles del usuario desde localStorage
                 const userRoles: string[] = this.getUserRolesFromLocalStorage();
@@ -40,7 +39,6 @@ export class NavigationService {
                 // Filtra las opciones del menú según los roles
                 const filteredNavigation = this.filterNavigationByRoles(navigation, userRoles);
 
-                console.log('Filtered Navigation:', filteredNavigation);
 
                 // Actualiza el BehaviorSubject con la navegación filtrada
                 this._navigation.next(filteredNavigation);

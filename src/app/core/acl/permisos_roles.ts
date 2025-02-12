@@ -4,6 +4,8 @@ export const PERMISOSROLES = {
         Validador:  'validador',
         Caracterizador:  'caracterizador',
         jefeUnida:  'jefeUnidad',
-        evaluador: 'evaluador'
+        seguimiento: 'seguimiento',
+        evaluador: 'evaluador',
+        comiteTecnico: 'comiteTecnico'
     }
 };

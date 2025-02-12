@@ -7,7 +7,7 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
     providedIn: 'root' // Disponible en toda la aplicación
 })
 export class CreateService {
-    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/form/guardar`; // Cambia por tu endpoint del backend
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/form/save`; // Cambia por tu endpoint del backend
 
     constructor(private http: HttpClient) {}
 

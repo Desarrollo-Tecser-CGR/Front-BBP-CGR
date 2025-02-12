@@ -20,20 +20,16 @@ export class DataServices{
     public getFileByIdResumen(getIdentity:number) : Observable<any[]>{
       return this.http.get(this.url + getIdentity).pipe(
         map((response:any)=>{
-          console.log('Data:', response);
           const files :any[] = response.files;
-          console.log('Files:', files);
           return files;
         }),
         catchError((e)=>{
-          console.error('Error al obtener los archivos:', e);
           return throwError(e);
         })
       )
     }
 
     public downloadFile(id : number):void{
-      console.log('Descargando archivo con ID:', id); 
       this.http.get(`${this.downloadUrl}${id}?action=download`, {responseType: 'blob', observe: 'response'}).subscribe({
       next: (response) =>{
         const constentDisposition = response.headers.get('Content-Disposition');
@@ -69,7 +65,6 @@ export class DataServices{
             icon: 'error',
             confirmButtonText: 'Aceptar',
         });
-        console.error("Error al descargar el archivo", err)
 
       }
      })
@@ -79,7 +74,7 @@ export class DataServices{
       this.http.get(`${this.downloadUrl}${id}?action=view`,{responseType:'blob'}).subscribe((fileBlob)=>{
         const fileURL = URL.createObjectURL(fileBlob);
         window.open(fileURL);
-      }) //
+      }) 
     }
     private columns: any[]=[
         {key:'id', label:'Id'},

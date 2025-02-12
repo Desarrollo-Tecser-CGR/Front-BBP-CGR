@@ -1,0 +1,215 @@
+<div class="p-6 flex flex-col w-full">
+  <div>
+      <h1 class="text-2xl font-bold mb-4">Administrar preguntas</h1>
+  </div>
+
+  <!-- Pestañas -->
+  <div class="flex mb-0">
+      <button 
+        (click)="activeTab = 'allQuestions'; currentPageAllQuestions = 1" 
+        class="px-4 py-2 rounded-t-lg border border-gray-300 transition-colors duration-300"
+        [ngClass]="{
+          'bg-white border-b-0 text-gray-800': activeTab === 'allQuestions', 
+          'bg-gray-200 text-gray-600': activeTab !== 'allQuestions'
+        }"
+      >
+          Todas las preguntas ({{ allQuestions.length }})
+      </button>
+      <button 
+        (click)="activeTab = 'customForm'; currentPageCustomForm = 1" 
+        class="px-4 py-2 rounded-t-lg border border-gray-300 transition-colors duration-300"
+        [ngClass]="{
+          'bg-white border-b-0 text-gray-800': activeTab === 'customForm', 
+          'bg-gray-200 text-gray-600': activeTab !== 'customForm'
+        }"
+      >
+          Formulario personalizado ({{ customFormQuestions.length }})
+      </button>
+
+      <!-- Botón para abrir el modal -->
+      <button (click)="openModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Crear</button>
+  </div>
+
+  <!-- Contenedor de la tabla con unión a las pestañas -->
+  <div class="border border-gray-300 rounded-b-lg rounded-r-lg overflow-hidden">
+
+    <!-- Pestaña de Todas las preguntas -->
+    <div *ngIf="activeTab === 'allQuestions'">
+      <table class="w-full border-collapse">
+          <thead>
+              <tr class="bg-white">
+                  <th class="border-b border-gray-300 p-2">#</th>
+                  <th class="border-b border-gray-300 p-2">Pregunta</th>
+                  <th class="border-b border-gray-300 p-2">Opciones</th>
+                  <th class="border-b border-gray-300 p-2">Respuesta Correcta</th>
+                  <th class="border-b border-gray-300 p-2">Acciones</th>
+              </tr>
+          </thead>
+          <tbody class="bg-white">
+            <tr *ngFor="let question of getPaginatedQuestions(allQuestions, 'allQuestions'); let i = index" class="border border-gray-300">
+              <td class="border-b border-gray-300 p-2">{{ (currentPageAllQuestions - 1) * itemsPerPage + i + 1 }}</td>
+                  <td class="border-b border-gray-300 p-2">{{ question.questions.enunciado }}</td>
+                  <td class="border-b border-gray-300 p-2">
+                    <ul class="flex gap-x-2 ml-2 list-none">
+                      <li *ngFor="let option of question.questions.answers; let last = last">
+                        {{ option.respuesta }}{{ !last ? ' /' : '' }}
+                      </li>
+                    </ul>
+                  </td>
+                  <td class=" border-gray-300 p-2">
+                    <p class="flex justify-center">
+                      {{question.answers.respuesta}}
+                    </p>
+                  </td>
+                  <td class="border-b border-gray-300 p-2">
+                      <button (click)="addToCustomForm(question)" class="">
+                        <mat-icon svgIcon="heroicons_solid:plus-circle"></mat-icon>
+                      </button>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+      <!-- Paginador -->
+      <div class="pagination-buttons flex justify-end gap-x-2 pt-3 pr-10 pb-3 bg-white">
+        <button (click)="previousPage('allQuestions')" [disabled]="currentPageAllQuestions === 1"
+          class="p-3 text-[#2D3480] py-1 px-4 rounded-lg"
+        >
+        <mat-icon svgIcon="heroicons_solid:chevron-left"></mat-icon>
+        </button>
+        <select class="py-2 px-4 rounded-lg border cursor-pointer"
+        (change)="goToPage($event, 'allQuestions')" [value]="currentPageAllQuestions"
+      >
+        <option *ngFor="let page of totalPagesArrayAllQuestions; let i = index" [value]="i + 1">
+          {{ i + 1 }}
+        </option>
+      </select>
+        <button (click)="nextPage('allQuestions')" [disabled]="currentPageAllQuestions === getTotalPages(allQuestions)"
+          class="p-3 text-[#2D3480] py-1 px-4 rounded-lg"
+        >
+          <mat-icon svgIcon="heroicons_solid:chevron-right"></mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pestaña de Formulario personalizado -->
+    <div *ngIf="activeTab === 'customForm'">
+      <table class="w-full border-collapse">
+          <thead>
+              <tr class="bg-white">
+                  <th class="border-b border-gray-300 p-2">#</th>
+                  <th class="border-b border-gray-300 p-2">Pregunta</th>
+                  <th class="border-b border-gray-300 p-2">Opciones</th>
+                  <th class="border-b border-gray-300 p-2">Respuesta Correcta</th>
+                  <th class="border-b border-gray-300 p-2">Acciones</th>
+              </tr>
+          </thead>
+          <tbody class="bg-white">
+            <tr *ngFor="let question of getPaginatedQuestions(customFormQuestions, 'customForm'); let i = index" class="border-b border-gray-300">
+                  <td class=" p-2">{{ (currentPageCustomForm - 1) * itemsPerPage + i + 1 }}</td>
+                  <td class=" p-2">{{ question.questions.enunciado }}</td>
+                  <td class=" p-2">
+                    <ul class="flex gap-x-2 ml-6 list-none">
+                      <li *ngFor="let option of question.questions.answers let last = last">
+                        {{ option.respuesta }}{{ !last ? ' /' : '' }}
+                      </li>
+                    </ul>
+                  </td>
+                  <td class="border-b border-gray-300 p-2">{{question.answers.respusta}}</td>
+                  <td class="p-2 flex justify-center items-center">
+                    <button (click)="addToCustomForm(question)" class="flex justify-center items-center">
+                      <mat-icon svgIcon="heroicons_solid:backspace"></mat-icon>
+                    </button>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+      <div class="flex justify-between items-center bg-white p-3 w-full border-t border-gray-300">
+    
+        <!-- Botón de Guardar Formulario -->
+        <button (click)="openSaveModal()" class="bg-green-500 text-white px-4 py-2 rounded-2xl">
+          Guardar Formulario
+        </button>
+    
+        <!-- Paginador -->
+        <div class="flex items-center gap-x-2">
+          <button
+            (click)="previousPage('customForm')" [disabled]="currentPageCustomForm === 1"
+            class="p-3 text-[#2D3480] py-1 px-4 rounded-lg"
+          >
+            <mat-icon svgIcon="heroicons_solid:chevron-left"></mat-icon>
+          </button>
+    
+          <select
+            class="py-2 px-4 rounded-lg border cursor-pointer"
+            (change)="goToPage($event, 'customForm')" [value]="currentPageCustomForm"
+          >
+            <option *ngFor="let page of totalPagesArrayCustomForm; let i = index" [value]="i + 1">
+              {{ i + 1 }}
+            </option>
+          </select>
+    
+          <button
+            (click)="nextPage('customForm')" [disabled]="currentPageCustomForm === getTotalPages(customFormQuestions)"
+            class="p-3 text-[#2D3480] py-1 px-4 rounded-lg"
+          >
+            <mat-icon svgIcon="heroicons_solid:chevron-right"></mat-icon>
+          </button>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h2 class="text-xl font-semibold mb-4">Crear Pregunta</h2>
+
+    <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()">
+      <label class="block mb-2">Enunciado:</label>
+      <input type="text" formControlName="enunciado" class="w-full border p-2 rounded">
+
+      <label class="block mt-4">Selecciona la respuesta correcta:</label>
+      <div class="flex gap-4 mt-2">
+        <label>
+          <input type="radio" formControlName="correctAnswer" value="Sí"> Sí
+        </label>
+        <label>
+          <input type="radio" formControlName="correctAnswer" value="No"> No
+        </label>
+      </div>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button type="button" (click)="closeModal()" class="bg-gray-400 px-3 py-1 rounded">Cancelar</button>
+        <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal de Guardar Formulario -->
+<div *ngIf="showSaveModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h2 class="text-xl font-semibold mb-4">Guardar Cuestionario</h2>
+
+    <form [formGroup]="saveForm" (ngSubmit)="submitForm()">
+      <label class="block mb-2">Nombre del cuestionario:</label>
+      <input 
+        type="text" 
+        formControlName="nombreCuestionario" 
+        class="w-full border p-2 rounded"
+        [class.border-red-500]="saveForm.controls['nombreCuestionario'].invalid && saveForm.controls['nombreCuestionario'].touched"
+      >
+
+      <!-- Mensaje de error si no escribe nada -->
+      <p *ngIf="saveForm.controls['nombreCuestionario'].invalid && saveForm.controls['nombreCuestionario'].touched" 
+         class="text-red-500 text-sm mt-1">
+        ⚠️ El nombre del cuestionario es obligatorio.
+      </p>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button type="button" (click)="closeSaveModal()" class="bg-gray-400 px-3 py-1 rounded">Cancelar</button>
+        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

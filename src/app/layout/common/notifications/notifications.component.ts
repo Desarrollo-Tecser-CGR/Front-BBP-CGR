@@ -18,7 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
  
 @Component({
     selector: 'notifications',
@@ -73,22 +73,43 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this._notificationsService._notifications.asObservable();
 
         if (this.rol === 'validador') {
+            forkJoin([
+                this._notificationsService.getByType(1),
+                this._notificationsService.getByType(2),
+                this._notificationsService.getByType(6)
+            ]).subscribe(
+                ([registerNotifications, validationNotifications, caracterizationNotifications])=>{
+                    const response = [
+                        ...registerNotifications,
+                        ...validationNotifications,
+                        ...caracterizationNotifications
+                    ];
 
-            this._notificationsService._notifications.subscribe(
-                (data)=>{
-                    console.log('Notificaciones recibidas en el componente:', data); 
-                    this.notifications= data;
+                    this._notificationsService._notifications.next(response);
+                    this.notifications = response;
+
                     this._calculateUnreadCount();
                     this._changeDetectorRef.markForCheck();
-    
+                },
+                (error) =>{
+                    console.error('Error al obtener las notificaciones:',error);
+                    
+                }
+            )
+        } 
+        if (this.rol === 'caracterizador') {
+            this._notificationsService.getByType(3).subscribe(
+                (data) =>{
+                    this._notificationsService._notifications.next(data);
+                    this.notifications= data;
+
+                    this._calculateUnreadCount();
+                    this._changeDetectorRef.markForCheck();
                 },
                 (error)=>{
-                    console.error('Error al obtener las notificaciones:', error);
                 }
             );
         };
-
-
     }
  
     /**

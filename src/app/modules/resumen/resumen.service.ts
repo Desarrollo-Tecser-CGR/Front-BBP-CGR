@@ -6,20 +6,18 @@ import registerUsersRoutes from '../auth/register-users/register-users.routes';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 
-
 @Injectable({
     providedIn: 'root',
 })
 export class ResumenService {
 
-    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/guardar`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/save`;
     private uploadUrl = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
     private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity`;
     private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getAllTypes`;
     private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
-
 
     // Propiedades para almacenar datos compartidos
     private typesData: { [key: string]: any[] } = {}; 
@@ -30,16 +28,13 @@ export class ResumenService {
     constructor(private http: HttpClient,
     ) {}
 
-
     sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; // Concatenar el nombre al endpoint
-   
+        const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; 
         return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
             map((response: any) => {
-                console.log('Data:', response);
+
                 const id = response.data.id;
-                console.log('Id hv:', id);
                 return response;
             }),
             catchError((e) => {
@@ -48,9 +43,7 @@ export class ResumenService {
             }),
         );
     }
-   
     uploadFile(identityId: number, fileData: FormData): Observable<any> {
-        console.log('Id pasando al servicio de carga', identityId)
         return this.http.post(this.uploadUrl+`?identityId=${identityId}` , fileData);
     }
 
@@ -61,8 +54,11 @@ export class ResumenService {
     updateDataAsJson(id: number, formData: any): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         const url = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity/${id}`;
-        return this.http.patch(url, formData, { headers }); 
-    }    
+        console.log('ID a actualizar:', id);
+        console.log('Datos a enviar:', formData);
+        return this.http.patch(url, formData, { headers, responseType: 'text' as 'json' }); // Cambiar responseType a 'text'
+    }
+    
 
     updateStateWithPatch(id: number, updatedData: any): Observable<any> {
         const url = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity/${id}`;
@@ -70,28 +66,19 @@ export class ResumenService {
         return this.http.patch(url, updatedData, { headers });
     }
     
-
     fetchAllTypes(): Observable<any> {
         return new Observable((observer) => {
             this.http.get<any>(this.apiUrlgetdates).subscribe(
                 (response) => {
                     if (response && response.data) {
                         this.typesData = response.data; 
-                        console.log(
-                            'Datos cargados del servicio:',
-                            this.typesData
-                        ); 
                         this.isDataLoaded.next(true); 
                     } else {
-                        console.error(
-                            'No se encontró el campo data en la respuesta.'
-                        );
                     }
                     observer.next(response);
                     observer.complete();
                 },
                 (error) => {
-                    console.error('Error al obtener los datos:', error);
                     observer.error(error);
                 }
             );

@@ -1,0 +1,26 @@
+<div class="max-w-full">
+    <form class="bg-transparent overflow-hidden rounded">
+      <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+        <ng-container matColumnDef="key">
+          <th mat-header-cell *matHeaderCellDef>Propiedad</th>
+          <td mat-cell *matCellDef="let element">{{ element.key }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="value">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element">
+            <ng-container *ngIf="!isObjectOrArray(element.value)">
+              {{ element.value }}
+            </ng-container>
+  
+            <ng-container *ngIf="isObjectOrArray(element.value)">
+              <pre>{{ element.value }}</pre>
+            </ng-container>
+          </td>
+        </ng-container>
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </form>
+  </div>

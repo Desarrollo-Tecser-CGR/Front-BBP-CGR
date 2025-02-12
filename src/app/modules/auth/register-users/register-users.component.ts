@@ -101,7 +101,6 @@ export class AuthRegisterUsersComponent implements OnInit {
                         icon: 'success',
                         confirmButtonText:'Aceptar',
                     })
-                    console.log('Usuario creado', response);
                     this.showAlert = true;
                 },
                 error =>{
@@ -111,7 +110,6 @@ export class AuthRegisterUsersComponent implements OnInit {
                             icon: 'error',
                             confirmButtonText: 'Aceptar',
                         });
-                    console.error('Error al crear el usuario', error);
                     this.showAlert = true;
                 }
             )

@@ -10,7 +10,7 @@ export class UserService {
 
   private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/user/createUser`;
   private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/user`;
-  private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/cargar-archivo`;
+  private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
   private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
   
     constructor(private http: HttpClient) { }

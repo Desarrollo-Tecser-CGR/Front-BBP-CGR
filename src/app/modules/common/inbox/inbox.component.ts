@@ -26,7 +26,7 @@ export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
   columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
   cargo: string;
-
+  fullName: string;
   buttons = [
     {
       // label: 'Edit',
@@ -35,14 +35,14 @@ export class InboxComponent implements OnInit {
       action: (row: any) => this.editRow(row),
     },
     {
-      // label: 'Delete',
+      // label: 'Validate',
       icon: 'heroicons_outline:document-check',
       color: 'accent',
       action: (row: any) => this.validateRow(row),
-    }
+    },
+    // 
   ]; // Botones dinámicos
   private _router: any;
-  fullName: string = '';
 
   constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router, private notificationsService: NotificationsService) { } // , private dialog: MatDialog
 
@@ -53,24 +53,51 @@ export class InboxComponent implements OnInit {
     console.log('Fullname inbox', this.fullName);
   
     // Definir botones dinámicamente según el rol
-    if (this.cargo === 'evaluador') {
-        this.buttons = [
-          {
-            icon: 'feather:check-square',
-            color: 'primary', 
-            action: (row: any) => this.evaluatePractice(row), 
-          },
-        ]
-    } else{
-      this.buttons = [
-        {
-          icon: 'heroicons_outline:pencil-square',
-          color: 'primary',
-          action: (row: any) => this.editRow(row),
-        },
-      ];
-    }
+
+ switch (this.cargo) {
+  case 'evaluador':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.evaluatePractice(row),
+      },
+    ];
+    break;
+
+  case 'comiteTecnico':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.openCommittee(row),
+      },
+    ];
+    break;
+
+  case 'seguimiento':
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:users',
+        color: 'primary',
+        action: (row: any) => this.auditPractice(row),
+      },
+    ];
+    break;
+
+  default:
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:pencil-square',
+        color: 'primary',
+        action: (row: any) => this.editRow(row),
+      },
+    ];
+    break;
+}
+
     
+
   
     // Agregar el botón de validación solo para validador y administrador
     if (['validador', 'administrador'].includes(this.cargo)) {
@@ -82,7 +109,6 @@ export class InboxComponent implements OnInit {
     }
     this.filterService.filter$.subscribe((filters) => {
       if (filters) {
-        console.log('Filtros emitidos desde FilterService:', filters);
         this.loadData(filters); // Siempre carga datos con los filtros emitidos
       }
     });
@@ -92,19 +118,22 @@ export class InboxComponent implements OnInit {
 
   loadData(filters?: any): void {
  
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador'].includes(this.cargo)) {
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento', 'comiteTecnico'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         sAMAccountName: this.fullName,
         ...filters, // Agrega los filtros si están definidos
  
       };
-     
- 
+      
+      console.log('datos cargados:', filters)
+
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
           console.log('Cuerpo de la petición:', requestBody);
  
+          console.log('Cuerpo de la petición:', requestBody);
+
           let response = dataRes.data;
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
@@ -130,17 +159,19 @@ export class InboxComponent implements OnInit {
  
     }
   }
-  
+  auditPractice(row:any):void{
+    if(this.cargo === 'seguimiento'){
+      this.router.navigateByUrl('/diffusion/' + row.id)
+    }
+  }
   evaluatePractice(row:any):void{
-    if(this.cargo === 'evaluador'){
+    if(this.cargo === 'evaluador', 'administrador'){
       this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
       console.log('id en validacion', row.id);
     }
   }
 
   editRow(row: any): void {
-    console.log('Estado del flujo:', row.estadoFlujo);
-    console.log('Rol actual:', this.cargo);
     // Condición de prueba
     if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
         Swal.fire({
@@ -156,7 +187,6 @@ export class InboxComponent implements OnInit {
   }
 
   deleteRow(row: any): void {
-    console.log('Delete row:', row);
     // Lógica para eliminar una fila
   }
 
@@ -198,25 +228,19 @@ export class InboxComponent implements OnInit {
         }
     );
 }
+
+  openCommittee(row: any): void {
+    if (row && row.id) {
+      this.router.navigate(['/committee', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
+    }
+  }
+
   pageLoad(): void {
-    console.log('Evento onload disparado.');
     window.location.reload()
   }
 
-
-  // ======================== Logica que muestra el modal en la vista ======================== //
-
-  //  openCaracterizationModal(row: any): void {
-  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-  //      width: '500px',
-  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
-  //    });
-
-  //    dialogRef.afterClosed().subscribe((result) => {
-  //      console.log('Modal cerrado con:', result);
-  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
-  //    });
-  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 

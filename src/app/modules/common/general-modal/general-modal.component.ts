@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { GenaralModalService } from './general-modal.service';
 import { Usuario } from './user.type';
 import { MatInputModule } from '@angular/material/input';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'general-modal.component',
@@ -35,6 +36,7 @@ export class DialogOverviewExampleDialog {
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
     private genaralModalService: GenaralModalService,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: { role: string, selectedUser: any, selectedUsers: Usuario[], additionalInfo: string },
   ) {}
 
@@ -55,13 +57,10 @@ export class DialogOverviewExampleDialog {
         } else if (response.usuarios && Array.isArray(response.usuarios)) {
           this.users = this.filterUsersByRole(response.usuarios);
         } else {
-          console.error('La respuesta no contiene un arreglo válido de usuarios.');
           this.users = [];
         }
-        console.log('Usuarios cargados:', this.users);
       },
       (error) => {
-        console.error('Error al cargar usuarios:', error);
       }
     );
   }
@@ -97,8 +96,6 @@ export class DialogOverviewExampleDialog {
   }
 
   confirmSelection(): void {
-    console.log('Usuario seleccionado:', this.selectedUser);
-    console.log('Información adicional:', this.additionalInfo);
     this.dialogRef.close({
       selectedUser: this.selectedUser,
       selectedUsers: this.selectedUsers, // Asegúrate de enviar la propiedad correcta

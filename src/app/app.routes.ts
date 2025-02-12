@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'evaluador'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador'], module: '' }
             },
         ]
     },
@@ -148,7 +148,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'assessment', loadChildren: () =>
                 import('app/modules/assessment/assessment.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'evaluador'], module: '' }
             },
         ]
     },
@@ -182,6 +182,21 @@ export const appRoutes: Route[] = [
             },
         ]
     },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'publication-questions', loadChildren: () =>
+                import('app/modules/publication-questions/publication-questions.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
+            },
+        ]
+    },
     // Resumen common routes
     {
         path: '',
@@ -209,7 +224,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'seguimiento', 'comiteTecnico'], module: '' }
             },
         ]
     },
@@ -279,9 +294,69 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'diffusion', loadChildren: () =>
+                import('app/modules/diffusion/diffusion.routes'),
+                data: { requiredRoles: ['seguimiento'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
             {path: 'evaluation-questionnaire', loadChildren: () =>
                 import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
                 data: { requiredRoles: ['evaluador'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'evolution-questionnaire', loadChildren: () =>
+                import('app/layout/common/evolution-questionnaire/evolution-questionnaire.component.routes'),
+                data: { requiredRoles: ['administrador', 'evaluador', 'evolucionador'], module: '' }
             },
         ]
     }

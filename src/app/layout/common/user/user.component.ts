@@ -63,10 +63,6 @@ export class UserComponent implements OnInit, OnDestroy {
         const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
         const id = localStorage.getItem('accessId');
 
-        console.log(fullName);
-        console.log(cargo);
-        console.log('Id del usuario', id);
-
         // Inicializar `this.user` con datos del Local Storage
         this.user = {
             fullName: fullName,
