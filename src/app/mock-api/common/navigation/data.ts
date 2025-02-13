@@ -42,6 +42,15 @@ export const defaultNavigation: FuseNavigationItem[] = [
     //     link : '/assessment',
     //     roles: ['administrador', 'evaluador']
     // },
+
+    {
+        id   : 'evolution-questionnaire',
+        title: 'Evolucionador',
+        type : 'basic',
+        icon : 'heroicons_outline:queue-list',
+        link : '/evolution-questionnaire',
+        roles: ['administrador', 'evaluador']
+    },
     {
         id   : 'follow',
         title: 'Gestión de usuarios',

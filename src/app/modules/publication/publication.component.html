@@ -35,39 +35,33 @@
 
     <!-- Pestaña de Todas las preguntas -->
     <div *ngIf="activeTab === 'allQuestions'">
-      <table class="w-full border-collapse">
-          <thead>
-              <tr class="bg-white">
-                  <th class="border-b border-gray-300 p-2">#</th>
-                  <th class="border-b border-gray-300 p-2">Pregunta</th>
-                  <th class="border-b border-gray-300 p-2">Opciones</th>
-                  <th class="border-b border-gray-300 p-2">Respuesta Correcta</th>
-                  <th class="border-b border-gray-300 p-2">Acciones</th>
-              </tr>
-          </thead>
-          <tbody class="bg-white">
-            <tr *ngFor="let question of getPaginatedQuestions(allQuestions, 'allQuestions'); let i = index" class="border border-gray-300">
-              <td class="border-b border-gray-300 p-2">{{ (currentPageAllQuestions - 1) * itemsPerPage + i + 1 }}</td>
-                  <td class="border-b border-gray-300 p-2">{{ question.questions.enunciado }}</td>
-                  <td class="border-b border-gray-300 p-2">
-                    <ul class="flex gap-x-2 ml-2 list-none">
-                      <li *ngFor="let option of question.questions.answers; let last = last">
-                        {{ option.respuesta }}{{ !last ? ' /' : '' }}
-                      </li>
-                    </ul>
-                  </td>
-                  <td class=" border-gray-300 p-2">
-                    <p class="flex justify-center">
-                      {{question.answers.respuesta}}
-                    </p>
-                  </td>
-                  <td class="border-b border-gray-300 p-2">
-                      <button (click)="addToCustomForm(question)" class="">
-                        <mat-icon svgIcon="heroicons_solid:plus-circle"></mat-icon>
-                      </button>
-                  </td>
-              </tr>
-          </tbody>
+      <table class="w-full border-collapse table-fixed">
+        <thead>
+          <tr class="bg-white">
+            <th class="w-1/12 border-b border-gray-300 p-2 text-left">#</th>
+            <th class="w-5/12 border-b border-gray-300 p-2 text-left">Pregunta</th>
+            <th class="w-2/12 border-b border-gray-300 p-2 text-left">Opciones</th>
+            <th class="w-1/12 border-b border-gray-300 p-2 text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <tr *ngFor="let question of getPaginatedQuestions(allQuestions, 'allQuestions'); let i = index" class="border border-gray-300">
+            <td class="border-b border-gray-300 p-2">{{ (currentPageAllQuestions - 1) * itemsPerPage + i + 1 }}</td>
+            <td class="border-b border-gray-300 p-2">{{ question.questions.enunciado }}</td>
+            <td class="border-b border-gray-300 p-2">
+              <ul class="flex gap-x-2 ml-2 list-none">
+                <li *ngFor="let option of question.questions.answers; let last = last">
+                  {{ option.respuesta }}{{ !last ? ' /' : '' }}
+                </li>
+              </ul>
+            </td>
+            <td class="border-b border-gray-300 p-2">
+              <button (click)="addToCustomForm(question.questions.id)" class="flex justify-center items-center">
+                <mat-icon svgIcon="heroicons_solid:plus-circle"></mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <!-- Paginador -->
       <div class="pagination-buttons flex justify-end gap-x-2 pt-3 pr-10 pb-3 bg-white">
@@ -93,35 +87,39 @@
 
     <!-- Pestaña de Formulario personalizado -->
     <div *ngIf="activeTab === 'customForm'">
-      <table class="w-full border-collapse">
-          <thead>
-              <tr class="bg-white">
-                  <th class="border-b border-gray-300 p-2">#</th>
-                  <th class="border-b border-gray-300 p-2">Pregunta</th>
-                  <th class="border-b border-gray-300 p-2">Opciones</th>
-                  <th class="border-b border-gray-300 p-2">Respuesta Correcta</th>
-                  <th class="border-b border-gray-300 p-2">Acciones</th>
-              </tr>
-          </thead>
-          <tbody class="bg-white">
-            <tr *ngFor="let question of getPaginatedQuestions(customFormQuestions, 'customForm'); let i = index" class="border-b border-gray-300">
-                  <td class=" p-2">{{ (currentPageCustomForm - 1) * itemsPerPage + i + 1 }}</td>
-                  <td class=" p-2">{{ question.questions.enunciado }}</td>
-                  <td class=" p-2">
-                    <ul class="flex gap-x-2 ml-6 list-none">
-                      <li *ngFor="let option of question.questions.answers let last = last">
-                        {{ option.respuesta }}{{ !last ? ' /' : '' }}
-                      </li>
-                    </ul>
-                  </td>
-                  <td class="border-b border-gray-300 p-2">{{question.answers.respusta}}</td>
-                  <td class="p-2 flex justify-center items-center">
-                    <button (click)="addToCustomForm(question)" class="flex justify-center items-center">
-                      <mat-icon svgIcon="heroicons_solid:backspace"></mat-icon>
-                    </button>
-                  </td>
-              </tr>
-          </tbody>
+      <table class="w-full border-collapse table-fixed">
+        <thead>
+          <tr class="bg-white">
+            <th class="w-1/12 border-b border-gray-300 p-2 text-left">#</th>
+            <th class="w-5/12 border-b border-gray-300 p-2 text-left">Pregunta</th>
+            <th class="w-2/12 border-b border-gray-300 p-2 text-left">Opciones</th>
+            <th class="w-2/12 border-b border-gray-300 p-2 text-left">Respuesta Correcta</th>
+            <th class="w-1/12 border-b border-gray-300 p-2 text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <tr *ngFor="let question of getPaginatedQuestions(customFormQuestions, 'customForm'); let i = index" class="border-b border-gray-300">
+            <td class="p-2">{{ (currentPageCustomForm - 1) * itemsPerPage + i + 1 }}</td>
+            <td class="p-2">{{ question.enunciado }}</td>
+            <td class="p-2">
+              <ul class="flex gap-x-2 ml-6 list-none">
+                <li *ngFor="let option of question.answers; let last = last">
+                  {{ option.respuesta }}{{ !last ? ' /' : '' }}
+                </li>
+              </ul>
+            </td>
+            <td class="p-2">
+              <div class="flex justify-center items-center">
+                {{ getSelectedAnswer(question.id) }}
+              </div>
+              </td>
+            <td class="p-2">
+              <button (click)="addToCustomForm(question.id)" class="flex justify-center items-center">
+                <mat-icon svgIcon="heroicons_solid:backspace"></mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <div class="flex justify-between items-center bg-white p-3 w-full border-t border-gray-300">
     
@@ -159,7 +157,7 @@
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal para Crear Pregunta -->
 <div *ngIf="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
   <div class="bg-white p-6 rounded-lg shadow-lg w-96">
     <h2 class="text-xl font-semibold mb-4">Crear Pregunta</h2>
@@ -168,21 +166,29 @@
       <label class="block mb-2">Enunciado:</label>
       <input type="text" formControlName="enunciado" class="w-full border p-2 rounded">
 
-      <label class="block mt-4">Selecciona la respuesta correcta:</label>
-      <div class="flex gap-4 mt-2">
-        <label>
-          <input type="radio" formControlName="correctAnswer" value="Sí"> Sí
-        </label>
-        <label>
-          <input type="radio" formControlName="correctAnswer" value="No"> No
-        </label>
-      </div>
-
       <div class="mt-4 flex justify-end gap-2">
         <button type="button" (click)="closeModal()" class="bg-gray-400 px-3 py-1 rounded">Cancelar</button>
         <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded">Guardar</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Modal para Seleccionar Respuesta -->
+<div *ngIf="showAnswerModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h2 class="text-xl font-semibold mb-4">Seleccionar Respuesta</h2>
+    
+    <p class="mb-4">Pregunta: {{ selectedQuestion?.enunciado }}</p>
+
+    <div class="flex gap-4">
+      <button (click)="saveAnswer('Sí')" class="bg-green-500 text-white px-3 py-1 rounded">Sí</button>
+      <button (click)="saveAnswer('No')" class="bg-red-500 text-white px-3 py-1 rounded">No</button>
+    </div>
+
+    <div class="mt-4 flex justify-end">
+      <button (click)="closeAnswerModal()" class="bg-gray-400 px-3 py-1 rounded">Cerrar</button>
+    </div>
   </div>
 </div>
 
