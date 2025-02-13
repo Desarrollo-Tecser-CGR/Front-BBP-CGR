@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
-
+import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root',

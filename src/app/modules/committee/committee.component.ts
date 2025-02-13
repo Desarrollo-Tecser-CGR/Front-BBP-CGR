@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -26,11 +26,14 @@ export class CommitteeComponent implements OnInit {
     id: string | null = null;
     committeeData: any = {}; // Almacenar todos los datos
     showAnswers: boolean = false;
+    roles: any[] = [];
+    usuarios: any[] = [];
 
     constructor(
         private activatedRoute: ActivatedRoute,
         private committeeService: CommitteeService,
-        private resumenService: ResumenService
+        private resumenService: ResumenService,
+        private cdRef: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -45,7 +48,6 @@ export class CommitteeComponent implements OnInit {
         });
     }
     
-
      // 🔹 Método para obtener los datos del comité
      private loadCommitteeData(id: number): void {
         this.committeeService.getCommitteeData(id).subscribe(
@@ -199,6 +201,6 @@ export class CommitteeComponent implements OnInit {
                 });
             }
         );
-    }    
+    }
 }    
 
