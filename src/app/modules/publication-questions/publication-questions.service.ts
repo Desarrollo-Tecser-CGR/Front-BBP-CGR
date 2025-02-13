@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
@@ -9,9 +9,9 @@ import { catchError, map, Observable, of, throwError } from 'rxjs';
     providedIn: 'root',
 })
 
-export class PublicactionService{
+export class PublicactionQuestionService{
     private data =[
-        {id:1, comment:false, question:'¿La buena práctica está documentada de manera clara y concisa?',options:[{option:'Si'}, {option:'No'}]},//si
+        {id:1, comment:false, question:'¿?',options:[{option:'Si'}, {option:'No'}]},//si
         {id:2, comment:false, question:'¿La descripción de la buena práctica está escrita en un lenguaje accesible para todos los públicos (sin tecnicismos innecesarios)?',options:[{option:'Si'},{option:'No'}]}, //si
         {id:3, comment:false, question:'¿Las etapas o fases de implementación de la buena práctica son fáciles de seguir y entender?',options:[{option:'Si'},{option:'No'}]},//si
         {id:4, comment:false, question:'¿Se proporciona suficiente información visual (gráficos, diagramas, etc.) que facilite la comprensión de la práctica?',options:[{option:'Si'},{option:'No'}]},//si
@@ -52,11 +52,21 @@ export class PublicactionService{
     private apiUrlPostQuestion = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
+
+    private apipreguntas = 'http://192.168.2.44:5500/api/v1/admin/questionall'
     
     constructor(private http :HttpClient){}
     
     getQuestionsGroups() : Observable<any[]>{
         return of(this.data);
+    }
+
+    getQuestionAll(token:string):Observable<any>{
+        const url = `${this.apipreguntas}`;
+        const headers = new HttpHeaders ({
+            'Authorization' :`Bearer ${token}`
+          });
+        return this.http.get<any>(url)
     }
 
     getQuestion():Observable<any>{

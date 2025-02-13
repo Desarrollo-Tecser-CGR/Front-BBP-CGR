@@ -10,6 +10,7 @@ import { QuestionnaireService } from 'app/layout/common/evaluation-questionnaire
 import { PublicactionService } from 'app/modules/publication/publication.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 
 // Definición de rutas
@@ -46,7 +47,6 @@ export class PublicationComponent {
   allQuestions: any[] = [];
   customFormQuestions: any[] = [];
 
-
    // Variables de paginación
   currentPageAllQuestions = 1;
   currentPageCustomForm = 1;
@@ -60,6 +60,12 @@ export class PublicationComponent {
   showSaveModal = false; // Estado para mostrar el modal
   saveForm: FormGroup; // Formulario Reactivo
 
+  selectAnswerModal = false;
+  selectedQuestion: any;
+  selectedAnswer: string = '';
+  tempAnswers: any[] = [];
+  showAnswerModal: boolean = false;
+
   constructor(
     private resumenService: ResumenService,
     private route: ActivatedRoute,
@@ -67,83 +73,142 @@ export class PublicationComponent {
     private publicationService: PublicactionService
   ) {
     this.questionForm = this.fb.group({
-      enunciado: ['', Validators.required],
-      correctAnswer: ['', Validators.required]
+      enunciado: ['', Validators.required]
     });
     this.saveForm = this.fb.group({
       nombreCuestionario: ['', Validators.required] // Campo obligatorio
     });
   }
 
-  openSaveModal() {
-    this.showSaveModal = true;
+  ngOnInit(): void {
+    this.initializeForm();
+    this.getQuestions();
   }
 
-  closeSaveModal() {
-    this.showSaveModal = false;
-    this.saveForm.reset(); // Limpiar formulario al cerrar
+  initializeForm() {
+    this.questionForm = this.fb.group({
+      enunciado: ['', Validators.required],
+    });
+  }
+
+  getQuestionid(id: number) {
+  const token: any = localStorage.getItem('accessToken');
+  this.publicationService.getQuestionId(id, token).subscribe(response => {
+    console.log('Pregunta del back:', response);
+
+    if (response && response.data) {
+      this.selectedQuestion = response.data; // Guardar la pregunta seleccionada
+      this.customFormQuestions.push(response.data); // Agregar la pregunta al cuestionario personalizado
+      console.log('customFormQuestions después de agregar:', this.customFormQuestions); // Verificar el array
+      this.showAnswerModal = true; // Mostrar el modal de respuestas
+    }
+  },error => {
+      console.error("Error obteniendo la pregunta:", error);
+    });
   }
 
   submitForm() {
     if (this.saveForm.valid) {
       const nombreCuestionario = this.saveForm.value.nombreCuestionario;
-      
-      // Aquí podrías enviar el cuestionario a la base de datos o hacer lo que necesites
-      console.log('Guardando cuestionario:', nombreCuestionario);
+      const roleFormId = 11; // Valor fijo
+      const enabled = 1; // Valor fijo
 
-      this.closeSaveModal(); // Cerrar modal después de guardar
+      const idQuestions = this.customFormQuestions.map(question => question.id);
+      const idAnswers = idQuestions.map(questionId => {
+        const answer = this.tempAnswers.find(a => a.questionId === questionId);
+        
+        // Convertir "Sí" a 1 y "No" a 2
+        if (answer) {
+          return answer.answer === "Sí" ? 1 : 2;
+        } else {
+          return null; // Si no hay respuesta, devuelve null
+        }
+      });
+
+       // Construir el objeto JSON
+    const formData = {
+      formName: nombreCuestionario,
+      roleFormId: roleFormId,
+      enabled: enabled,
+      idQuestions: idQuestions,
+      idAnswers: idAnswers
+    };
+
+    console.log('Datos del formulario a guardar:', formData);
+
+    this.publicationService.saveQuestionary(formData).subscribe(
+      response => {
+        console.log('Formulario guardado con éxito:', response);
+        this.closeSaveModal();
+        setTimeout(() => {
+          this.alert();
+        }, 3000);
+      },
+      (error) => {
+        console.error('Error al guardar el formulario:', error);
+      });
     } else {
       // Marcar el campo como tocado para que muestre el mensaje de error
       this.saveForm.controls['nombreCuestionario'].markAsTouched();
     }
   }
 
-  // Abrir modal
-  openModal() {
-    this.showModal = true;
-  }
-
-  // Cerrar modal
-  closeModal() {
-    this.showModal = false;
-    this.questionForm.reset();
-  }
-
   // Guardar pregunta y agregarla al formulario personalizado
   saveQuestion() {
-  if (this.questionForm.valid) {
-    const newQuestionData = {
-      enunciado: this.questionForm.value.enunciado,
-      tipoPregunta: this.questionForm.value.tipoPregunta, // Asegúrate de tener este campo en el formulario
-      enabled: 1, // Se puede hacer dinámico si lo necesitas
-      peso: this.questionForm.value.peso, // Debe existir en el formulario
-      forms: null, // Si se usa, ajusta el valor correcto
-      answers: this.questionForm.value.answers // Asegúrate de que sea un array adecuado
-    };
+    if (this.questionForm.valid) {
+      const newQuestionData = {
+        enunciado: this.questionForm.value.enunciado,
+        tipoPregunta: "Seleccion multiple",
+        enabled: 1,
+        peso: 5,
+        forms: null,
+        answers: [1, 2]
+      };
 
-    this.publicationService.createQuestion(
-      newQuestionData.enunciado,
-      newQuestionData.tipoPregunta,
-      newQuestionData.enabled,
-      newQuestionData.peso,
-      newQuestionData.forms,
-      newQuestionData.answers
-    ).subscribe(
-      (response) => {
-        console.log('Pregunta guardada con éxito:', response);
-        this.customFormQuestions.push(response); // Agregar la respuesta del backend al array
-        this.updateTotalPagesArray();
-        this.closeModal();
-      },
-      (error) => {
-        console.error('Error al guardar la pregunta:', error);
-      }
-    );
+      this.publicationService.createQuestion(
+        newQuestionData.enunciado,
+        newQuestionData.tipoPregunta,
+        newQuestionData.enabled,
+        newQuestionData.peso,
+        newQuestionData.forms,
+        newQuestionData.answers
+      ).subscribe(
+        (response) => {
+          console.log('Pregunta guardada con éxito:', response);
+          const id = response.data.id;
+          this.getQuestionid(id);
+          this.closeModal();
+        },
+        (error) => {
+          console.error('Error al guardar la pregunta:', error);
+      });
+    }
   }
-}
 
-  ngOnInit(): void {
-    this.getQuestions();
+  saveAnswer(selectedAnswer: string) {
+    if (this.selectedQuestion) {
+      // Buscar si ya existe una respuesta para esta pregunta
+      const existingAnswerIndex = this.tempAnswers.findIndex(a => a.questionId === this.selectedQuestion.id);
+  
+      if (existingAnswerIndex !== -1) {
+        // Si ya existe, actualizar la respuesta
+        this.tempAnswers[existingAnswerIndex].answer = selectedAnswer;
+      } else {
+        // Si no existe, agregar la nueva respuesta
+        this.tempAnswers.push({
+          questionId: this.selectedQuestion.id,
+          answer: selectedAnswer
+        });
+      }
+  
+      console.log('Respuestas temporales:', this.tempAnswers);
+      this.showAnswerModal = false; // Cerrar el modal después de guardar
+    }
+  }
+
+  getSelectedAnswer(questionId: number): string {
+    const answer = this.tempAnswers.find(a => a.questionId === questionId);
+    return answer ? answer.answer : 'No seleccionada'; // Devuelve la respuesta o un mensaje por defecto
   }
 
   getQuestions(){
@@ -161,7 +226,6 @@ export class PublicationComponent {
     const end = start + this.itemsPerPage;
     return questions.slice(start, end);
   }
-  
 
   getTotalPages(questions: any[]): number {
     return Math.ceil(questions.length / this.itemsPerPage);
@@ -203,19 +267,16 @@ export class PublicationComponent {
     this.updateTotalPagesArray(); 
   }
 
-  addToCustomForm(question: any) {
-    const index = this.customFormQuestions.findIndex(q => q.id === question.id);
-    if (index !== -1) {
-      // Si la pregunta ya está en customFormQuestions, la quitamos y la volvemos a allQuestions
-      this.customFormQuestions.splice(index, 1);
-      this.allQuestions.push(question);
-    } else {
-      // Si no está en customFormQuestions, la agregamos y la quitamos de allQuestions
-      this.customFormQuestions.push(question);
-      this.allQuestions = this.allQuestions.filter(q => q.id !== question.id);
+  addToCustomForm(questionId: number) {
+    console.log('Agregando pregunta con ID:', questionId);
+    const question = this.allQuestions.find(q => q.id === questionId); // Cambia q.questions.id a q.id
+    if (question) {
+      console.log('Pregunta encontrada:', question);
+      this.allQuestions = this.allQuestions.filter(q => q.id !== questionId); // Cambia q.questions.id a q.id
+      this.getQuestionid(questionId);
     }
-    console.log(this.customFormQuestions)
-  }  
+    console.log('customFormQuestions después de agregar:', this.customFormQuestions);
+  }
 
   // Eliminar una pregunta del formulario personalizado
   removeFromCustomForm(index: number): void {
@@ -248,4 +309,40 @@ export class PublicationComponent {
       options: question.options.map((opt: any) => ({ ...opt })), // Clonar las opciones
     };
   }
+
+  openSaveModal() {
+    this.showSaveModal = true;
+  }
+
+  closeSaveModal() {
+    this.showSaveModal = false;
+    this.saveForm.reset(); // Limpiar formulario al cerrar
+  }
+
+  closeAnswerModal() {
+    this.showAnswerModal = false;
+  }
+
+  // Abrir modal
+  openModal() {
+    this.showModal = true;
+  }
+
+  // Cerrar modal
+  closeModal() {
+    this.showModal = false;
+    this.questionForm.reset();
+  }
+
+  alert(){
+      Swal.fire({
+        icon: 'success',
+        title: 'Creacion de Formulario',
+        text: `El Formulario se ah creado Exitosamente`,
+        showConfirmButton: false,
+        timer: 2000
+      }).then(() => {
+        window.location.href = './example';
+      })
+    }
 }

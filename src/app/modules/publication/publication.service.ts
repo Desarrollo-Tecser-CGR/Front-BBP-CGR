@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
@@ -47,10 +47,10 @@ export class PublicactionService{
         {id:30, comment:true, question:'¿La práctica resultó en una mayor cooperación entre diferentes niveles de gobierno (local, regional, nacional)?',options:[{option:'Si'},{option:'No'}]},//si
     ]
 
-    private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/user/createUser`;
+    private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/admin/form`;
     private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question/static`;
     private apiUrlPostQuestion = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question`;
-    private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
+    private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/admin/questionall`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
     
     constructor(private http :HttpClient){}
@@ -64,6 +64,16 @@ export class PublicactionService{
         return this.http.get<any>(url)
     }
 
+    getQuestionId(id: number, token: string): Observable<any> {
+        const url = `${this.apiUrlUpdate}/${id}`;
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+    
+        return this.http.get<any>(url, { headers });
+    }    
+
     createQuestion(enunciado:string, tipoPregunta:string, enabled:number, peso:number, forms:boolean, answers:any):Observable<any>{
         const url = `${this.apiUrlPostQuestion}`
         const params = {
@@ -74,7 +84,11 @@ export class PublicactionService{
             forms: forms,
             answers: answers
         }
-
         return this.http.post<any>(url, params)
+    }
+
+    saveQuestionary(formData:any):Observable<any>{
+        const url = `${this.apiUrl}`;
+        return this.http.post<any>(url, formData)
     }
 }
