@@ -42,18 +42,21 @@ const routes: Routes = [
 export class PublicationComponent {
 
   preguntas = [
-    { id: 1, enunciado: '¿Necesita un Aumento de recursos?', respuesta: '', comentario: '' },
-    { id: 2, enunciado: '¿?', respuesta: '', comentario: '' },
-    { id: 3, enunciado: '¿El sistema es accesible para todos los usuarios?', respuesta: '', comentario: '' },
-    { id: 4, enunciado: '¿Las pruebas han sido correctamente implementadas?', respuesta: '', comentario: '' },
-    { id: 5, enunciado: '¿El rendimiento es óptimo?', respuesta: '', comentario: '' }
+    { id: 1, enunciado: '¿Necesita un aumento de recursos?', respuesta: '', comentario: '' },
+    { id: 2, enunciado: '¿Se realizaran cambios en la gestions de los recursos?', respuesta: '', comentario: '' },
+    { id: 3, enunciado: '¿Como se distribuyeron los recursos?', respuesta: '', comentario: '' },
+    { id: 4, enunciado: '¿Como se han asigando los recursos y cuales son los resultados?', respuesta: '', comentario: '' },
+    { id: 5, enunciado: '¿Mitigacion de malas practicas?', respuesta: '', comentario: '' }
   ];
 
+  preguntasOriginales: any[] = []
   palabraCount = 0;
   evolucion:string = ''; 
   currentGroupIndex = 0;
   preguntasPorPagina = 3;
   currentGroup: any[] = [];
+  modalAbierto: boolean = false; 
+  nuevaPregunta: any = { enunciado: '' };
   preguntasSeleccionadas: any[] = [];
 
 
@@ -63,13 +66,15 @@ export class PublicationComponent {
     private fb: FormBuilder,
     private publicationQuestion: PublicactionQuestionService,
     private router:Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.getQuestions();
     this.preguntasSeleccionadas = []; // Inicializar la lista de preguntas seleccionadas
     console.log('preguntas :', this.preguntasSeleccionadas)
+
+    this.preguntasOriginales = [...this.preguntas]
 
     const token:any = localStorage.getItem('accessToken')
     console.log(token)
@@ -79,6 +84,17 @@ export class PublicationComponent {
       }
     )
     console.log(preguntas)
+  }
+
+   // Método para abrir el modal
+  abrirModal() {
+    this.modalAbierto = true;
+  }
+
+  // Método para cerrar el modal
+  cerrarModal() {
+    this.modalAbierto = false;
+    this.nuevaPregunta.enunciado = ''; // Limpiar el formulario al cerrar
   }
 
   getQuestions() {
@@ -124,16 +140,24 @@ export class PublicationComponent {
     this.cdr.detectChanges(); // Forzar actualización en la vista
   }      
 
-  agregarNuevaPregunta() {
-    const nuevaPregunta = { id: Date.now(), enunciado: 'Nueva Pregunta...', respuesta: '', comentario: '' };
-    this.preguntas.push(nuevaPregunta);
-    
-    this.cdr.detectChanges(); // Forzar detección de cambios en Angular
-  }  
+  guardarPregunta() {
+    if (this.nuevaPregunta.enunciado) {
+      this.preguntasSeleccionadas.push({ ...this.nuevaPregunta }); // Agregar la nueva pregunta al array
+      this.cerrarModal(); // Cerrar el modal después de guardar
+    }
+  }
+
+  limpiarLista(){
+    this.preguntasOriginales = [...this.preguntas];
+
+    // Limpiar el array de preguntas seleccionadas
+    this.preguntasSeleccionadas = [];
+
+    console.log("Filtro limpiado. Preguntas disponibles:", this.preguntas);
+    console.log("Preguntas seleccionadas:", this.preguntasSeleccionadas);
+  }
 
   enviarFormulario() {
-    if (!this.todasRespondidas()) return;
-
     Swal.fire({
       icon: 'success',
       title: 'Registro Exitoso',
