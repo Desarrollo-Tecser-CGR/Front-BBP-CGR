@@ -15,7 +15,7 @@ export class CommitteeService {
 
   // Método para obtener los datos del comité por ID
   getCommitteeData(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/2`);
+    return this.http.get<any>(`${this.apiUrl}/1/${id}`);
   }
 
   updateDataAsJson(id: string, formData: any): Observable<any> {

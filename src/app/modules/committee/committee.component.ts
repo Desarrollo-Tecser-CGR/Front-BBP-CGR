@@ -49,17 +49,41 @@ export class CommitteeComponent implements OnInit {
     }
     
      // 🔹 Método para obtener los datos del comité
-     private loadCommitteeData(id: number): void {
-        this.committeeService.getCommitteeData(id).subscribe(
-            (response) => {
-                console.log('Datos del comité:', response.data);
-                this.committeeData = response.data;
-            },
-            (error) => {
-                console.error('Error al obtener los datos:', error);
+private loadCommitteeData(id: number): void {
+    this.committeeService.getCommitteeData(id).subscribe(
+        (response) => {
+            console.log('Datos del comité:', response.data);
+
+            const data = response.data;
+
+            // Determinar el número mínimo de registros en cada bloque
+            const totalRegistros = Math.min(
+                data.identitys.length,
+                data.userIds.length,
+                data.formEntitys.length
+            );
+
+            // Agrupar los datos relacionados
+            const groupedData = [];
+            for (let i = 0; i < totalRegistros; i++) {
+                groupedData.push({
+                    identity: data.identitys[i], 
+                    userId: data.userIds[i], 
+                    formEntity: data.formEntitys[i],
+                    showAnswers: false // Agregar la propiedad showAnswers a cada objeto
+                });
             }
-        );
-    }
+
+            this.committeeData = groupedData;
+            console.log('Datos agrupados:', this.committeeData);
+        },
+        (error) => {
+            console.error('Error al obtener los datos:', error);
+        }
+    );
+}
+
+
 
     // 🔹 Método para obtener estadoFlujo y codigoPractica
     private loadResumenData(id: string): void {
@@ -74,7 +98,8 @@ export class CommitteeComponent implements OnInit {
                     this.committeeData = {
                         ...this.committeeData, // Mantener los datos actuales
                         estadoFlujo: response.estadoFlujo,
-                        codigoPractica: response.codigoPractica
+                        codigoPractica: response.codigoPractica,
+                        estimacion: response.estimacion
                     };
                 } else {
                     console.warn('La respuesta de resumen está vacía o no tiene datos.');
@@ -87,8 +112,8 @@ export class CommitteeComponent implements OnInit {
     }    
 
     // Método para alternar la visibilidad de las respuestas
-    toggleAnswers(): void {
-        this.showAnswers = !this.showAnswers;
+    toggleAnswers(item: any): void {
+        item.showAnswers = !item.showAnswers; // Cambia el estado individualmente
     }
 
     cambiarEstadoDeFlujo(): void {
@@ -143,6 +168,20 @@ export class CommitteeComponent implements OnInit {
             }
         );
     }
+    
+
+    getBoxClass(estimacion: string): string {
+        if (estimacion === 'malaPractica') {
+            return 'border-red';  // Rojo
+        } else if (estimacion === 'null' || estimacion === null) {
+            return 'border-gray';  // Gris
+        } else if (estimacion === 'enviada') {
+            return 'border-green';  // Verde
+        }
+        return 'border-blue';  // Azul por defecto
+    }
+    
+
     
     // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
     dismissPractice(): void {

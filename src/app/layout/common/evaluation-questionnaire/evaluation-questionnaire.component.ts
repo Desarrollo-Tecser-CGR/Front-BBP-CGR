@@ -198,6 +198,7 @@ selectForm(index: number) {
     //}, 3000);
     this.questionnaireService.enviarCuestionario(this.formularioId, userId, idAnswers, idQuestions,this.id, 1, estimacion).subscribe(
       response => {
+        this.dismissPractice();
         console.log('Cuestionario enviado con éxito', response);
         setTimeout(() => {
           this.alert();
@@ -221,91 +222,69 @@ selectForm(index: number) {
   }
 
 
-
-  dismissPractice(): void {
-    if (!this.id) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No se puede cambiar el estado de la práctica porque no se encontró un ID válido.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar',
-        });
+  dismissPractice() {
+    if (!this.comiteTecnicoUserId) {
+        console.error("No se pudo obtener el idUser del comité técnico.");
         return;
     }
 
-    const comiteTecnicoUser = this.comiteTecnicoUser; // Obtienes el nombre del comité técnico
-
-    if (!comiteTecnicoUser) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No se encontró un usuario del comité técnico. No se puede realizar la actualización.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar',
-        });
-        return; // Finaliza si no hay comiteTecnicoUser
+    if (!this.id) {  // Verificar que se tiene el ID correcto
+        console.error("No se encontró un ID válido para identity.");
+        return;
     }
 
-    // Convertir el id a número
-    const idAsNumber = Number(this.id);
-
-    const patchData = {
-        actualizaciones: {
-            estadoFlujo: 'descartada', // Actualizar el estado de flujo
-        },
-        sAMAccountName: comiteTecnicoUser, // Aquí se usa el nombre del comité técnico
-        estadoFlujo: 'descartada', // Estado de flujo actualizado
-        comentarioUsuario: 'Comentario estándar', // Comentario fijo
+    const requestBody = {
+        user: this.comiteTecnicoUserId, // ID del usuario comité técnico
+        identity: this.id, // Tomamos el ID dinámicamente
+        stateFlow: "evaluacion",
+        fechaDiligenciamiento: this.formatDate(new Date()), // Fecha actual en formato YYYY-MM-DD
+        comentarioUsuario: "" // Por ahora vacío
     };
 
-    // Llamar al servicio de actualización con el nuevo formato
-    this.resumenService.updateDataAsJson(idAsNumber, patchData).subscribe(
+    this.questionnaireService.sendTraceability(requestBody).subscribe({
+        next: (response) => {
+            console.log('Trazabilidad enviada con éxito:', response);
+        },
+        error: (error) => {
+            console.error('Error al enviar trazabilidad:', error);
+        }
+    });
+}
+
+formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+}
+  
+
+// ======================== Método para ver los datos del endpoint ======================== //
+comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
+
+getRolesYUsuarios() {
+    this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
         (response) => {
-            Swal.fire({
-                title: '¡Práctica Desestimada!',
-                text: 'El estado de la práctica ha sido actualizado correctamente a "desestimada".',
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-            }).then(() => {
-                window.location.href = './example'; // Redirigir a la página deseada
-            });
+            console.log('Usuarios y roles obtenidos:', response);
+
+            if (response && Array.isArray(response.data)) {
+                const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
+
+                if (comiteTecnico) {
+                    this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
+                    console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
+                } else {
+                    console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
+                }
+            } else {
+                console.error("La respuesta no es un array válido:", response);
+            }
         },
         (error) => {
-            Swal.fire({
-                title: 'Error',
-                text: 'No se pudo actualizar el estado de la práctica. Intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-            });
+            console.error('Error al obtener roles y usuarios:', error);
         }
     );
 }
 
-// ======================== Método para ver los datos del endpoint ======================== //
-  comiteTecnicoUser: string | null = null; // Variable para almacenar el usuario del comité técnico
-
-  getRolesYUsuarios() {
-      this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
-          (response) => {
-              console.log('Usuarios y roles obtenidos:', response);
-
-              // Verificar si response tiene una propiedad `data` que es un array
-              if (response && Array.isArray(response.data)) {
-                  const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
-
-                  if (comiteTecnico) {
-                      this.comiteTecnicoUser = comiteTecnico.userName; // Guardamos el userName de comité técnico
-                      console.log('Usuario del comité técnico encontrado:', this.comiteTecnicoUser);
-                  } else {
-                      console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
-                  }
-              } else {
-                  console.error("La respuesta no es un array válido:", response);
-              }
-          },
-          (error) => {
-              console.error('Error al obtener roles y usuarios:', error);
-          }
-      );
-  }
 
 }

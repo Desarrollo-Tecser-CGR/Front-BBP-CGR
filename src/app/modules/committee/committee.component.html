@@ -1,68 +1,56 @@
 <div class="container">
     <h1>Comité</h1>
 
-    <!-- Tarjeta con la información -->
-    <div class="card" *ngIf="committeeData && committeeData.userId; else noData" 
-         [ngStyle]="{'border-left': '5px solid blue', 'padding': '20px', 'border-radius': '10px', 'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)'}">
-        
-        <h2>Información del Evaluador</h2>
-        
-        <!-- Datos del usuario -->
-        <div class="user-info">
-            <p><strong>Nombre de Usuario:</strong> {{ committeeData.userId.userName }}</p>
-            <p><strong>Email:</strong> {{ committeeData.userId.email }}</p>
-            <p><strong>Cargo:</strong> {{ committeeData.userId.cargo }}</p>
-        </div>
-        <!-- Datos adicionales en un nuevo cuadro -->
-        <div class="additional-info">
-            <p><strong>Estado de Flujo:</strong> {{ committeeData.estadoFlujo }}</p>
-            <p><strong>Código de la Práctica:</strong> {{ committeeData.codigoPractica }}</p>
-        </div>
-        <!-- Botón para expandir respuestas -->
-        <button (click)="toggleAnswers()" mat-icon-button>
-            <mat-icon>{{ showAnswers ? 'expand_less' : 'expand_more' }}</mat-icon>
-        </button>
+    <!-- Sección de Tarjetas -->
+    <div *ngFor="let item of committeeData" class="card">
+        <div class="info-box" [ngClass]="getBoxClass(item.formEntity.estimacion)">
+            <!-- Información del Evaluador -->
+            <h2>Información del Evaluador</h2>
+            <div class="user-info">
+                <p><strong>Nombre de Usuario:</strong> {{ item.userId.userName }}</p>
+                <p><strong>Email:</strong> {{ item.userId.email }}</p>
+                <p><strong>Cargo:</strong> {{ item.userId.cargo }}</p>
+                <p><strong>Estimación:</strong> {{ item.formEntity.estimacion }}</p>
+            </div>
 
-        <!-- Contenedor con scroll para las respuestas -->
-        <div *ngIf="showAnswers" class="scroll-container">
-            <h3>Formulario: {{ committeeData.formEntity.formName }}</h3>
+            <!-- Información adicional -->
+            <!-- <div class="additional-info">
+                <p><strong>Estimación:</strong> {{ estimacion }}</p>
+                <p><strong>Estado de Flujo:</strong> {{ estadoFlujo }}</p>
+            </div> -->
 
-            <div *ngFor="let question of committeeData.formEntity.questions" class="question-card">
+            <!-- Información del Formulario -->
+            <h3>Formulario: {{ item.formEntity.formName }}</h3>
+
+            <!-- Botón para Expandir Respuestas -->
+            <button (click)="toggleAnswers(item)" mat-icon-button>
+                <mat-icon>{{ item.showAnswers ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+        </div>
+
+        <!-- Contenedor con Scroll para Respuestas -->
+        <div *ngIf="item.showAnswers" class="scroll-container">
+            <div *ngFor="let question of item.formEntity.questions" class="question-card">
                 <h4>{{ question.id }}. {{ question.enunciado }}</h4>
-                <p *ngIf="question.answer">
-                    Respuesta Seleccionada: 
-                    <strong>{{ question.answer.respuesta ? question.answer.respuesta : 'No hay respuesta seleccionada' }}</strong>
+                <p>
+                    <strong>Respuesta Seleccionada:</strong>
+                    {{ question.answer?.respuesta || 'No hay respuesta seleccionada' }}
                 </p>
-                <p>Comentario: <strong>{{ question.comentario }}</strong></p>
+                <p><strong>Comentario:</strong> {{ question.comentario }}</p>
             </div>
         </div>
     </div>
 
-    <ng-template #noData>
-        <p>No hay datos disponibles</p>
-    </ng-template>
-
-    <div class="mt-0 flex justify-end">
-        <button 
-            type="button" 
-            mat-raised-button 
-            class="warn-color"
-            (click)="dismissPractice()"
-        >
+    <!-- Botones de Acción -->
+    <div class="mt-4 flex justify-end">
+        <button mat-raised-button class="warn-color" (click)="dismissPractice()">
             Desestimar Práctica
         </button>
-    </div> 
+    </div>
 
     <div class="mt-4 flex justify-end">
-        <button 
-            mat-raised-button 
-            color="primary" 
-            class="space-buttons"
-            (click)="cambiarEstadoDeFlujo()">
+        <button mat-raised-button color="primary" class="space-buttons" (click)="cambiarEstadoDeFlujo()">
             Realizar Seguimiento
         </button>
     </div>
-    
-    
-
 </div>
