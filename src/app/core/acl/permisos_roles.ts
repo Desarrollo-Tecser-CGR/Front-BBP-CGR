@@ -6,6 +6,7 @@ export const PERMISOSROLES = {
         jefeUnida:  'jefeUnidad',
         seguimiento: 'seguimiento',
         evaluador: 'evaluador',
-        comiteTecnico: 'comiteTecnico'
+        comiteTecnico: 'comiteTecnico',
+        evolucionador: 'evolucionador',
     }
 };

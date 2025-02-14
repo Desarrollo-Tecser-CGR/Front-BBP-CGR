@@ -82,7 +82,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador', 'evolucionador'], module: '' }
             },
         ]
     },
@@ -224,7 +224,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'seguimiento', 'comiteTecnico'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'seguimiento', 'comiteTecnico', 'evolucionador'], module: '' }
             },
         ]
     },
@@ -356,7 +356,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'evolution-questionnaire', loadChildren: () =>
                 import('app/layout/common/evolution-questionnaire/evolution-questionnaire.component.routes'),
-                data: { requiredRoles: ['administrador', 'evaluador', 'evolucionador'], module: '' }
+                data: { requiredRoles: ['administrador', 'evolucionador'], module: '' }
             },
         ]
     }

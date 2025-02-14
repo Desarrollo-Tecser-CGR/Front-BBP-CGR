@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico', 'evaluador', 'seguimiento']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico', 'evaluador', 'seguimiento', 'evolucionador']
     },
     {
         id   : 'resumen',
@@ -43,14 +43,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
     //     roles: ['administrador', 'evaluador']
     // },
 
-    {
-        id   : 'evolution-questionnaire',
-        title: 'Evolucionador',
-        type : 'basic',
-        icon : 'heroicons_outline:queue-list',
-        link : '/evolution-questionnaire',
-        roles: ['administrador', 'evaluador']
-    },
+    // {
+    //     id   : 'evolution-questionnaire',
+    //     title: 'Evolucionador',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:queue-list',
+    //     link : '/evolution-questionnaire',
+    //     roles: ['administrador', 'evolucionador']
+    // },
     {
         id   : 'follow',
         title: 'Gestión de usuarios',
@@ -73,7 +73,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:megaphone',
         link : '/publication-questions',
-        roles: ['administrador', 'evolucionador']
+        roles: ['administrador']
     },
     {
         id   : 'inbox',
@@ -81,7 +81,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento', 'comiteTecnico']
+        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento', 'comiteTecnico', 'evolucionador']
     },
     // {
     //     id   : 'comiteTecnico',

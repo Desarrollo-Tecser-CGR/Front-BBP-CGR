@@ -85,6 +85,16 @@ export class InboxComponent implements OnInit {
     ];
     break;
 
+    case 'evolucionador':
+      this.buttons = [
+        {
+          icon: 'feather:check-square',
+          color: 'primary',
+          action: (row: any) => this.evoluationPractice(row),
+        },
+      ];
+      break;
+
   default:
     this.buttons = [
       {
@@ -118,7 +128,7 @@ export class InboxComponent implements OnInit {
 
   loadData(filters?: any): void {
  
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento', 'comiteTecnico'].includes(this.cargo)) {
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento', 'comiteTecnico', 'evolucionador'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         sAMAccountName: this.fullName,
@@ -130,7 +140,7 @@ export class InboxComponent implements OnInit {
 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
-          console.log('Cuerpo de la petición:', requestBody);
+          console.log('Cuerpo de la petición:', dataRes);
  
           console.log('Cuerpo de la petición:', requestBody);
 
@@ -168,6 +178,14 @@ export class InboxComponent implements OnInit {
     if(this.cargo === 'evaluador', 'administrador'){
       this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
       console.log('id en validacion', row.id);
+    }
+  }
+
+  evoluationPractice(row:any):void{
+    if (row && row.id) {
+      this.router.navigate(['/evolution-questionnaire', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
     }
   }
 
