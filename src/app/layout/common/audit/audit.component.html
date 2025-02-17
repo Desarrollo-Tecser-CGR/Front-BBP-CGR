@@ -1,101 +1,85 @@
 <!-- barra -->
  <div>
     <div class="grid grid-cols-2 gap-2 min-w-0">
-        <div class="flex flex-col items-start p-4 bg-white shadow-md rounded-lg">
-            <h1 class="text-xl font-semibold text-gray-800 mb-2">Grupos</h1>
-            <mat-divider class="w-full mb-4 "></mat-divider>
-            <ng-container *ngFor="let group of groups">
-                <mat-checkbox [checked]>
-                    {{group.name}}
-                </mat-checkbox>
-            </ng-container>
-        </div>
-        <div class="flex flex-col items-center p-4 bg-white shadow-md rounded-lg">
-            <h1 class="text-xl font-semibold text-gray-800 mb-2">Progreso</h1>
-            <mat-progress-spinner
-                class="example-margin"
-                [color]="'primary'"
-                [mode]="'determinate'"
-                [strokeWidth]="10"
-                [value]="80">
-            </mat-progress-spinner>
-            <p class="text-lg p-4 flex-end">Indicador de progreso 80%</p>
-            <!-- <ng-container>
-                <mat-checkbox *ngFor="let indicator of indicators">
-
-                </mat-checkbox>
-            </ng-container>  -->
-        </div>
+      <div class="flex flex-col items-start p-4 bg-white shadow-md rounded-lg">
+        <h1 class="text-xl font-semibold text-gray-800 mb-2">Grupos</h1>
+        <mat-divider class="w-full mb-4"></mat-divider>
+        <mat-radio-group [(ngModel)]="btnRadio" (change)="onRadioChecked($event.value)">
+          <mat-radio-button [value]="'all'" class="block mb-2"> 
+            Todas
+          </mat-radio-button>
+          <mat-radio-button *ngFor="let group of groups" [value]="group.name" class="block mb-2"> 
+            {{ group.name }}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="flex flex-col items-center p-4 bg-white shadow-md rounded-lg"> 
+        <h1 class="text-xl font-semibold text-gray-800 mb-2">Progreso</h1> 
+        <mat-progress-spinner
+            class="example-margin"
+            [color]="'primary'" 
+            [mode]="'determinate'"
+            [strokeWidth]="10"
+            [value]="80">
+        </mat-progress-spinner>
+        <p class="text-lg p-4 text-gray-800">Indicador de progreso 80%</p> 
+      </div>
     </div>
     
  </div>
  <!-- tabla de auditorias -->
   <div class="p-4">
     <h1>Auditorias</h1>
-    <table mat-table [dataSource]="auditorias" class="w-full">
-        <!-- Columna ID -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef> ID </th>
-          <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
-        </ng-container>
-   
-        <!-- Columna Código de Auditoría -->
-        <ng-container matColumnDef="auditCode">
-          <th mat-header-cell *matHeaderCellDef> Código de Auditoría </th>
-          <td mat-cell *matCellDef="let element"> {{ element.auditCode }} </td>
-        </ng-container>
-   
-        <!-- Columna Fecha Inicio -->
-        <ng-container matColumnDef="startDate">
-          <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
-          <td mat-cell *matCellDef="let element"> {{ element.startDate }} </td>
-        </ng-container>
-   
-        <!-- Columna Fecha Fin -->
-        <ng-container matColumnDef="endDate">
-          <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
-          <td mat-cell *matCellDef="let element"> {{ element.endDate }} </td>
-        </ng-container>
-   
-        <!-- Columna Grupo -->
-        <ng-container matColumnDef="groupId">
-          <th mat-header-cell *matHeaderCellDef> Grupo </th>
-          <td mat-cell *matCellDef="let element"> {{ element.groupName }} </td>
-        </ng-container>
-   
-        <!-- Columna Estado -->
-        <ng-container matColumnDef="state">
-          <th mat-header-cell *matHeaderCellDef> Estado </th>
-          <td mat-cell *matCellDef="let element"> {{ element.state ? 'Activo' : 'Inactivo' }} </td>
-        </ng-container>
-   
-        <!-- Encabezado y filas -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-  </div>
+      <div class="h-60 overflow-y-auto border border-gray-300 rounded-lg p-2">
+        <table mat-table [dataSource]="dataSource" class="w-full">
+          <ng-container *ngFor="let header of headers; let i = index" [matColumnDef]="i.toString()">
+            <th mat-header-cell *matHeaderCellDef> {{header}}</th>
+            <td mat-cell *matCellDef="let element"> {{ element[i] }}</td>
+          </ng-container>
+          <!-- Encabezado y filas -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"
+           class="bg-stone-200 hover:text-stone-600 cursor-pointer" (click)="onClickAudit(row)"></tr>
+        </table>
+      </div>
+      <div> 
+        <div class="grid grid-cols-2 gap-4" *ngIf="selectedAudit">
+          <div>
+            <app-files-table [IdAudit]="idAudit" [CodeAudit]="codeAudit"></app-files-table>
+          </div>
   
-<!-- submit archivos---->
-<div class="file-upload-container">
-    <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
-        <i class="upload-icon">☁️</i>
-        <button type="button" (click)="fileInput.click()">Escoger archivos</button>
-        <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
-            accept=".jpeg,.png,.csv,.pdf" multiple />
-        <p>Escoja sus archivos o arrastre y suelte aquí</p>
-        <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
+          <div>
+            <div class="w-full overflow-x-auto file-upload-container">
+              <div class="w-max">
+                <mat-button-toggle-group name="fontStyle" aria-label="Font Style" class="flex gap-2" [appearance]="'standard'">
+                  <button mat-button  *ngFor="let day of periodicity" class="primary">{{day}}</button>
+                </mat-button-toggle-group>
+              </div>
+            </div>
+            <div class="file-upload-container">
+              <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+                  <i class="upload-icon">☁️</i>
+                  <button type="button" (click)="fileInput.click()">Escoger archivos</button>
+                  <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
+                      accept=".jpeg,.png,.csv,.pdf" multiple />
+                  <p>Escojña sus archivos o arrastre y suelte aquí</p>
+                  <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
+              </div>
+                  <!-- Lista de archivos seleccionados -->
+                  <div *ngIf="selectedFiles.length > 0" class="file-info">
+                      <p><strong>Archivos seleccionados:</strong></p>
+                      <ul>
+                          <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
+                              number: '1.0-2' }} KB)</li>
+                      </ul>
+                  </div>
+                  <!-- Botón Enviar Documento -->
+                  <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
+                      (click)="submitDocumentoActuacion(identityId)">
+                      Carga de archivos
+                  </button>
+                </div>
+            </div>
+          </div>
+        </div>
     </div>
-    <!-- Lista de archivos seleccionados -->
-    <div *ngIf="selectedFiles.length > 0" class="file-info">
-        <p><strong>Archivos seleccionados:</strong></p>
-        <ul>
-            <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
-                number: '1.0-2' }} KB)</li>
-        </ul>
-    </div>
-    <!-- Botón Enviar Documento -->
-    <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
-        (click)="submitDocumentoActuacion(identityId)">
-        Carga de archivos
-    </button>
-</div>

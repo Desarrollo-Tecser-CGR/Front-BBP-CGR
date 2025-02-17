@@ -7,7 +7,6 @@ import { EmailAuditComponent } from "../../layout/common/email-audit/email-audit
 import { MatDivider } from '@angular/material/divider';
 import { MatDividerModule } from '@angular/material/divider';
 
-MatDivider
 @Component({
   selector: 'app-diffusion',
   standalone: true,
@@ -17,7 +16,7 @@ MatDivider
     AuditComponent,
     EmailAuditComponent,
     MatDivider,
-    MatDividerModule
+    MatDividerModule,
 ],
   templateUrl: './diffusion.component.html',
   styleUrl: './diffusion.component.scss'

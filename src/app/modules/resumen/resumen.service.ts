@@ -28,6 +28,44 @@ export class ResumenService {
     constructor(private http: HttpClient,
     ) {}
 
+    columns = [
+        { key: 'id', header: 'Id de la practica' },
+        { key: 'fechaDiligenciamiento', header: 'Fecha de Diligenciamiento' },
+        { key: 'entityCgr', header: 'Entidad' },
+        { key: 'nombreDependenciaArea', header: 'Dependencia' },
+        { key: 'nombre', header: 'Nombre' },
+        { key: 'cargo', header: 'Cargo' },
+        { key: 'correo', header: 'Correo' },
+        { key: 'contacto', header: 'Contacto' },
+        { key: 'typeStrategyIdentification', header: 'Tipo de Estrategia' },
+        { key: 'typePractice', header: 'Tipo de Práctica' },
+        { key: 'codigoPractica', header: 'Código de la Práctica' },
+        { key: 'typology', header: 'Tipología' },
+        { key: 'estadoFlujo', header: 'Estado de Flujo' },
+        { key: 'nombreDescriptivoBuenaPractica', header: 'Descripción BP' },
+        { key: 'propositoPractica', header: 'Propósito de la Práctica' },
+        { key: 'expectedImpact', header: 'Impacto Esperado' },
+        { key: 'metodologiaUsada', header: 'Metodología Usada' },
+        { key: 'durationImplementation', header: 'Duración de la Implementación' },
+        { key: 'stagesMethodology', header: 'Etapas de la Metodología' },
+        { key: 'periodoDesarrolloInicio', header: 'Inicio del Desarrollo' },
+        { key: 'periodoDesarrolloFin', header: 'Fin del Desarrollo' },
+        { key: 'typeMaterialProduced', header: 'Tipo de Material Producido' },
+        { key: 'supportReceived', header: 'Apoyo Recibido' },
+        { key: 'recognitionsNationalInternational', header: 'Reconocimientos Nacionales o Internacionales' },
+        { key: 'controlObject', header: 'Objeto de Control' },
+        { key: 'taxonomyEvent', header: 'Taxonomía del Evento' },
+        { key: 'typePerformance', header: 'Tipo de Actuación' },
+        { key: 'documentoActuacion', header: 'Documento de Actuación' },
+        { key: 'descripcionResultados', header: 'Descripción de los Resultados' },
+        { key: 'levelGoodPractice', header: 'Nivel de la Buena Práctica' },
+        { key: 'objectiveMainPractice', header: 'Objetivo Principal de la Práctica' }
+    ];
+    
+    
+    getColumns(){
+        return this.columns;
+    }
     sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; 
