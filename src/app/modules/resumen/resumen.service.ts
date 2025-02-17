@@ -94,4 +94,23 @@ export class ResumenService {
         const params = query ? { search: query } : {};
         return this.http.get<any>(this.apiUrlEntities, { headers, params });
     }
+
+    getTraceabilityData(id: number, idState: number): Observable<any> {
+        const url = `${GlobalConstants.API_BASE_URL}/api/v1/traceability/${id}/4`;  // URL quemada temporalmente
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Asegúrate de tener este token guardado
+            'Content-Type': 'application/json'
+        });
+    
+        return this.http.get<any>(url, { headers }).pipe(
+            map(response => {
+                console.log('🟢 Respuesta del endpoint /traceability:', response);
+                return response;
+            }),
+            catchError(error => {
+                console.error('🔴 Error al obtener trazabilidad:', error);
+                return throwError(error);
+            })
+        );
+    }    
 }
