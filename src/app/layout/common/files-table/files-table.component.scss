@@ -119,24 +119,3 @@
         }
     }
 }
-
-.primary {
-    background-color: #2D3580 !important;
-    color: white !important;
-}
-.primary .mat-button-checked{
-    background-color: #2d3580cf !important;
-    color: white !important;
-}
-.custom-row {    
-    &:hover {
-      background-color: black !important;
-      color: white !important;
-    }
-  }     
-  tr.mat-row.custom-row:hover {
-    background-color: black !important;
-    color: white !important;
-    cursor: pointer !important;
-  }
-

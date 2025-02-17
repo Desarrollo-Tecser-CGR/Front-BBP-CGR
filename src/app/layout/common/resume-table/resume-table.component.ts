@@ -26,23 +26,20 @@ export class ResumeTableComponent {
   data: any = {};
   displayedColumns: any[] = [];
   dataSource: any[]= [];
+  columns :any[]= [];
 
   constructor( private resumenService:ResumenService, private route: ActivatedRoute,){}
   ngOnInit(): void{
     this.route.params.subscribe((params)=>{
       this.id = params['id'];
     })
-    console.log('Id en tabla generica:', this.id);
 
+    this.columns = this.resumenService.getColumns();
     this.resumenService.getDataAsJson(this.id).subscribe(
         (response) => {
             this.data = response;
-            console.log('Práctica:', this.data);
-            this.dataSource = this.preparateTableData(this.data);
-            this.displayedColumns = this.getDisplayedColumns(this.dataSource);
-
-            console.log('Columnas:', this.displayedColumns);
-            console.log('Data Source:',this.dataSource);
+            this.dataSource = this.preparateTableData(this.data, this.columns);
+            this.displayedColumns = this.getDisplayedColumns(this.columns);
         },
         (error) => {
             Swal.fire({
@@ -55,42 +52,40 @@ export class ResumeTableComponent {
     );
   }
   // columnas dinamicas
-  getDisplayedColumns(data: any): any[] {
-    console.log('Data en el display de columns:', data);
-    const practice = data[0]
+  getDisplayedColumns(columns: any): any[] {
+    const practice = columns[0]
     return Object.keys(practice).filter(
-      (key) => typeof data[key] !== 'object' && !Array.isArray(data[key])
+      (key) => typeof columns[key] !== 'object' && !Array.isArray(columns[key])
     );
   }
-  // preparar datos en la tabla
-  preparateTableData(data: any): any[] {
-    console.log('Data en la preparación de la tabla:', data);
-    const tableData = [];
 
-    for (const key in data) {
-        if (data.hasOwnProperty(key)) {
-            const value = data[key];
-            if(key === 'files'){
-              continue;  
-            }
-            if (Array.isArray(value) ) {
-                if (value.length === 0) {
-                    tableData.push({ key, value: 'N/A' });
-                } 
-                else {
-                    tableData.push({ key, value });
-                }
-            } 
-            else if (typeof value === 'object' && value !== null && 'name' in value) {
-                tableData.push({ key, value: value.name });
-            } 
-            else {
-                tableData.push({ key, value });
-            }
-        }
+  // Preparar datos en la tabla
+preparateTableData(data: any, columns: any[]): any[] {
+  const tableData = [];
+
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      const value = data[key];
+
+      if (key === 'files') {
+        continue;
+      }
+
+      let formattedValue;
+      if (Array.isArray(value)) {
+        formattedValue = value.length === 0 ? 'N/A' : value;
+      } else if (typeof value === 'object' && value !== null && 'name' in value) {
+        formattedValue = value.name;
+      } else {
+        formattedValue = value;
+      }
+      const column = columns.find(col => col.key === key);
+      const header = column ? column.header : key; 
+
+      tableData.push({ header, value: formattedValue });
     }
-
-    return tableData;
+  }
+  return tableData;
 }
 
 

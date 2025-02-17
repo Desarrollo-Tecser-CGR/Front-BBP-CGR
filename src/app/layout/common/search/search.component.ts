@@ -1,8 +1,7 @@
 import { Overlay } from '@angular/cdk/overlay';
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgForOf, NgTemplateOutlet, NgIf } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
-
 import {
     Component,
     ElementRef,
@@ -60,7 +59,9 @@ import { MatDialog } from '@angular/material/dialog';
         MatFormFieldModule,
         MatInputModule,
         NgClass,
-        RouterModule
+        RouterModule,
+        NgForOf,
+        NgIf
     ],
     providers: [
         {

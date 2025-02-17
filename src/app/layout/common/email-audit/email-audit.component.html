@@ -1,113 +1,134 @@
 <div class="text-blue-800">
-  <mat-card class="p-6 bg-white shadow-lg">
-    <div class="flex flex-col gap-2">
-      
-      <!-- Asunto -->
-      <mat-form-field  class="w-full">
-        <mat-label>Asunto</mat-label>
-        <input matInput type="text" placeholder="Ingrese el asunto" class="text-lg" />
-      </mat-form-field>
+  <form [formGroup]="emailForm" class="p-6 bg-white shadow-lg">
+    <mat-horizontal-stepper [linear]="true" #horizontalStepper>
+      <!-- Paso 1 -->
+      <!-- Id de la practica-->
+      <mat-step [formGroupName]="'step1'" [stepControl]="emailForm.get('step1')">
+        <mat-form-field>
+          <mat-label>Practica</mat-label>
+          <input matInput type="number" formControlName="identityId" [value]="identityId" [ngModel]="identityId" readonly>
+        </mat-form-field>
+        <!-- Asunto -->
+        <mat-form-field class="w-full">
+          <mat-label>Asunto</mat-label>
+          <input matInput type="text" placeholder="Ingrese el asunto" formControlName="subject" />
+        </mat-form-field>
 
-      <!-- Remitente -->
-      <mat-form-field class="w-full">
-        <mat-label>Remitente</mat-label>
-        <div class="flex flex-col">
-          <div class="grid grid-cols-2">
-            <mat-chip-listbox *ngIf="selectUsers" (change)="getSelectedUsers()" class="mt-2 bg-gray-50  rounded-lg">
-              <mat-chip *ngFor="let user of selectUsers" class="bg-blue-100 text-blue-700">
-                {{user.email}}
-                <button matChipRemove>
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </mat-chip>
-            </mat-chip-listbox>
-            <mat-chip-listbox *ngIf="emails" class="mt-2 bg-gray-50  rounded-lg">
-              <mat-chip *ngFor="let email of emails" class="bg-blue-100 text-blue-700" (removed)="removeEmail(email)">
-                {{email}}
-                <button matChipRemove>
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </mat-chip>
-            </mat-chip-listbox>
-
-          </div>
-          
-          <input matInput type="text"
-          placeholder="Ingrese el remitente" 
-          class="text-lg py-2"
-          (keydown)="onKeyDown($event)"
-           />
-        </div>
-      </mat-form-field>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <mat-form-field class="w-full">
-            <mat-label>Grupo</mat-label>
-            <mat-select
-              [(ngModel)]="selectedGroup"
-              (selectionChange)="onGroupSelected()"
-              class="bg-gray-50 rounded-lg shadow-sm"
-            >
-              <mat-option *ngFor="let group of groups" [value]="group">
-                {{ group.name }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <!-- Usuarios del Grupo -->
-         <div>
-          <mat-card *ngIf="selectedGroup" class="bg-white shadow-md rounded-lg border border-gray-300">
-            <mat-card-header class="bg-gray-200 p-4 rounded-t-lg">
-              <mat-card-title class="text-lg font-semibold text-gray-800">
-                Usuarios de {{ selectedGroup.name }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-4">
-              <div *ngFor="let user of selectedGroup.users" class="mb-2">
-                <mat-checkbox [(ngModel)]="user.selected" (change)="getSelectedUsers()" class="text-gray-800">
-                  {{ user.name }}
-                  <p class="text-sm text-gray-600">{{ user.email }}</p>
-                </mat-checkbox>
+        <!-- Remitente -->
+        <mat-form-field class="w-full">
+          <mat-label>Remitente</mat-label>
+          <div class="flex flex-col">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <mat-chip-listbox *ngIf="selectUsers" (change)="getSelectedUsers()" class="mt-2 bg-gray-50 rounded-lg">
+                  <mat-chip *ngFor="let user of selectUsers" class="bg-blue-100 text-blue-700">
+                    {{ user.email }}
+                    <button matChipRemove>
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-listbox>
               </div>
-            </mat-card-content>
-          </mat-card>
-         </div>
-      </div>
+              <div>
+                <mat-chip-listbox *ngIf="emails" class="mt-2 bg-gray-50 rounded-lg">
+                  <mat-chip *ngFor="let email of emails" class="bg-blue-100 text-blue-700" (removed)="removeEmail(email)" >
+                    {{ email }}
+                    <button matChipRemove>
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-listbox>
+              </div>
+            </div>
+            <input
+              matInput
+              type="text"
+              placeholder="Ingrese el remitente"
+              class="text-lg py-2"
+              (keydown)="onKeyDown($event)"
+              formControlName="emails"
+              placeholder="remitente@example.com"
+            />
+          </div>
+        </mat-form-field>
 
-      <!-- Periodicidad -->
-      <div>
-        <mat-label class="text-lg font-semibold text-gray-700 py-8">Periodicidad</mat-label>
+        <!-- Grupo -->
         <div class="grid grid-cols-2 gap-4">
-          <mat-form-field  class="w-full">
-            <mat-label>Fecha de inicio</mat-label>
-            <input matInput [matDatepicker]="picker" placeholder="Seleccione la fecha inicio" />
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-          
-          <mat-form-field  class="w-full">
-            <mat-label>Fecha fin</mat-label>
-            <input matInput [matDatepicker]="picker2" placeholder="Seleccione la fecha fin" />
-            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-            <mat-datepicker #picker2></mat-datepicker>
-          </mat-form-field>
+          <div>
+            <mat-form-field class="w-full">
+              <mat-label>Grupo</mat-label>
+              <mat-select formControlName="groupId" (selectionChange)="onGroupSelected($event.value)" >
+                <mat-option *ngFor="let group of groups" [value]="group.id" >
+                  {{ group.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Usuarios del Grupo -->
+          <div>
+            <mat-card *ngIf="selectedGroup" class="bg-white shadow-md rounded-lg border border-gray-300">
+              <mat-card-header class="bg-gray-200 p-4 rounded-t-lg">
+                <mat-card-title class="text-lg font-semibold text-gray-800">
+                  Usuarios de {{ selectedGroup.name }}
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="p-4">
+                <div *ngFor="let user of selectedGroup.users" class="mb-2">
+                  <mat-checkbox formControlName="userSelected" (change)="getSelectedUsers()" class="text-gray-800" [(ngModel)]="user.selected">
+                    {{ user.name }}
+                    <p class="text-sm text-gray-600">{{ user.email }}</p>
+                  </mat-checkbox>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
         </div>
+        <div class="mt-8 flex justify-end">
+          <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
+              Siguiente
+          </button>
       </div>
-    </div>
+      </mat-step>
+      
+      <mat-step [formGroupName]="'step2'" [stepControl]="emailForm.get('step2')">
+        <!-- Periodicidad -->
+        <div>
+          <mat-label class="text-lg font-semibold text-gray-700 py-8">Periodicidad</mat-label>
+          <div class="grid grid-cols-2 gap-4">
+            <mat-form-field class="w-full">
+              <mat-label>Fecha de inicio</mat-label>
+              <input matInput [(ngModel)]="startDate" [placeholder]="startDate" [value]="startDate" formControlName="startDate" readonly />
+              <mat-icon svgIcon="heroicons_outline:calendar"></mat-icon>
+            </mat-form-field>
 
-    <!-- Mensaje -->
-    <mat-form-field class="w-full mt-6">
-      <mat-label>Mensaje</mat-label>
-      <textarea matInput placeholder="Escriba su mensaje" class="text-lg"></textarea>
-    </mat-form-field>
+            <mat-form-field class="w-full">
+              <mat-label>Fecha fin</mat-label>
+              <input matInput [matDatepicker]="picker2" placeholder="Seleccione la fecha fin" formControlName="endDate" />
+              <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+              <mat-datepicker #picker2></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
 
-    <!-- Botón de Enviar -->
-    <div class="flex justify-end mt-6">
-      <button mat-flat-button color="primary" class="text-lg font-semibold px-6 py-3">
-        <mat-icon>send</mat-icon>
-        Enviar
-      </button>
-    </div>
-  </mat-card>
+        <!-- Mensaje -->
+        <mat-form-field class="w-full mt-6">
+          <mat-label>Mensaje</mat-label>
+          <textarea matInput placeholder="Escriba su mensaje" formControlName="body"></textarea>
+        </mat-form-field>
+
+        <!-- Botón de Enviar -->
+        <div class="flex justify-end mt-6">
+          <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
+              matStepperPrevious>
+              Volver
+          </button>
+          <button mat-flat-button color="primary" class="text-lg font-semibold px-6 py-3" (click)="onSendForm()">
+            <mat-icon>send</mat-icon>
+            Enviar
+          </button>
+        </div>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </form>
 </div>
