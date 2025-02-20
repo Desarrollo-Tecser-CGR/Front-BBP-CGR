@@ -8,7 +8,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         type : 'basic',
         icon : 'heroicons_outline:chart-pie',
         link : '/example',
-        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico', 'evaluador', 'seguimiento']
+        roles: ['administrador', 'validador', 'registro' , 'caracterizador', 'jefeUnidad', 'comiteTecnico', 'evaluador', 'seguimiento', 'evolucionador']
     },
     {
         id   : 'resumen',
@@ -34,14 +34,23 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/catalog',
         roles: ['administrador']
     },
-    {
-        id   : 'assessment',
-        title: 'Evaluación',
-        type : 'basic',
-        icon : 'heroicons_outline:queue-list',
-        link : '/assessment',
-        roles: ['administrador', 'evaluador']
-    },
+    // {
+    //     id   : 'assessment',
+    //     title: 'Evaluación',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:queue-list',
+    //     link : '/assessment',
+    //     roles: ['administrador', 'evaluador']
+    // },
+
+    // {
+    //     id   : 'evolution-questionnaire',
+    //     title: 'Evolucionador',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:queue-list',
+    //     link : '/evolution-questionnaire',
+    //     roles: ['administrador', 'evolucionador']
+    // },
     {
         id   : 'follow',
         title: 'Gestión de usuarios',
@@ -59,13 +68,29 @@ export const defaultNavigation: FuseNavigationItem[] = [
         roles: ['administrador']
     },
     {
+        id   : 'publication-questions',
+        title: 'Formulario de Evolucionador',
+        type : 'basic',
+        icon : 'heroicons_outline:megaphone',
+        link : '/publication-questions',
+        roles: ['administrador']
+    },
+    {
         id   : 'inbox',
         title: 'Inbox',
         type : 'basic',
         icon : 'heroicons_outline:inbox',
         link : '/inbox',
-        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento']
+        roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento', 'comiteTecnico', 'evolucionador']
     },
+    // {
+    //     id   : 'comiteTecnico',
+    //     title: 'comiteTecnico',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:inbox',
+    //     link : '/comiteTecnico',
+    //     roles: ['administrador', 'validador' , 'caracterizador', 'jefeUnidad', 'evaluador','seguimiento', 'comiteTecnico']
+    // },
     {
         id   : 'create',
         title: 'Creación de Formularios',
@@ -75,14 +100,6 @@ export const defaultNavigation: FuseNavigationItem[] = [
         roles: ['administrador']
 
     },
-    {
-        id   : 'committee',
-        title: 'Comite',
-        type : 'basic',
-        icon : 'heroicons_outline:queue-list',
-        link : '/committee',
-        roles: ['administrador', 'comiteTecnico']
-    }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {

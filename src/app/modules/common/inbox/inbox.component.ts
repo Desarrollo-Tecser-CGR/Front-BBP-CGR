@@ -53,34 +53,61 @@ export class InboxComponent implements OnInit {
     console.log('Fullname inbox', this.fullName);
   
     // Definir botones dinámicamente según el rol
-    if (this.cargo === 'evaluador') {
-        this.buttons = [
-          {
-            icon: 'feather:check-square',
-            color: 'primary', 
-            action: (row: any) => this.evaluatePractice(row), 
-          },
-        ]
-    } 
-    if (this.cargo === 'seguimiento') {
+
+ switch (this.cargo) {
+  case 'evaluador':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.evaluatePractice(row),
+      },
+    ];
+    break;
+
+  case 'comiteTecnico':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.openCommittee(row),
+      },
+    ];
+    break;
+
+  case 'seguimiento':
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:users',
+        color: 'primary',
+        action: (row: any) => this.auditPractice(row),
+      },
+    ];
+    break;
+
+    case 'evolucionador':
       this.buttons = [
         {
-          icon:'heroicons_outline:users',
+          icon: 'feather:check-square',
           color: 'primary',
-          action: (row: any)=> this.auditPractice(row),
-        },
-      ]
-    }
-    else{
-      this.buttons = [
-        {
-          icon: 'heroicons_outline:pencil-square',
-          color: 'primary',
-          action: (row: any) => this.editRow(row),
+          action: (row: any) => this.evoluationPractice(row),
         },
       ];
-    }
+      break;
+
+  default:
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:pencil-square',
+        color: 'primary',
+        action: (row: any) => this.editRow(row),
+      },
+    ];
+    break;
+}
+
     
+
   
     // Agregar el botón de validación solo para validador y administrador
     if (['validador', 'administrador'].includes(this.cargo)) {
@@ -101,7 +128,7 @@ export class InboxComponent implements OnInit {
 
   loadData(filters?: any): void {
  
-    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento'].includes(this.cargo)) {
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento', 'comiteTecnico', 'evolucionador'].includes(this.cargo)) {
       const requestBody = {
         rol: this.cargo,
         sAMAccountName: this.fullName,
@@ -113,7 +140,7 @@ export class InboxComponent implements OnInit {
 
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
-          console.log('Cuerpo de la petición:', requestBody);
+          console.log('Cuerpo de la petición:', dataRes);
  
           console.log('Cuerpo de la petición:', requestBody);
 
@@ -148,8 +175,17 @@ export class InboxComponent implements OnInit {
     }
   }
   evaluatePractice(row:any):void{
-    if(this.cargo === 'evaluador'){
+    if(this.cargo === 'evaluador', 'administrador'){
       this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
+      console.log('id en validacion', row.id);
+    }
+  }
+
+  evoluationPractice(row:any):void{
+    if (row && row.id) {
+      this.router.navigate(['/evolution-questionnaire', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
     }
   }
 
@@ -210,23 +246,19 @@ export class InboxComponent implements OnInit {
         }
     );
 }
+
+  openCommittee(row: any): void {
+    if (row && row.id) {
+      this.router.navigate(['/committee', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
+    }
+  }
+
   pageLoad(): void {
     window.location.reload()
   }
 
-  // ======================== Logica que muestra el modal en la vista ======================== //
-
-  //  openCaracterizationModal(row: any): void {
-  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-  //      width: '500px',
-  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
-  //    });
-
-  //    dialogRef.afterClosed().subscribe((result) => {
-  //      console.log('Modal cerrado con:', result);
-  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
-  //    });
-  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 

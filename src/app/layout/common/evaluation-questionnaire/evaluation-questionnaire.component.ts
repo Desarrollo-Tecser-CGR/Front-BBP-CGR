@@ -1,14 +1,13 @@
-import { catchError, of, throwError, map } from 'rxjs';
+import { catchError, of, throwError, map, Observable } from 'rxjs';
 import { Component, OnInit, Input, ViewEncapsulation, Renderer2, importProvidersFrom } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { RouterModule, Routes } from '@angular/router';
+import { Router, RouterModule, Routes } from '@angular/router';
 import { MatButtonModule} from '@angular/material/button';
 import { MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { ResumenService } from 'app/modules/resumen/resumen.service';
 import Swal from 'sweetalert2';
-import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import {FormBuilder, FormGroup, FormsModule,ReactiveFormsModule,UntypedFormBuilder,UntypedFormGroup,Validators,FormArray, Form, FormControl
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -21,7 +20,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { QuestionnaireService } from './evaluation-questionnaire.service';
-import { NgForOf } from '@angular/common'; 
+import { CommonModule, NgForOf } from '@angular/common'; 
+import {GenaralModalService} from '../../../modules/common/general-modal/general-modal.service';
+import { DialogOverviewExampleDialog } from '../../../modules/common/general-modal/general-modal.component';
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -45,107 +46,283 @@ import { NgForOf } from '@angular/common';
         ReactiveFormsModule,
         MatCheckbox,
         NgForOf,
-          
+        CommonModule,
+        DialogOverviewExampleDialog,
   ],
   templateUrl: './evaluation-questionnaire.component.html',
   styleUrl: './evaluation-questionnaire.component.scss'
 })
 
-export class EvaluationQuestionnaireComponent{
-  id: string = '';
+export class EvaluationQuestionnaireComponent implements OnInit{
+  id: any;
   data: any = {};
   questions: any[] = [];
   verticalStepperForm: FormGroup;
 
-  constructor(
-      private resumenService: ResumenService,
-      private route: ActivatedRoute,
-      private fb: FormBuilder,
-      private questionnaireService: QuestionnaireService
-  ) {
-      this.verticalStepperForm = this.fb.group({
-          questionGroups: this.fb.array([])
-      });
-  }
+  questionsGroups$: Observable<any[]>;
+  currentGroupIndex: number = 0; // Índice del grupo actual
+  currentGroup: any[] = []; // Preguntas del grupo actual
+  allGroups: any[] = []; // Lista de todos los grupos de preguntas
+  allQuestions: any[] = []; // Lista de todas las preguntas (aplanadas)
+  answeredQuestions: { [key: string]: string } = {}; // Respuestas guardadas
+  currentQuestionIndex: number = 0; // Índice de la pregunta actual
+  groupSize: number = 2; // Número de preguntas por grupo
+  formularioId: number;
 
+  estimacionTrue:string = "enviada"
+  estimacionFalse: string = "malaPractica"
+
+  allForms: any[] = [];
+
+  selectedUserFromModal: any = null;
+  selectedUsersFromModal: any[] = [];
+  additionalInfoFromModal: string = '';
+  showButton: boolean;
+
+  constructor(
+    private resumenService: ResumenService,
+    private route: ActivatedRoute,
+    private fb: FormBuilder,
+    private questionnaireService: QuestionnaireService,
+    private router:Router,
+    private genaralModalService: GenaralModalService,
+    private dialog: MatDialog
+  ) {
+    this.verticalStepperForm = this.fb.group({
+      questionGroups: this.fb.array([]),
+    });
+  }
 
   ngOnInit(): void {
-      this.id = this.route.snapshot.paramMap.get('id');
-      this.resumenService.getDataAsJson(this.id).subscribe(
+    this.id = this.route.snapshot.paramMap.get('id');
+    this.getQuestions();
+    this.getRolesYUsuarios();
+  }
+
+  getQuestions() {
+    this.questionnaireService.getQuestion().subscribe(groups => {
+      console.log(groups)
+      this.allForms = groups.data; // Guardamos todos los formularios
+      this.selectForm(0); // Inicializamos con el primer formulario (índice 0)
+    });
+  }
+
+  // Método para seleccionar un formulario por su índice en el array
+selectForm(index: number) {
+  const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
+  
+  this.formularioId = selectedForm.id; // Guardamos su ID
+  this.allQuestions = selectedForm.questions.map((q: any) => ({
+    ...q,
+    respuesta: '', // Inicializamos respuesta en vacío
+  }));
+
+  // Inicializar el objeto de seguimiento de respuestas
+  this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
+    acc[q.id] = false;
+    return acc;
+  }, {} as { [key: string]: boolean });
+
+  // Agrupar preguntas en conjuntos del tamaño deseado
+  this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
+
+  // Cargar el primer grupo de preguntas
+  this.loadGroup(this.currentGroupIndex);
+}
+
+  chunkArray(arr: any[], size: number): any[][] {
+    if (!arr || size <= 0) return []; // Evita divisiones por 0 o valores inválidos
+    const result = Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+      arr.slice(i * size, i * size + size)
+    );
+    return result;
+  }  
+
+  // Cargar un grupo específico
+  loadGroup(index: number): void {
+    if (index >= 0 && index < this.allGroups.length) {
+      this.currentGroup = this.allGroups[index]; 
+      this.currentGroupIndex = index; 
+    } else {
+      console.error("Índice de grupo fuera de rango");
+    }
+  }  
+
+  // Navegar a una pregunta específica
+  goToQuestion(index: number): void {
+    if (index >= 0 && index < this.allQuestions.length) {
+      this.currentQuestionIndex = index; // Actualizar el índice de la pregunta actual
+      const groupIndex = Math.floor(index / this.groupSize); // Calcular el grupo correspondiente
+      this.loadGroup(groupIndex); // Cargar el grupo correspondiente
+    }
+  }
+
+  // Navegar al grupo anterior
+  previousGroup(): void {
+    if (this.currentGroupIndex > 0) {
+      this.loadGroup(this.currentGroupIndex - 1); // Cargar el grupo anterior
+    }
+  }
+
+  // Navegar al siguiente grupo
+  nextGroup(): void {
+    if (this.currentGroupIndex < this.allGroups.length - 1) {
+      this.currentGroupIndex++; // Asegurar que el índice se actualice correctamente
+      this.loadGroup(this.currentGroupIndex); // Cargar el grupo actualizado
+    }
+  }
+
+  // Manejar cambios en las respuestas
+  onAnswerChange(questionId: number, selectedOption: string) {
+    this.answeredQuestions[questionId] = selectedOption;
+  
+    // Buscar la pregunta y actualizar su campo 'respuesta'
+    const question = this.allQuestions.find(q => q.id === questionId);
+    if (question) {
+      question.respuesta = selectedOption;
+    }
+  }  
+
+  // Calcular el número de pregunta correcto
+  getQuestionNumber(indexInGroup: number): number {
+    return (this.currentGroupIndex * this.groupSize) + (indexInGroup + 1);
+  }
+
+  get todasRespondidas(): boolean {
+    return Object.values(this.answeredQuestions).every(value => value);
+  }
+
+  enviarFormulario(estimacion:any){
+    const userId: any = localStorage.getItem('Iduser')
+    const idQuestions = this.allQuestions.map(q => q.id);  // Extraer los IDs de las preguntas
+    const idAnswers = this.allQuestions.map(q => q.respuesta === "si" ? 1 : 2); // Extraer las respuestas seleccionadas
+
+    console.log(this.formularioId)
+    console.log(idQuestions)
+    console.log(idAnswers)
+    // setTimeout(() => {
+    //   this.alert();
+    //}, 3000);
+    this.questionnaireService.enviarCuestionario(this.formularioId, userId, idAnswers, idQuestions,this.id, 1, estimacion).subscribe(
+      response => {
+        this.dismissPractice();
+        console.log('Cuestionario enviado con éxito', response);
+        setTimeout(() => {
+          this.alert();
+        }, 3000);
+      }, error => {
+        console.error('Error al enviar el cuestionario', error)
+      }
+    )
+  }
+
+  alert(){
+    Swal.fire({
+      icon: 'success',
+      title: 'Registro Exitoso',
+      text: `El Formulario se ah enviado exitosamente`,
+      showConfirmButton: false,
+      timer: 2000
+    }).then(() => {
+      window.location.href = './example';
+    })
+  }
+
+
+  dismissPractice() {
+    if (!this.comiteTecnicoUserId) {
+        console.error("No se pudo obtener el idUser del comité técnico.");
+        return;
+    }
+
+    if (!this.id) {  // Verificar que se tiene el ID correcto
+        console.error("No se encontró un ID válido para identity.");
+        return;
+    }
+
+    const requestBody = {
+        user: this.comiteTecnicoUserId, // ID del usuario comité técnico
+        identity: this.id, // Tomamos el ID dinámicamente
+        stateFlow: "evaluacion",
+        fechaDiligenciamiento: this.formatDate(new Date()), // Fecha actual en formato YYYY-MM-DD
+        comentarioUsuario: "" // Por ahora vacío
+    };
+
+    this.questionnaireService.sendTraceability(requestBody).subscribe({
+        next: (response) => {
+            console.log('Trazabilidad enviada con éxito:', response);
+        },
+        error: (error) => {
+            console.error('Error al enviar trazabilidad:', error);
+        }
+    });
+}
+
+formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+}
+  
+
+// ======================== Método para ver los datos del endpoint ======================== //
+  comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
+
+  getRolesYUsuarios() {
+      this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
           (response) => {
-              this.data = response;
-              console.log('Práctica:', this.data);
+              console.log('Usuarios y roles obtenidos:', response);
+
+              if (response && Array.isArray(response.data)) {
+                  const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
+
+                  if (comiteTecnico) {
+                      this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
+                      console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
+                  } else {
+                      console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
+                  }
+              } else {
+                  console.error("La respuesta no es un array válido:", response);
+              }
           },
           (error) => {
-              Swal.fire({
-                  title: 'Error',
-                  text: `No se pudo abrir la práctica. ${error}`,
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-              });
+              console.error('Error al obtener roles y usuarios:', error);
           }
       );
-
-      // Obtener preguntas
-      this.questionnaireService.getQuestionsGroups().pipe(
-          catchError((error) => {
-              Swal.fire({
-                  title: 'Error',
-                  text: `No se pudo abrir el cuestionario. ${error.message}`,
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-              });
-              return of([]);
-          })
-      ).subscribe((groups) => {
-          if (!groups || groups.length === 0) {
-              console.warn('No se recibieron grupos de preguntas.');
-              return;
-          }
-          this.questions = groups;
-          console.log('Preguntas', this.questions);
-          this.populateForm();
-      });
-  }
-  get questionsArray(): FormArray {
-    return this.verticalStepperForm.get('questionGroups') as FormArray;
   }
 
-  populateForm():void {
-    this.questions.forEach((group, groupIndex)=>{
-        const groupFromArray = this.fb.array([]);
-        group.forEach((question:any)=>{
-            const optionsFormArray = this.fb.array([]);
-            question.options.map(()=> this.fb.control(false));
-            });
-            const questionFormGroup = this.fb.group({
-                question:  this.questions
-            })
-            this.questionsArray.push(groupFromArray);
-        });
-    };
+  // ======================== Logica que muestra el modal en la vista ======================== //
+  openCaracterizationModal(): void {
+    const roles = localStorage.getItem('accessRoles');
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+
+    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+      width: '500px',
+      data: {
+        role: currentRole,
+        selectedUser: this.selectedUserFromModal,
+        selectedUsers: this.selectedUsersFromModal,
+        additionalInfo: this.additionalInfoFromModal
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.selectedUserFromModal = result.selectedUser || null;
+        this.selectedUsersFromModal = result.selectedUsers || [];
+        this.additionalInfoFromModal = result.additionalInfo || '';
+
+        if (this.selectedUsersFromModal.length > 0) {
+          localStorage.setItem('selectedUser', JSON.stringify(this.selectedUsersFromModal));
+        } else {
+          localStorage.removeItem('selectedUser');
+        }
+
+        console.log('Usuarios seleccionados:', this.selectedUsersFromModal);
+        console.log('Información adicional:', this.additionalInfoFromModal);
+      }
+    });
   }
-  // getQuestions(index: number): FormArray {
-  //   return this.verticalStepperForm.get(`step${index + 1}.questions`) as FormArray;
-  // }
-  
-  // checkFormValidity(form: FormGroup): boolean {
-  //   let isValid = true;
-  
-  //   Object.keys(form.controls).forEach((step) => {
-  //     const group = form.get(step) as FormGroup;
-  //     if (group) {
-  //       Object.keys(group.controls).forEach((control) => {
-  //         const formControl = group.get(control);
-  //         if (formControl && formControl.enabled && formControl.invalid) {
-  //           isValid = false;
-  //         }
-  //       });
-  //     }
-  //   });
-  
-  //   return isValid;
-  // }
-
-
-
+}

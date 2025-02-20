@@ -105,8 +105,10 @@ export class NotificationsService {
         });
     }
     
+
     getAll(): Observable<any[]>{
         return this._httpClient.get<Notification[]>(`${this.apiUrl}`).pipe(
+
             map((response:any)=>{
                 const data = response.data;
                 const currentNotifications = this._notifications.getValue();
@@ -121,6 +123,7 @@ export class NotificationsService {
     };
     getByType(typeId: number): Observable<any[]>{
         return this._httpClient.get<Notification[]>(`${this.apiUrl}/byTypeId/${typeId}`).pipe(
+
             map((response:any)=>{
 
                 const data = response.data;

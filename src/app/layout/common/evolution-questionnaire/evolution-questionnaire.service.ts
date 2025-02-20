@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
-import { HttpHeaders } from '@angular/common/http';
+
 
 @Injectable({
     providedIn: 'root',
@@ -51,8 +51,6 @@ export class QuestionnaireService{
     private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/11`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
-    private apiUrlTraceability = `${GlobalConstants.API_BASE_URL}/api/v1/traceability`;
-
 
     constructor(private http:HttpClient){}
     
@@ -84,11 +82,4 @@ export class QuestionnaireService{
         console.log(params)
         return this.http.post<any>(url, params)
     }
-
-    sendTraceability(data: any): Observable<any> {
-        const url = this.apiUrlTraceability; 
-        return this.http.post(url, data);
-    }
-    
-      
 }
