@@ -142,11 +142,11 @@ export class ResumenService {
     
         return this.http.get<any>(url, { headers }).pipe(
             map(response => {
-                console.log('🟢 Respuesta del endpoint /traceability:', response);
+                console.log(' Respuesta del endpoint /traceability:', response);
                 return response;
             }),
             catchError(error => {
-                console.error('🔴 Error al obtener trazabilidad:', error);
+                console.error(' Error al obtener trazabilidad:', error);
                 return throwError(error);
             })
         );

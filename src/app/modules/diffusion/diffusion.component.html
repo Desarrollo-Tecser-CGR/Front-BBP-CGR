@@ -5,6 +5,14 @@
                 <div class="h-80 overflow-y-auto border border-gray-300 rounded-lg p-2 mat-elevation-z6">
                     <app-resume-table [Id]="id"></app-resume-table>
                 </div>
+
+                 <!-- Botón Realizar Evolución -->
+                 <div class="mt-4 flex justify-end">
+                    <button mat-raised-button color="primary" class="space-buttons custom-border bg-blue-800 p-2 borde-none text-white" (click)="realizarEvolucion()">
+                      Realizar Evolución
+                    </button>
+                  </div>                  
+
                 <div class="my-4">
                     <mat-divider></mat-divider>
                     <h1 class="divider-text">Programar Auditoria</h1>

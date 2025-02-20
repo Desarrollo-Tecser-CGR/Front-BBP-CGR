@@ -22,6 +22,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { QuestionnaireService } from './evaluation-questionnaire.service';
 import { CommonModule, NgForOf } from '@angular/common'; 
 import {GenaralModalService} from '../../../modules/common/general-modal/general-modal.service';
+import { DialogOverviewExampleDialog } from '../../../modules/common/general-modal/general-modal.component';
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -45,7 +46,8 @@ import {GenaralModalService} from '../../../modules/common/general-modal/general
         ReactiveFormsModule,
         MatCheckbox,
         NgForOf,
-        CommonModule
+        CommonModule,
+        DialogOverviewExampleDialog,
   ],
   templateUrl: './evaluation-questionnaire.component.html',
   styleUrl: './evaluation-questionnaire.component.scss'
@@ -70,9 +72,13 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   estimacionTrue:string = "enviada"
   estimacionFalse: string = "malaPractica"
 
-  allForms: any[] = []
+  allForms: any[] = [];
 
-  
+  selectedUserFromModal: any = null;
+  selectedUsersFromModal: any[] = [];
+  additionalInfoFromModal: string = '';
+  showButton: boolean;
+
   constructor(
     private resumenService: ResumenService,
     private route: ActivatedRoute,
@@ -80,6 +86,7 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     private questionnaireService: QuestionnaireService,
     private router:Router,
     private genaralModalService: GenaralModalService,
+    private dialog: MatDialog
   ) {
     this.verticalStepperForm = this.fb.group({
       questionGroups: this.fb.array([]),
@@ -260,31 +267,62 @@ formatDate(date: Date): string {
   
 
 // ======================== Método para ver los datos del endpoint ======================== //
-comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
+  comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
 
-getRolesYUsuarios() {
-    this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
-        (response) => {
-            console.log('Usuarios y roles obtenidos:', response);
+  getRolesYUsuarios() {
+      this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
+          (response) => {
+              console.log('Usuarios y roles obtenidos:', response);
 
-            if (response && Array.isArray(response.data)) {
-                const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
+              if (response && Array.isArray(response.data)) {
+                  const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
 
-                if (comiteTecnico) {
-                    this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
-                    console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
-                } else {
-                    console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
-                }
-            } else {
-                console.error("La respuesta no es un array válido:", response);
-            }
-        },
-        (error) => {
-            console.error('Error al obtener roles y usuarios:', error);
+                  if (comiteTecnico) {
+                      this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
+                      console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
+                  } else {
+                      console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
+                  }
+              } else {
+                  console.error("La respuesta no es un array válido:", response);
+              }
+          },
+          (error) => {
+              console.error('Error al obtener roles y usuarios:', error);
+          }
+      );
+  }
+
+  // ======================== Logica que muestra el modal en la vista ======================== //
+  openCaracterizationModal(): void {
+    const roles = localStorage.getItem('accessRoles');
+    const currentRole = roles ? JSON.parse(roles)[0].toLowerCase() : 'registro';
+
+    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+      width: '500px',
+      data: {
+        role: currentRole,
+        selectedUser: this.selectedUserFromModal,
+        selectedUsers: this.selectedUsersFromModal,
+        additionalInfo: this.additionalInfoFromModal
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.selectedUserFromModal = result.selectedUser || null;
+        this.selectedUsersFromModal = result.selectedUsers || [];
+        this.additionalInfoFromModal = result.additionalInfo || '';
+
+        if (this.selectedUsersFromModal.length > 0) {
+          localStorage.setItem('selectedUser', JSON.stringify(this.selectedUsersFromModal));
+        } else {
+          localStorage.removeItem('selectedUser');
         }
-    );
-}
 
-
+        console.log('Usuarios seleccionados:', this.selectedUsersFromModal);
+        console.log('Información adicional:', this.additionalInfoFromModal);
+      }
+    });
+  }
 }

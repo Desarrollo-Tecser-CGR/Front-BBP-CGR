@@ -261,141 +261,93 @@ export class ResumenComponent implements OnInit {
                     return; // IMPORTANTE: Salir para evitar la llamada extra a updateDataAsJson
                 }
             }
-            
-
-
-
-                //Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
-                // if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
-                //     flattenedValues.estadoFlujo = 'caracterizada'; // Cambiar a caracterizada
-                //     console.log('Estado de flujo actualizado para jefeUnidad:', flattenedValues.estadoFlujo);
-                //     // Aquí agregamos la lógica para enviar el PATCH con los datos actualizados
-                //     const patchData = {
-                //         actualizaciones: {
-                //             estadoFlujo: 'caracterizada_JU', // Actualizar estado de flujo
-                //         },
-                //         sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario seleccionado desde el modal
-                //         estadoFlujo: 'caracterizada_JU', // Estado de flujo actualizado
-                //         comentarioUsuario: this.additionalInfoFromModal || '', // Información adicional desde el modal
-                //     };
-                //     // Llamar al servicio de actualización con PATCH
-                //     this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
-                //         (response) => {
-                //             console.log('Respuesta del servidor:', response);
-                //             // Mostrar mensaje de éxito
-                //             Swal.fire({
-                //                 title: '¡Actualización Exitosa!',
-                //                 text: 'El formulario ha sido actualizado.',
-                //                 icon: 'success',
-                //                 confirmButtonText: 'Aceptar',
-                //             }).then(() => {
-                //                 window.location.href = './example'; // Redirigir después de la actualización
-                //             });
-                //         },
-                //         (error) => {
-                //             // En caso de error
-                //             Swal.fire({
-                //                 title: 'Error',
-                //                 text: 'No se pudo actualizar el formulario. Intenta nuevamente.',
-                //                 icon: 'error',
-                //                 confirmButtonText: 'Aceptar',
-                //             });
-                //         }
-                //     );
-                //     return;
-
-                // }
 
 
                 //Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
-// Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
-if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
-    console.log('Cambiando estado de caracterizada_JU a caracterizada para Jefe de Unidad');
+                if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
+                    console.log('Cambiando estado de caracterizada_JU a caracterizada para Jefe de Unidad');
 
-    // Se actualiza el estado de flujo
-    flattenedValues.estadoFlujo = 'caracterizada';
+                    // Se actualiza el estado de flujo
+                    flattenedValues.estadoFlujo = 'caracterizada';
 
-    // Se obtiene el formulario completo
-    const formValues = this.horizontalStepperForm.getRawValue();
+                    // Se obtiene el formulario completo
+                    const formValues = this.horizontalStepperForm.getRawValue();
 
-    // Se construyen los datos que se enviarán
-    const patchData = {
-        actualizaciones: {
-            entityCgr: formValues.step1.entityCgr || null,
-            nombreDependenciaArea: formValues.step1.nombreDependenciaArea || null,
-            nombre: formValues.step2.nombre || '',
-            cargo: formValues.step2.cargo || '',
-            correo: formValues.step2.correo || '',
-            contacto: formValues.step2.contacto || '',
-            typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
-            typePractice: formValues.step3.typePractice || null,
-            typology: formValues.step3.typology || null,
-            estadoFlujo: 'caracterizada',  // Aquí se cambia a 'caracterizada'
-            levelGoodPractice: formValues.step3.levelGoodPractice || null,
-            nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
-            propositoPractica: formValues.step3.propositoPractica || '',
-            objectiveMainPractice: formValues.step3.objectiveMainPractice || null,
-            expectedImpact: formValues.step4.expectedImpact || [],
-            metodologiaUsada: formValues.step4.metodologiaUsada || '',
-            durationImplementation: formValues.step4.durationImplementation || null,
-            stagesMethodology: formValues.step4.stagesMethodology || [],
-            periodoDesarrolloInicio: formValues.step4.periodoDesarrolloInicio || '',
-            periodoDesarrolloFin: formValues.step4.periodoDesarrolloFin || '',
-            typeMaterialProduced: formValues.step5.typeMaterialProduced || [],
-            supportReceived: formValues.step5.supportReceived || [],
-            recognitionsNationalInternational: formValues.step5.recognitionsNationalInternational || null,
-            controlObject: formValues.step5.controlObject || null,
-            taxonomyEvent: formValues.step5.taxonomyEvent || [],
-            typePerformance: formValues.step5.typePerformance || null,
-            documentoActuacion: formValues.step6.documentoActuacion || '',
-            descripcionResultados: formValues.step5.descripcionResultados || ''
-        },
-        sAMAccountName: '', // Se asignará después con el userName del endpoint
-        estadoFlujo: 'caracterizada',  // Cambio de estado
-        comentarioUsuario: '', 
-    };
+                    // Se construyen los datos que se enviarán
+                    const patchData = {
+                        actualizaciones: {
+                            entityCgr: formValues.step1.entityCgr || null,
+                            nombreDependenciaArea: formValues.step1.nombreDependenciaArea || null,
+                            nombre: formValues.step2.nombre || '',
+                            cargo: formValues.step2.cargo || '',
+                            correo: formValues.step2.correo || '',
+                            contacto: formValues.step2.contacto || '',
+                            typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
+                            typePractice: formValues.step3.typePractice || null,
+                            typology: formValues.step3.typology || null,
+                            estadoFlujo: 'caracterizada',  // Aquí se cambia a 'caracterizada'
+                            levelGoodPractice: formValues.step3.levelGoodPractice || null,
+                            nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
+                            propositoPractica: formValues.step3.propositoPractica || '',
+                            objectiveMainPractice: formValues.step3.objectiveMainPractice || null,
+                            expectedImpact: formValues.step4.expectedImpact || [],
+                            metodologiaUsada: formValues.step4.metodologiaUsada || '',
+                            durationImplementation: formValues.step4.durationImplementation || null,
+                            stagesMethodology: formValues.step4.stagesMethodology || [],
+                            periodoDesarrolloInicio: formValues.step4.periodoDesarrolloInicio || '',
+                            periodoDesarrolloFin: formValues.step4.periodoDesarrolloFin || '',
+                            typeMaterialProduced: formValues.step5.typeMaterialProduced || [],
+                            supportReceived: formValues.step5.supportReceived || [],
+                            recognitionsNationalInternational: formValues.step5.recognitionsNationalInternational || null,
+                            controlObject: formValues.step5.controlObject || null,
+                            taxonomyEvent: formValues.step5.taxonomyEvent || [],
+                            typePerformance: formValues.step5.typePerformance || null,
+                            documentoActuacion: formValues.step6.documentoActuacion || '',
+                            descripcionResultados: formValues.step5.descripcionResultados || ''
+                        },
+                        sAMAccountName: '', // Se asignará después con el userName del endpoint
+                        estadoFlujo: 'caracterizada',  // Cambio de estado
+                        comentarioUsuario: '', 
+                    };
 
-    // Llamada al servicio para obtener los datos de trazabilidad
-    this.resumenService.getTraceabilityData(this.Id, 4).subscribe(
-        data => {
-            console.log(' Datos de trazabilidad:', data);
+                    // Llamada al servicio para obtener los datos de trazabilidad
+                    this.resumenService.getTraceabilityData(this.Id, 4).subscribe(
+                        data => {
+                            console.log(' Datos de trazabilidad:', data);
 
-            // Asignamos el userName del endpoint al campo sAMAccountName
-            patchData.sAMAccountName = data.data.userName; // Asigna el valor de userName
+                            // Asignamos el userName del endpoint al campo sAMAccountName
+                            patchData.sAMAccountName = data.data.userName; // Asigna el valor de userName
 
-            // Ahora que tenemos el userName, podemos continuar con la actualización
-            this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
-                () => {
-                    Swal.fire({
-                        title: '¡Actualización Exitosa!',
-                        text: 'El formulario ha sido actualizado correctamente.',
-                        icon: 'success',
-                        confirmButtonText: 'Aceptar',
-                    }).then(() => window.location.href = './example');
-                },
-                () => {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No se pudo actualizar el formulario.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                    });
+                            // Ahora que tenemos el userName, podemos continuar con la actualización
+                            this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
+                                () => {
+                                    Swal.fire({
+                                        title: '¡Actualización Exitosa!',
+                                        text: 'El formulario ha sido actualizado correctamente.',
+                                        icon: 'success',
+                                        confirmButtonText: 'Aceptar',
+                                    }).then(() => window.location.href = './example');
+                                },
+                                () => {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: 'No se pudo actualizar el formulario.',
+                                        icon: 'error',
+                                        confirmButtonText: 'Aceptar',
+                                    });
+                                }
+                            );
+
+                            // Se envía la notificación
+                            this.notificationService.sendNotification(this.Id, patchData.sAMAccountName, 6);
+
+                            console.log('Estado de flujo actualizado para Jefe de Unidad:', flattenedValues.estadoFlujo);
+                        },
+                        error => {
+                            console.error(' Error en la solicitud:', error);
+                        }
+                    );
                 }
-            );
-
-            // Se envía la notificación
-            this.notificationService.sendNotification(this.Id, patchData.sAMAccountName, 6);
-
-            console.log('Estado de flujo actualizado para Jefe de Unidad:', flattenedValues.estadoFlujo);
-        },
-        error => {
-            console.error(' Error en la solicitud:', error);
-        }
-    );
-}
-
-
-
 
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -959,10 +911,10 @@ if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracteriza
     
         this.resumenService.getTraceabilityData(id, idState).subscribe(
             (data) => {
-                console.log('🟢 Datos de trazabilidad:', data);
+                console.log(' Datos de trazabilidad:', data);
             },
             (error) => {
-                console.error('🔴 Error al obtener trazabilidad:', error);
+                console.error(' Error al obtener trazabilidad:', error);
             }
         );
     }
