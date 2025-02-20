@@ -2,6 +2,8 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { GenericTableComponent } from "../../../modules/common/generic-table/generic-table.component";
 import { FilesTableServices } from './files-table.service';
 import { ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
+import { DataServices } from 'app/modules/resumen-edit/resumen-edit.service';
 
 @Component({
   selector: 'app-files-table',
@@ -42,10 +44,22 @@ export class FilesTableComponent implements OnChanges {
   }
   ngOnChanges(changes: SimpleChanges) {
     if (changes['IdAudit'] && changes['IdAudit'].currentValue !== undefined) {
-      this.data = [...this.getFilesByAudit(changes['IdAudit'].currentValue)]; // Clonamos el array
+      this.getFilesByAudit(changes['IdAudit'].currentValue).subscribe(
+        (files)=>{
+          this.data=files;
+        },
+        (error) =>{
+            Swal.fire({
+              title: 'Error',
+              text: 'Error al obtener los archivos.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar',
+            });
+        }
+      ); // Clonamos el array
   
-      if (this.data.length === 0) {
-        this.data = [{ message: 'No hay archivos aún.', empty: true }]; // Mantenemos el array
+      if (!this.data) {
+        this.data = [{ message: 'No hay archivos aún.', empty: true }]; 
       }
   
       console.log('Files filtrados ts:', this.data);
@@ -54,12 +68,14 @@ export class FilesTableComponent implements OnChanges {
   
 
   downloadFile(row: any) {
-    throw new Error('Method not implemented.');
+    this.dataService.downloadFile(row.id)
   }
   visualizeFile(row: any) {
-    throw new Error('Method not implemented.');
+    this.dataService.viewFile(row.id);
   }
-  constructor(private filesServices: FilesTableServices, private cdr:ChangeDetectorRef){
+  constructor(private filesServices: FilesTableServices, private cdr:ChangeDetectorRef,
+    private dataService: DataServices,
+  ){
 
   }
   submitForm() {

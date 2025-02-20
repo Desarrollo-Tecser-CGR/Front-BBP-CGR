@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation} from '@angular/core';
+import { Component, Input, ViewEncapsulation, ViewChild, AfterViewInit} from '@angular/core';
 import { NgModule } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { AuditService } from './audit.service'
-import { NgForOf, NgIf } from '@angular/common';
+import { NgForOf, NgIf, NgClass, CommonModule } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -18,19 +18,20 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import { head } from 'lodash';
 import { MatButtonModule } from '@angular/material/button';
 import { P } from '@angular/cdk/keycodes';
-
+import { MatIcon } from '@angular/material/icon';
+import { ProgressAuditComponent } from '../progress-audit/progress-audit.component';
 
 @Component({
   selector: 'app-audit',
   standalone: true,
   imports: [
+    CommonModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
     MatFormFieldModule,
     FormsModule,
     NgForOf,
     NgIf,
-    MatDivider,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -38,15 +39,23 @@ import { P } from '@angular/cdk/keycodes';
     MatRadioModule,
     MatButtonToggleModule,
     MatButtonModule,
+    MatIcon,
+    ProgressAuditComponent,
+    NgClass
+
 ],
   providers:[],
   templateUrl: './audit.component.html',
   styleUrl: './audit.component.scss',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+ 
 })
-export class AuditComponent {
+export class AuditComponent implements AfterViewInit{
+
+  @ViewChild(ProgressAuditComponent) progress!:ProgressAuditComponent;
   id: string | null = null;
-  selectedFiles: File[] = [];
+  selectedFiles: File[]=[];
+  dateUploadSelected:string=''; 
   displayedColumns:any[]=[];
   audits:any[]=[];
   idAudit:number;
@@ -62,6 +71,16 @@ export class AuditComponent {
   dataSource:any[]=[];
   headers:string[]=[];
   tableData:any[]=[];
+  isSelect:boolean;
+  total:number = 0;
+  active:number = 0;
+  inactive:number = 0;
+  counts:any[]=[]
+
+  ngAfterViewInit(): void {
+      
+  } 
+  
   constructor(
     private resumenService:ResumenService,
     private auditService: AuditService,
@@ -96,6 +115,11 @@ export class AuditComponent {
     onSelectedAudit(value:any){
       this.selectedAudit = value;
       console.log('Aditoria seleccionada', this.selectedAudit);
+    }
+    onClickDate(date:string){
+      this.dateUploadSelected = date;
+      this.isSelect = true;
+      console.log('Date seleccionada:', this.dateUploadSelected);
     }
     getAudits(){
       if (this.btnRadio === 'all') {
@@ -141,10 +165,11 @@ export class AuditComponent {
       this.idAudit = id;
       this.selectedAudit = row;
       this.codeAudit =row[1];
-      console.log('Auditoria seleccionada:', this.selectedAudit);
-      console.log('Auditoria ID:', this.idAudit)
+      this.getProgress();
+      this.getPerodicityDays();
     }
-    submitDocumentoActuacion(identityId:number): void {
+    submitDocumentoActuacion(idAudit:number): void {
+      console.log('Carga auditoria', idAudit);
 
           if (this.selectedFiles.length > 0) {
               const formData = new FormData();
@@ -154,9 +179,11 @@ export class AuditComponent {
               formData.append('files', file);
             });
 
+            const dateAudit = this.dateUploadSelected;
+            formData.append('dateAudit', dateAudit);
 
               // Enviamos los archivos al servicio
-              this.resumenService.uploadFile(identityId,formData).subscribe(
+              this.auditService.postAuditFiles(idAudit,formData).subscribe(
                   (response) => {
                       Swal.fire({
                           title: '¡Actualización Exitosa!',
@@ -168,9 +195,10 @@ export class AuditComponent {
                       this.selectedFiles = [];
                   },
                   (error) => {
+                    console.error('Carga de archivos',error);
                       Swal.fire({
                           title:  'Error',
-                          text: 'Error al cargar los documentos.',
+                          text: `Error al cargar los documentos: ${error.error}`,
                           icon: 'error',
                           confirmButtonText: 'Aceptar',
                       })
@@ -181,6 +209,7 @@ export class AuditComponent {
       }
 
     ngOnInit():void{
+      this.getAllCounts();
       this.getAudits();
       this.columns = this.auditService.getColumns();
       this.auditService.getAllGroups().subscribe(
@@ -197,8 +226,59 @@ export class AuditComponent {
         }
       );      
       console.log('Grupos:', this.groups)
-        // llamar las auditorias por la hoja de vida
-      this.periodicity= this.auditService.getPerodicityDays();
+    }
+    getPerodicityDays(){
+      this.auditService.getPeriocityByAudit(this.idAudit).subscribe(
+        (response)=>{
+          this.periodicity = response.days;
+        },
+        (error)=>{
+          Swal.fire({
+            title:  'Error',
+            text: 'Error al cargar la periodicidad.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          })
+        }
+      );
+    }
+    getAllCounts(){
+      this.auditService.getAuditsCounts().subscribe(
+        (response)=>{
+          this.total = response.total;
+          console.log('Contador total,',this.total);
+          this.inactive = response.inactive;
+          this.active = response.active;
+          this.counts = [
+            {label:'Total de auditorias', count:this.total, icon:'heroicons_outline:arrow-long-right', color:'orange'},
+            {label:'Auditorias inactivas', count:this.inactive, icon:'heroicons_outline:arrow-down-left', color:'red'},
+            {label:'Auditorias activas', count:this.active, icon:'heroicons_outline:arrow-up-right', color:'orange'},]
+        },
+        (error)=>{
+          Swal.fire({
+            title: 'Error',
+            text: 'Error al obtener los contadores.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+        }
+      )
+    }
+    getProgress(){
+      this.auditService.getProgressByAudit(Number(this.idAudit)).subscribe(
+        (response)=>{
+          console.log('Progress', response.progress);
+          this.progress.updateProgress(response.progress);
+        },
+        (error)=>{
+          Swal.fire({
+            title: 'Error',
+            text: 'Error al cargar el progreso.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+        }
+      );
     }
 
     preparateTableData(data: any, columns: any[]): {headers:string[], tableData:any[][]} {

@@ -1,6 +1,6 @@
 import { ResumenService } from './../../../modules/resumen/resumen.service';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
@@ -23,23 +23,9 @@ export class AuditService{
         { key: 'startDate', header: 'Fecha Inicio' },
         { key: 'endDate', header: 'Fecha Fin' },
         { key: 'groupName', header: 'Grupo'},
-        { Key: 'state', header:'Estado'},
-        { key: 'identityId', header:'Id Practica'}
+        { key: 'identityId', header:'Id Practica'},
+        { key: 'state', header:'Estado'}
     ]
-    private periodicity = {
-        "totalDays": 5,
-        "range": {
-          "startDate": "2023-10-01",
-          "endDate": "2023-10-05"
-        },
-        "days": [
-          "2023-10-01",
-          "2023-10-02",
-          "2023-10-03",
-          "2023-10-04",
-          "2023-10-05"
-        ]
-      }
 
     private formatDate(dateString:string) {
         const date = new Date(dateString);
@@ -56,32 +42,17 @@ export class AuditService{
     getColumns(){
         return this.columns;
     }
-    getPerodicityDays(){
-        const days = this.periodicity.days.map((day)=>{
-            return this.formatDate(day);
-        });
-        return days;
-    }
-
-    // getAudits():Observable<any[]>{
-    //     const response = this.http.get<any[]>(this.urlMocks);
-    //     console.log('Audits en el servicio:', response);
-    //     return response;
-    // }
-    // addAudit(audit:any):Observable<any>{
-    //     return this.http.post<any>(this.urlMocks, audit);
-    // }
-
-    // getAuditFiles(idAuditoria:number):Observable<any[]>{
-    //     return this.http.get<any[]>(`${this.urlMocks}'/Files?id='${idAuditoria}`)
-    // }
-
-    // getAuditsByGroup(groupName:string):Observable<any[]>{
-    //     return this.http.get<any[]>(`${this.urlMocks}'/Group?groupName='${groupName}`)
-
-    // }
     
     //servicios con api en el back
+
+
+    postAuditFiles(idAudit:number,fileData: FormData):Observable<any>{
+        return this.http.post<any>(`${this.urlAudit}/${idAudit}/files/upload`, fileData);
+    }
+
+    getProgressByAudit(idAudit:number):Observable<any>{
+        return this.http.get<any>(`${this.urlAudit}/${idAudit}/progress`);
+    }
 
     getAllGroups():Observable<any>{
         return this.http.get<any>(this.urlGroups);
@@ -99,8 +70,11 @@ export class AuditService{
     getAuditGroups(groupName:string){
         return this.http.get<any>(`${this.urlAudit}/getByGroup/${groupName}`);
     }
-    getPeriocityByAudit(idAudit:number){
-        return 
+    getAuditsCounts():Observable<any>{
+        return this.http.get<any>(`${this.urlAudit}/count`);
+    }
+    getPeriocityByAudit(idAudit:number):Observable<any>{
+        return this.http.get<any>(`${this.urlAudit}/calculate-periodicity/${idAudit}`);
     }
     onSendForm(){
     }

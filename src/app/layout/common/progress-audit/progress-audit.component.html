@@ -1,0 +1,13 @@
+<div>
+    <h3 class="text-blue-800 font-bold">Progreso de la auditoria {{CodeAudit}}</h3>
+    <div class="">
+      <apx-chart 
+      [series]="[progress]" 
+      [chart]="chartOptions.chart" 
+      [plotOptions]="chartOptions.plotOptions"
+      [fill]="chartOptions.fill"
+      [labels]="chartOptions.labels"
+      >
+    </apx-chart>
+    </div>
+  </div>

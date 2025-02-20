@@ -38,6 +38,7 @@ export class ResumeTableComponent {
     this.resumenService.getDataAsJson(this.id).subscribe(
         (response) => {
             this.data = response;
+            console.log('Practica:', this.data);
             this.dataSource = this.preparateTableData(this.data, this.columns);
             this.displayedColumns = this.getDisplayedColumns(this.columns);
         },
@@ -73,7 +74,8 @@ preparateTableData(data: any, columns: any[]): any[] {
 
       let formattedValue;
       if (Array.isArray(value)) {
-        formattedValue = value.length === 0 ? 'N/A' : value;
+        formattedValue = value.length === 0 ? 'N/A' : value.map(item => item.name || JSON.stringify(item)).join(', ');
+        ;
       } else if (typeof value === 'object' && value !== null && 'name' in value) {
         formattedValue = value.name;
       } else {

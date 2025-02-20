@@ -30,8 +30,8 @@ export class AuditsMockApi{
         this.mockApiService
         .onGet('/api/common/auditsFiles')
         .reply(({request})=> {
-            const idAuditoria = request.params.get('id');
-            const filteredFiles = this._files.filter(file => file.idAuditoria === Number(idAuditoria));
+            const idAudit = request.params.get('id');
+            const filteredFiles = this._files.filter(file => file.idAudit === Number(idAudit));
             return [200, filteredFiles];
         })
         //Traer todas las auditorias por grupo

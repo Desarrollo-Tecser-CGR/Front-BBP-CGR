@@ -181,7 +181,7 @@ export class EmailAuditComponent implements OnInit {
       error => {
         Swal.fire({
           title: 'Error al programar auditoria',
-          text: `Error:${error}`,
+          text: `Error:${error.data}`,
           icon: 'error',
           confirmButtonText: 'Aceptar'
         });
