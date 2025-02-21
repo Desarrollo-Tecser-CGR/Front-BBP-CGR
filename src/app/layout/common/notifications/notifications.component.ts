@@ -72,44 +72,67 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.rol = this.roles[0];
         this._notificationsService._notifications.asObservable();
 
-        if (this.rol === 'validador') {
-            forkJoin([
-                this._notificationsService.getByType(1),
-                this._notificationsService.getByType(2),
-                this._notificationsService.getByType(6)
-            ]).subscribe(
-                ([registerNotifications, validationNotifications, caracterizationNotifications])=>{
-                    const response = [
-                        ...registerNotifications,
-                        ...validationNotifications,
-                        ...caracterizationNotifications
-                    ];
+        switch (this.rol) {
+            case 'validador':
+                forkJoin([
+                    this._notificationsService.getByType(1),
+                    this._notificationsService.getByType(2),
+                    this._notificationsService.getByType(6)
+                ]).subscribe(
+                    ([registerNotifications, validationNotifications, caracterizationNotifications]) => {
+                        const response = [
+                            ...registerNotifications,
+                            ...validationNotifications,
+                            ...caracterizationNotifications
+                        ];
+        
+                        this._notificationsService._notifications.next(response);
+                        this.notifications = response;
+        
+                        this._calculateUnreadCount();
+                        this._changeDetectorRef.markForCheck();
+                    },
+                    (error) => {
+                        console.error('Error al obtener las notificaciones:', error);
+                    }
+                );
+                break;
+        
+            case 'caracterizador':
+                this._notificationsService.getByType(3).subscribe(
+                    (data) => {
+                        this._notificationsService._notifications.next(data);
+                        this.notifications = data;
+        
+                        this._calculateUnreadCount();
+                        this._changeDetectorRef.markForCheck();
+                    },
+                    (error) => {
+                        console.error('Error al obtener las notificaciones:', error);
+                    }
+                );
+                break;
 
-                    this._notificationsService._notifications.next(response);
-                    this.notifications = response;
-
-                    this._calculateUnreadCount();
-                    this._changeDetectorRef.markForCheck();
-                },
-                (error) =>{
-                    console.error('Error al obtener las notificaciones:',error);
-                    
-                }
-            )
-        } 
-        if (this.rol === 'caracterizador') {
-            this._notificationsService.getByType(3).subscribe(
-                (data) =>{
-                    this._notificationsService._notifications.next(data);
-                    this.notifications= data;
-
-                    this._calculateUnreadCount();
-                    this._changeDetectorRef.markForCheck();
-                },
-                (error)=>{
-                }
-            );
-        };
+            case 'evaluador':
+                this._notificationsService.getByType(7).subscribe(
+                    (data) => {
+                        this._notificationsService._notifications.next(data);
+                        this.notifications = data;
+        
+                        this._calculateUnreadCount();
+                        this._changeDetectorRef.markForCheck();
+                    },
+                    (error) => {
+                        console.error('Error al obtener las notificaciones:', error);
+                    }
+                );
+                break;
+        
+            default:
+                console.warn(`Rol no reconocido: ${this.rol}`);
+                break;
+        }
+        
     }
  
     /**
