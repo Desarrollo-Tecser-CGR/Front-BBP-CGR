@@ -85,7 +85,7 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   
   preguntas = [
       { id: 1, enunciado: '¿Necesita un Aumento de recursos?', respuesta: '', comentario: '' },
-      { id: 2, enunciado: '¿?', respuesta: '', comentario: '' },
+      { id: 2, enunciado: '¿Disminución, reducción o contención de gastos?', respuesta: '', comentario: '' },
       { id: 3, enunciado: '¿El sistema es accesible para todos los usuarios?', respuesta: '', comentario: '' },
       { id: 4, enunciado: '¿Las pruebas han sido correctamente implementadas?', respuesta: '', comentario: '' },
       { id: 5, enunciado: '¿El rendimiento es óptimo?', respuesta: '', comentario: '' }

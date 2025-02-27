@@ -7,6 +7,7 @@ import { CommitteeService } from './committee.service';
 import { ResumenService } from '../resumen/resumen.service';
 import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
+import {GenaralModalService} from '../../modules/common/general-modal/general-modal.service';
 
 @Component({
     selector: 'committee',
@@ -33,7 +34,8 @@ export class CommitteeComponent implements OnInit {
         private activatedRoute: ActivatedRoute,
         private committeeService: CommitteeService,
         private resumenService: ResumenService,
-        private cdRef: ChangeDetectorRef
+        private cdRef: ChangeDetectorRef,
+        private genaralModalService: GenaralModalService,
     ) {}
 
     ngOnInit(): void {
@@ -46,6 +48,7 @@ export class CommitteeComponent implements OnInit {
                 this.loadResumenData(this.id); // 🔹 Llamamos a loadResumenData en lugar de getDataAsJson directamente
             }
         });
+        this.getRolesYUsuarios();
     }
     
      // 🔹 Método para obtener los datos del comité
@@ -132,17 +135,17 @@ private loadCommitteeData(id: number): void {
     
         // Accedemos al 'userName' desde el objeto 'committeeData.userId.userName'
         const accessName = this.committeeData.userId?.userName || 'defaultUser'; // Si no existe, usar 'defaultUser'
-    
+
         // Creamos el objeto con la actualización que solo incluye el estado de flujo
         const updatedData = {
             actualizaciones: {
                 estadoFlujo: nuevoEstadoFlujo, // Estado de flujo actualizado
             },
-            sAMAccountName: accessName, // Usamos 'accessName' como 'userName'
+            sAMAccountName: 'bbp16.cgr', // Usamos 'accessName' como 'userName'
             estadoFlujo: nuevoEstadoFlujo, // Estado de flujo actualizado
             comentarioUsuario: '', // Comentario adicional desde el modal
         };
-    
+        console.log('datos de user', accessName);
         // Convertimos el 'id' a number antes de pasarlo al servicio
         const idAsNumber = Number(this.id);
     
@@ -238,6 +241,34 @@ private loadCommitteeData(id: number): void {
                     icon: 'error',
                     confirmButtonText: 'Aceptar',
                 });
+            }
+        );
+    }
+
+
+    // ======================== Método para ver los datos del endpoint ======================== //
+    comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
+
+    getRolesYUsuarios() {
+        this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
+            (response) => {
+                console.log('Usuarios y roles obtenidos:', response);
+    
+                if (response && Array.isArray(response.data)) {
+                    const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
+    
+                    if (comiteTecnico) {
+                        this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
+                        console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
+                    } else {
+                        console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
+                    }
+                } else {
+                    console.error("La respuesta no es un array válido:", response);
+                }
+            },
+            (error) => {
+                console.error('Error al obtener roles y usuarios:', error);
             }
         );
     }

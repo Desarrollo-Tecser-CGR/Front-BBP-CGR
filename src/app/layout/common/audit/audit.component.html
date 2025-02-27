@@ -1,28 +1,36 @@
 <!-- barra -->
  <div>
-    <div class="grid grid-cols-2 gap-2 min-w-0">
-      <div class="flex flex-col items-start p-4 bg-white shadow-md rounded-lg">
-        <h1 class="text-xl font-semibold text-gray-800 mb-2">Grupos</h1>
-        <mat-divider class="w-full mb-4"></mat-divider>
-        <mat-radio-group [(ngModel)]="btnRadio" (change)="onRadioChecked($event.value)">
-          <mat-radio-button [value]="'all'" class="block mb-2"> 
-            Todas
-          </mat-radio-button>
-          <mat-radio-button *ngFor="let group of groups" [value]="group.name" class="block mb-2"> 
-            {{ group.name }}
-          </mat-radio-button>
+    <div class="grid grid-cols-[70%_30%] gap-4 min-w-0">
+      <div class="w-full flex flex-col items-start  p-4 bg-white shadow-md rounded-lg col-span-2">
+        <h1 class="text-xl font-semibold text-gray-800 ">Grupos</h1>
+        <mat-radio-group [(ngModel)]="btnRadio" (change)="onRadioChecked($event.value)" class="btn-radio flex bg-indigo-800 rounded-md text-white align-center px-2">
+            <mat-radio-button [value]="'all'" class="btn-radio text-white" color="white"> 
+              Todas
+            </mat-radio-button>
+            <mat-radio-button *ngFor="let group of groups" [value]="group.name" class="text-white hover:bg-white-200"  color="white"> 
+              {{ group.name }}
+            </mat-radio-button>
         </mat-radio-group>
       </div>
-      <div class="flex flex-col items-center p-4 bg-white shadow-md rounded-lg"> 
-        <h1 class="text-xl font-semibold text-gray-800 mb-2">Progreso</h1> 
-        <mat-progress-spinner
-            class="example-margin"
-            [color]="'primary'" 
-            [mode]="'determinate'"
-            [strokeWidth]="10"
-            [value]="80">
-        </mat-progress-spinner>
-        <p class="text-lg p-4 text-gray-800">Indicador de progreso 80%</p> 
+      <div class="bg-stone-300 p-5 rounded-md flex flex-col ">
+        <h1 class="text-xl font-bold mb-2">Auditorias</h1>
+        <p class="text-indigo-900 font-bold mb-4">Febrero 2025</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div *ngFor="let count of counts" class="bg-white rounded-md p-4 w-full shadow-md">
+            <div class="flex">
+              <mat-icon [svgIcon]="count.icon" [style.color]="count.color"></mat-icon>
+              <p class="text-gray-600">{{count.label}}</p>
+            </div>
+            <div class="flex  justify-between items-end ">
+              <a href="">Ver detalles</a>
+              <h3 class="text-6xl font-bold">{{count.count}}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- grafica de progreso -->
+      <div class="flex items-center p-4 bg-white shadow-md rounded-lg align-center"> 
+        <app-progress-audit [idAudit]="idAudit" [CodeAudit]="codeAudit"></app-progress-audit>
       </div>
     </div>
     
@@ -43,7 +51,7 @@
         </table>
       </div>
       <div> 
-        <div class="grid grid-cols-2 gap-4" *ngIf="selectedAudit">
+        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2  gap-4" *ngIf="selectedAudit">
           <div>
             <app-files-table [IdAudit]="idAudit" [CodeAudit]="codeAudit"></app-files-table>
           </div>
@@ -51,18 +59,18 @@
           <div>
             <div class="w-full overflow-x-auto file-upload-container">
               <div class="w-max">
-                <mat-button-toggle-group name="fontStyle" aria-label="Font Style" class="flex gap-2" [appearance]="'standard'">
-                  <button mat-button  *ngFor="let day of periodicity" class="primary">{{day}}</button>
-                </mat-button-toggle-group>
+                <div class="custom-toggle gap-2">
+                  <button *ngFor="let day of periodicity" (click)="onClickDate(day)" [ngClass]="{'active': dateUploadSelected === day}">{{day}}</button>
+                </div>
               </div>
             </div>
             <div class="file-upload-container">
               <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
                   <i class="upload-icon">☁️</i>
                   <button type="button" (click)="fileInput.click()">Escoger archivos</button>
-                  <input type="file" #fileInput hidden (change)="onFilesSelected($event)"
+                  <input class="submit-button" type="file" #fileInput hidden (change)="onFilesSelected($event)" [disabled]="dateUploadSelected === ''"
                       accept=".jpeg,.png,.csv,.pdf" multiple />
-                  <p>Escojña sus archivos o arrastre y suelte aquí</p>
+                  <p>Escoja sus archivos o arrastre y suelte aquí</p>
                   <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
               </div>
                   <!-- Lista de archivos seleccionados -->
@@ -75,7 +83,7 @@
                   </div>
                   <!-- Botón Enviar Documento -->
                   <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
-                      (click)="submitDocumentoActuacion(identityId)">
+                      (click)="submitDocumentoActuacion(idAudit)">
                       Carga de archivos
                   </button>
                 </div>

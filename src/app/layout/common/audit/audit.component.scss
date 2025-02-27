@@ -139,4 +139,33 @@
     color: white !important;
     cursor: pointer !important;
   }
+.btn-radio{
+    color: white !important;
+}
 
+.custom-toggle {
+    display: flex;
+    background: none;
+}
+.custom-toggle button {
+    border: none;
+    background: #313b92b2;
+    padding: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+    border-radius: 12px;
+    color: white; 
+    width: 200px;
+ 
+    &:hover {
+        background: #2d3580cf; 
+    }
+ 
+    &.active {
+        background: #202557cf; 
+        color: white; 
+        font-weight: bold;
+        width: 200px;
+    }
+}

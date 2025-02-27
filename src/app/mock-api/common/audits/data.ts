@@ -97,70 +97,70 @@ export const audits = [
       "path": "Path/file1",
       "name": "Document_01",
       "extension": ".jpg",
-      "idAuditoria": 1
+      "idAudit": 1
     },
     {
       "id": 2,
       "path": "Path/file2",
       "name": "Report_02",
       "extension": ".png",
-      "idAuditoria": 2
+      "idAudit": 2
     },
     {
       "id": 3,
       "path": "Path/file3",
       "name": "Invoice_03",
       "extension": ".pdf",
-      "idAuditoria": 1
+      "idAudit": 1
     },
     {
       "id": 4,
       "path": "Path/file4",
       "name": "Presentation_04",
       "extension": ".docx",
-      "idAuditoria": 3
+      "idAudit": 3
     },
     {
       "id": 5,
       "path": "Path/file5",
       "name": "Summary_05",
       "extension": ".xlsx",
-      "idAuditoria": 2
+      "idAudit": 2
     },
     {
       "id": 6,
       "path": "Path/file6",
       "name": "Diagram_06",
       "extension": ".svg",
-      "idAuditoria": 4
+      "idAudit": 4
     },
     {
       "id": 7,
       "path": "Path/file7",
       "name": "Checklist_07",
       "extension": ".txt",
-      "idAuditoria": 3
+      "idAudit": 3
     },
     {
       "id": 8,
       "path": "Path/file8",
       "name": "Schedule_08",
       "extension": ".csv",
-      "idAuditoria": 4
+      "idAudit": 4
     },
     {
       "id": 9,
       "path": "Path/file9",
       "name": "Notes_09",
       "extension": ".json",
-      "idAuditoria": 1
+      "idAudit": 1
     },
     {
       "id": 10,
       "path": "Path/file10",
       "name": "Contract_10",
       "extension": ".xml",
-      "idAuditoria": 2
+      "idAudit": 2
     }
   ];
   

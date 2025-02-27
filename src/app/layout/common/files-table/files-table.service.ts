@@ -9,6 +9,9 @@ import { catchError, map, Observable, throwError } from 'rxjs';
     providedIn: 'root',
 })
 export class FilesTableServices{
+    private urlAudit = `${GlobalConstants.API_BASE_URL}/api/v1/audit`;
+    constructor(private http: HttpClient) { }
+    
     private data:any[]=[
         {id:1, name:'Historia de usuario 005.pdf', idAudit:1},
         {id:2, name:'Historia de usuario 006.pdf', idAudit:1},
@@ -24,11 +27,11 @@ export class FilesTableServices{
     getColumns(){
         return this.columns;    
     }
-    getData(){
-        return this.data;
-    }
-    getFilesByAudit(idAudit:number){
+    // getData(){
+    //     return this.data;
+    // }
+    getFilesByAudit(idAudit:number):Observable<any>{
         console.log('Auditoria sv:', idAudit);
-        return this.data.filter((file)=>file.idAudit == idAudit);
+        return this.http.get<any>(`${this.urlAudit}/${idAudit}/files/getAll`);
     }
 }

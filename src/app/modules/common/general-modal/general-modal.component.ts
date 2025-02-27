@@ -70,6 +70,8 @@ export class DialogOverviewExampleDialog {
       return users; // No se aplica filtro
     } else if (this.currentRole === 'validador') {
       return users.filter((user) => user.cargo === 'caracterizador');
+    } else if (this.currentRole === 'evaluador') {
+      return users.filter((user) => user.cargo === 'evaluador');
     } else if (this.currentRole === 'caracterizador') {
       return users.filter((user) => user.cargo === 'evaluador' || user.cargo === 'jefeUnidad');
     }

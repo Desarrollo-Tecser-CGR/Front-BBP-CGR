@@ -76,9 +76,28 @@
             <!-- <button mat-button color="primary" (click)="dismissPractice()">
               Cambiar Estado de Flujo
             </button> -->
+            <button mat-raised-button color="primary" (click)="openCaracterizationModal()">
+              Abrir Caracterización
+            </button>
             
+            <!-- Mostrar usuarios seleccionados -->
+            <!-- <div *ngIf="selectedUsersFromModal.length > 0">
+              <h3>Usuarios Seleccionados:</h3>
+              <ul>
+                <li *ngFor="let user of selectedUsersFromModal">
+                  {{ user.fullName }} - {{ user.cargo }}
+                </li>
+              </ul>
+            </div> -->
+            
+            <!-- Mostrar información adicional -->
+            <!-- <div *ngIf="additionalInfoFromModal">
+              <h3>Información Adicional:</h3>
+              <p>{{ additionalInfoFromModal }}</p>
+            </div>
+             -->
           </div>
-        </div>   
+        </div>  
       </div>
       <div *ngIf="currentGroup.length === 0">
         <p>No hay más preguntas.</p>
