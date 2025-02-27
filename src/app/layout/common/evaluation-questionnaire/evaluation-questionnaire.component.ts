@@ -23,6 +23,7 @@ import { QuestionnaireService } from './evaluation-questionnaire.service';
 import { CommonModule, NgForOf } from '@angular/common'; 
 import {GenaralModalService} from '../../../modules/common/general-modal/general-modal.service';
 import { DialogOverviewExampleDialog } from '../../../modules/common/general-modal/general-modal.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -228,34 +229,55 @@ selectForm(index: number) {
     })
   }
 
-
   dismissPractice() {
-    if (!this.comiteTecnicoUserId) {
-        console.error("No se pudo obtener el idUser del comité técnico.");
-        return;
-    }
-
-    if (!this.id) {  // Verificar que se tiene el ID correcto
+    if (!this.id) {
         console.error("No se encontró un ID válido para identity.");
         return;
     }
 
-    const requestBody = {
-        user: this.comiteTecnicoUserId, // ID del usuario comité técnico
-        identity: this.id, // Tomamos el ID dinámicamente
-        stateFlow: "evaluacion",
-        fechaDiligenciamiento: this.formatDate(new Date()), // Fecha actual en formato YYYY-MM-DD
-        comentarioUsuario: "" // Por ahora vacío
-    };
+    const fechaActual = this.formatDate(new Date());
+    const comentario = this.additionalInfoFromModal || ""; // Obtener comentario desde el modal
 
-    this.questionnaireService.sendTraceability(requestBody).subscribe({
-        next: (response) => {
-            console.log('Trazabilidad enviada con éxito:', response);
+    // Crear lista de peticiones a enviar
+    const traceabilityRequests = [];
+
+    // ✅ Enviar trazabilidad a TODOS los comités técnicos (ahora en un array)
+    if (this.comiteTecnicoUserIds.length > 0) {
+        this.comiteTecnicoUserIds.forEach(id => {
+            traceabilityRequests.push(this.createTraceabilityRequest(String(id), fechaActual, comentario));
+        });
+    } else {
+        console.warn("No se encontraron usuarios con cargo 'comiteTecnico' para enviar trazabilidad.");
+    }
+
+    // ✅ Agregar cada evaluador seleccionado a la lista de envíos
+    this.selectedUsersFromModal.forEach(evaluador => {
+        traceabilityRequests.push(this.createTraceabilityRequest(evaluador.idUser, fechaActual, comentario));
+    });
+
+    // ✅ Ejecutar todas las peticiones en paralelo
+    forkJoin(traceabilityRequests).subscribe({
+        next: (responses) => {
+            console.log('Trazabilidad enviada con éxito para todos:', responses);
         },
         error: (error) => {
             console.error('Error al enviar trazabilidad:', error);
         }
     });
+}
+
+
+// Método para crear la petición de trazabilidad con comentario
+private createTraceabilityRequest(userId: string, fecha: string, comentario: string) {
+    const requestBody = {
+        user: userId, // ID del usuario (puede ser comité técnico o evaluador)
+        identity: this.id, // Tomamos el ID dinámicamente
+        stateFlow: "evaluacion",
+        fechaDiligenciamiento: fecha, // Fecha actual en formato YYYY-MM-DD
+        comentarioUsuario: comentario // Comentario obtenido del modal
+    };
+
+    return this.questionnaireService.sendTraceability(requestBody);
 }
 
 formatDate(date: Date): string {
@@ -264,34 +286,35 @@ formatDate(date: Date): string {
   const day = ('0' + date.getDate()).slice(-2);
   return `${year}-${month}-${day}`;
 }
-  
 
 // ======================== Método para ver los datos del endpoint ======================== //
-  comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
+comiteTecnicoUserIds: number[] = []; // Cambiar a un array para múltiples IDs
 
-  getRolesYUsuarios() {
-      this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
-          (response) => {
-              console.log('Usuarios y roles obtenidos:', response);
+getRolesYUsuarios() {
+    this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
+        (response) => {
+            console.log('Usuarios y roles obtenidos:', response);
 
-              if (response && Array.isArray(response.data)) {
-                  const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
+            if (response && Array.isArray(response.data)) {
+                // Filtrar TODOS los usuarios con cargo "comiteTecnico"
+                const comiteTecnicoUsers = response.data.filter(user => user.cargo === "comiteTecnico");
 
-                  if (comiteTecnico) {
-                      this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
-                      console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
-                  } else {
-                      console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
-                  }
-              } else {
-                  console.error("La respuesta no es un array válido:", response);
-              }
-          },
-          (error) => {
-              console.error('Error al obtener roles y usuarios:', error);
-          }
-      );
-  }
+                if (comiteTecnicoUsers.length > 0) {
+                    this.comiteTecnicoUserIds = comiteTecnicoUsers.map(user => user.idUser);
+                    console.log('IDs de los usuarios del comité técnico encontrados:', this.comiteTecnicoUserIds);
+                } else {
+                    console.warn("No se encontraron usuarios con cargo 'comiteTecnico'.");
+                }
+            } else {
+                console.error("La respuesta no es un array válido:", response);
+            }
+        },
+        (error) => {
+            console.error('Error al obtener roles y usuarios:', error);
+        }
+    );
+}
+
 
   // ======================== Logica que muestra el modal en la vista ======================== //
   openCaracterizationModal(): void {

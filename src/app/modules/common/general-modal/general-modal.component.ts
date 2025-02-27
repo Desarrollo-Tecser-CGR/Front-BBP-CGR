@@ -67,13 +67,15 @@ export class DialogOverviewExampleDialog {
 
   filterUsersByRole(users: Usuario[]): Usuario[] {
     if (this.currentRole === 'administrador') {
-      return users; // No se aplica filtro
+      return users;
     } else if (this.currentRole === 'validador') {
       return users.filter((user) => user.cargo === 'caracterizador');
     } else if (this.currentRole === 'evaluador') {
       return users.filter((user) => user.cargo === 'evaluador');
     } else if (this.currentRole === 'caracterizador') {
       return users.filter((user) => user.cargo === 'evaluador' || user.cargo === 'jefeUnidad');
+    } else if (this.currentRole === 'comiteTecnico') {
+      return users.filter((user) => user.cargo === 'seguimiento');
     }
     return [];
   }
@@ -92,7 +94,7 @@ export class DialogOverviewExampleDialog {
     }
     
     // Si el rol es 'validador' y hay más de un usuario seleccionado, permitimos seleccionar solo uno
-    if (this.currentRole === 'validador' && this.selectedUsers.length > 1) {
+    if ((this.currentRole === 'validador' || this.currentRole === 'comiteTecnico') && this.selectedUsers.length > 1) {
       this.selectedUsers = [this.selectedUsers[0]]; // Solo permite un usuario si es 'validador'
     }
   }

@@ -72,7 +72,7 @@ h1 {
 
 .question {
     margin-bottom: 20px;
-  }
+}
   
   .question h3 {
     margin-bottom: 10px;
@@ -88,7 +88,7 @@ h1 {
   }
   
   .navigation button {
-    margin-right: 10px;
+    margin-right: 30px;
   }
 
   .progress-indicator {
@@ -120,4 +120,38 @@ h1 {
     background-color: #28a745; /* Color para preguntas respondidas */
     color: white;
     border-color: #28a745;
+  }
+
+  .yellow-color {
+    background-color: #F0BA41 !important;
+    color: white!important;
+    border-radius: 21px !important;
+    font-size: 13px;
+  }
+
+  .border-buttons {
+    border-radius: 21px !important;
+    color: white !important;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .btn-enviar {
+    background-color: #4f46e5 !important; /* Azul */
+  }
+
+  .btn-enviar:hover {
+      background-color: #4338ca !important; /* Azul más oscuro */
+  }
+
+  .btn-desestimar {
+      background-color: #D63421 !important; /* Rojo */
+  }
+
+  .btn-desestimar:hover {
+      background-color: #b72b1a !important; /* Rojo más oscuro */
+  }
+
+  .border-buttons:hover {
+    box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.4); // Sombra más fuerte al pasar el mouse
+    transform: translateY(0px); // Efecto de elevación
   }

@@ -8,6 +8,9 @@ import { ResumenService } from '../resumen/resumen.service';
 import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
 import {GenaralModalService} from '../../modules/common/general-modal/general-modal.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogOverviewExampleDialog } from '../../modules/common/general-modal/general-modal.component'; 
+
 
 @Component({
     selector: 'committee',
@@ -29,6 +32,8 @@ export class CommitteeComponent implements OnInit {
     showAnswers: boolean = false;
     roles: any[] = [];
     usuarios: any[] = [];
+    selectedUserFromModal: any = null;
+    additionalInfoFromModal: string = '';
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -36,6 +41,7 @@ export class CommitteeComponent implements OnInit {
         private resumenService: ResumenService,
         private cdRef: ChangeDetectorRef,
         private genaralModalService: GenaralModalService,
+        private dialog: MatDialog
     ) {}
 
     ngOnInit(): void {
@@ -130,26 +136,33 @@ private loadCommitteeData(id: number): void {
             return;
         }
     
-        // Aquí definimos el nuevo estado de flujo
-        const nuevoEstadoFlujo = 'seguimiento';
+        if (!this.selectedUserFromModal) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un usuario antes de cambiar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+            return;
+        }
     
-        // Accedemos al 'userName' desde el objeto 'committeeData.userId.userName'
-        const accessName = this.committeeData.userId?.userName || 'defaultUser'; // Si no existe, usar 'defaultUser'
-
-        // Creamos el objeto con la actualización que solo incluye el estado de flujo
+        const nuevoEstadoFlujo = 'seguimiento';
+        const accessName = this.selectedUserFromModal?.userName || 'defaultUser'; // 🔹 Usuario seleccionado en el modal
+        const comentario = this.additionalInfoFromModal || ''; // 🔹 Comentario ingresado
+    
         const updatedData = {
             actualizaciones: {
-                estadoFlujo: nuevoEstadoFlujo, // Estado de flujo actualizado
+                estadoFlujo: nuevoEstadoFlujo,
             },
-            sAMAccountName: 'bbp16.cgr', // Usamos 'accessName' como 'userName'
-            estadoFlujo: nuevoEstadoFlujo, // Estado de flujo actualizado
-            comentarioUsuario: '', // Comentario adicional desde el modal
+            sAMAccountName: accessName, // 🔹 Enviar el usuario seleccionado
+            estadoFlujo: nuevoEstadoFlujo,
+            comentarioUsuario: comentario // 🔹 Enviar el comentario
         };
-        console.log('datos de user', accessName);
-        // Convertimos el 'id' a number antes de pasarlo al servicio
+    
+        console.log('Datos a enviar:', updatedData); // 🔹 Log para verificar los datos antes de enviarlos
+    
         const idAsNumber = Number(this.id);
     
-        // Llamamos al servicio para enviar el PATCH con la estructura JSON correcta
         this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
             (response) => {
                 Swal.fire({
@@ -171,6 +184,7 @@ private loadCommitteeData(id: number): void {
             }
         );
     }
+    
     
 
     getBoxClass(estimacion: string): string {
@@ -272,5 +286,28 @@ private loadCommitteeData(id: number): void {
             }
         );
     }
-}    
 
+ // ======================== Logica que muestra el modal en la vista ======================== //
+ openModal(): void {
+    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+        width: '500px',
+        data: {
+            role: 'comiteTecnico', 
+            selectedUser: this.selectedUserFromModal, // 🔹 Enviar el usuario seleccionado previamente
+            selectedUsers: [], 
+            additionalInfo: this.additionalInfoFromModal
+        }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+            this.selectedUserFromModal = result.selectedUser || this.selectedUserFromModal; 
+            this.additionalInfoFromModal = result.additionalInfo || this.additionalInfoFromModal; 
+
+            // 🔹 Agregar logs para ver los valores seleccionados
+            console.log('Usuario seleccionado:', this.selectedUserFromModal);
+            console.log('Comentario ingresado:', this.additionalInfoFromModal);
+        }
+    });
+    }
+}    

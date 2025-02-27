@@ -42,15 +42,21 @@
     </div>
 
     <!-- Botones de Acción -->
+    
+
     <div class="mt-4 flex justify-end">
+        <button mat-raised-button class="yellow-color" (click)="openModal()">Usuario de Seguimiento</button>
+
+        <button mat-raised-button color="primary" class="space-buttons" (click)="cambiarEstadoDeFlujo()">
+            Realizar Seguimiento
+        </button>
+
         <button mat-raised-button class="warn-color" (click)="dismissPractice()">
             Desestimar Práctica
         </button>
     </div>
 
     <div class="mt-4 flex justify-end">
-        <button mat-raised-button color="primary" class="space-buttons" (click)="cambiarEstadoDeFlujo()">
-            Realizar Seguimiento
-        </button>
+        
     </div>
 </div>

@@ -51,6 +51,7 @@ export class QuestionnaireService{
     private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/11`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
+    private  apiForm = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/`;
 
     constructor(private http:HttpClient){}
     
@@ -82,4 +83,25 @@ export class QuestionnaireService{
         console.log(params)
         return this.http.post<any>(url, params)
     }
+
+    getFormById(id: number): Observable<any> {
+        const url = `${this.apiForm}${id}`;
+        console.log("Ejecutando getFormById..."); 
+        console.log("Realizando petición a:", url); 
+    
+        return this.http.get(url).pipe(
+            map(response => {
+                console.log("Respuesta obtenida:", response); 
+                return response;
+            }),
+            catchError(error => {
+                console.error("Error en la petición:", error);
+                return throwError(() => error);
+            })
+        );
+    }
+    
+    saveEvaluation(data: any): Observable<any> {
+        return this.http.post('http://192.168.2.6:5500/api/v1/admin/record/list/evo', data);
+    }        
 }

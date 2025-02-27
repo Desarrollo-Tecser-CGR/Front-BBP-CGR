@@ -107,6 +107,7 @@
 .warn-color {
     background-color: #D63421 !important;
     color: white !important;
+    margin: 0px 0 0 10px ;
 }
 
 .info-box {
@@ -131,4 +132,10 @@
 
 .border-blue {
     border-left: 5px solid blue;  // Azul por defecto
+}
+
+.yellow-color {
+    background-color: #F0BA41 !important;
+    color: white !important;
+    margin: 0px 10px 0 0;
 }
