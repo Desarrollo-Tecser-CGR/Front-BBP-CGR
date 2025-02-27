@@ -1,66 +1,46 @@
-<!-- Botón de usuario -->
- <div class="w-full px-8">
-    <button mat-icon-button [matMenuTriggerFor]="userActions" style="display: flex; align-items: center; justify-items: center;">
-        <div style="display: flex; align-items: center;">
-            @if (showAvatar && user.avatar) {
-                <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 1em;"></mat-icon>
-            }
-            <div>
-                <p style="font-size: 12px; margin: 0;">{{ user?.fullName || 'Usuario' }}</p>
-                <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ user?.cargo || 'Cargo' }}</p>
+<!-- User Toggle -->
+<button [matMenuTriggerFor]="userActions"
+    class="overflow-hidden w-[140px] h-full p-1 m-1 flex items-center justify-center rounded-full hover:bg-gray-300 hover:shadow-md transition-shadow duration-200"
+    style="margin-right: 60px;">
+    <span class="flex flex-row m-1 items-center justify-center w-full h-auto">
+        <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 0.5em;"></mat-icon>
+        <div style="margin-right: 2.0em;">
+            <p style="font-size: 12px; margin: 0;">{{ user?.fullName || 'Usuario' }}</p>
+            <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ user?.cargo || 'Cargo' }}</p>
+        </div>
+    </span>
+</button>
+ 
+<!-- Menú principal -->
+<mat-menu [xPosition]="'before'" #userActions="matMenu">
+    <span
+        class="flex flex-col px-3 text-gray-700 dark:text-gray-200 leading-tight">
+        <div *ngIf="userRoles.length > 0" class="flex flex-col space-y-2">
+            <span class="text-sm font-semibold text-gray-500">Roles
+                asignados:</span>
+            <div *ngFor="let role of userRoles"
+                class="flex items-center space-x-2">
+                <mat-icon class="text-gray-500"
+                    [svgIcon]="'heroicons_outline:information-circle'"></mat-icon>
+                <span
+                    class="text-sm font-medium text-gray-800 dark:text-white">{{
+                    role.name }}</span>
             </div>
         </div>
-    </button>
- </div>
-
-<!-- Menú desplegable -->
-<mat-menu [xPosition]="'before'" #userActions="matMenu">
-    <button mat-menu-item>
-        <span class="flex flex-col leading-none">
-            <span>Signed in as</span>
-            <span class="mt-1.5 text-md font-medium">{{ user.email }}</span>
-        </span>
-    </button>
+        <span *ngIf="userRoles.length === 0"
+            class="text-sm font-semibold text-gray-500">Sin roles
+            asignados</span>
+    </span>
+ 
     <mat-divider class="my-2"></mat-divider>
-    <button mat-menu-item>
-        <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
-        <span>Profile</span>
-    </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="goToSettings()">
         <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>
         <span>Settings</span>
-    </button>
-    <button mat-menu-item [matMenuTriggerFor]="userStatus">
-        <mat-icon
-            [svgIcon]="'heroicons_outline:ellipsis-horizontal-circle'"
-        ></mat-icon>
-        <span>Status</span>
     </button>
     <mat-divider class="my-2"></mat-divider>
     <button mat-menu-item (click)="signOut()">
         <mat-icon
-            [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"
-        ></mat-icon>
+            [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"></mat-icon>
         <span>Sign out</span>
-    </button>
-</mat-menu>
-
-<!-- Menú de estado -->
-<mat-menu class="user-status-menu" #userStatus="matMenu">
-    <button mat-menu-item (click)="updateUserStatus('online')">
-        <span class="mr-3 inline-flex h-4 w-4 rounded-full bg-green-500"></span>
-        <span>Online</span>
-    </button>
-    <button mat-menu-item (click)="updateUserStatus('away')">
-        <span class="mr-3 inline-flex h-4 w-4 rounded-full bg-amber-500"></span>
-        <span>Away</span>
-    </button>
-    <button mat-menu-item (click)="updateUserStatus('busy')">
-        <span class="mr-3 inline-flex h-4 w-4 rounded-full bg-red-500"></span>
-        <span>Busy</span>
-    </button>
-    <button mat-menu-item (click)="updateUserStatus('not-visible')">
-        <span class="mr-3 inline-flex h-4 w-4 rounded-full bg-gray-400"></span>
-        <span>Invisible</span>
     </button>
 </mat-menu>

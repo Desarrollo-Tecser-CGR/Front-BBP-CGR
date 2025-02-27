@@ -3,9 +3,9 @@
     <!-- Main -->
     <div class="flex-auto p-6 sm:p-10">
         <div class="mt-2">
-            <h2 class="truncate text-3xl font-extrabold leading-7 tracking-tight sm:leading-10 md:text-4xl">
-                {{ isEdit ? 'Editar Hoja' : 'Hoja de Vida' }}
-            </h2>
+            <h1>
+                {{ isEdit ? 'Editar Hoja' : 'Hoja de vida de la práctica' }}
+            </h1>
         </div>
         <!-- Barra de progreso personalizada -->
          @if (isReadOnly) {} @else {
@@ -14,39 +14,6 @@
                 <div class="progress-bar" [style.width.%]="progress" [ngClass]="progressColor"></div>
             </div>
          }
-        <!-- <form [formGroup]="horizontalStepperForm.get('newFields')" class="filters-form" style="display: flex; gap: 16px;">
-        <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
-            <mat-label>Nombre de la práctica</mat-label>
-            <input matInput formControlName="nombrePractica" />
-            <mat-error *ngIf="horizontalStepperForm.get('newFields.nombrePractica')?.hasError('required')">
-                Este campo es obligatorio
-            </mat-error>
-        </mat-form-field>
- 
-        <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
-            <mat-label>Identificación</mat-label>
-            <mat-select formControlName="identificacion">
-                <mat-option value="opcion1">Opción 1</mat-option>
-                <mat-option value="opcion2">Opción 2</mat-option>
-                <mat-option value="opcion3">Opción 3</mat-option>
-            </mat-select>
-            <mat-error *ngIf="horizontalStepperForm.get('newFields.identificacion')?.hasError('required')">
-                Este campo es obligatorio
-            </mat-error>
-        </mat-form-field>
- 
-        <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
-            <mat-label>Contenido</mat-label>
-            <mat-select formControlName="contenido">
-                <mat-option value="contenido1">Contenido 1</mat-option>
-                <mat-option value="contenido2">Contenido 2</mat-option>
-                <mat-option value="contenido3">Contenido 3</mat-option>
-            </mat-select>
-            <mat-error *ngIf="horizontalStepperForm.get('newFields.contenido')?.hasError('required')">
-                Este campo es obligatorio
-            </mat-error>
-        </mat-form-field>
-    </form> -->
 
         <div class="max-w-3x">
             <!-- Horizontal stepper -->
@@ -67,24 +34,7 @@
                         </div>
 
                         <div class="gt-xs:flex-row flex flex-col">
-                            <!-- <mat-form-field class="example-full-width" appearance="fill">
-                                <input
-                                    matInput
-                                    placeholder="Nombre de la entidad"
-                                    formControlName="entityCgr"
-                                    [matAutocomplete]="auto"
-                                />
-                                <mat-autocomplete
-                                    #auto="matAutocomplete"
-                                    (optionSelected)="onEntitySelected($event.option.value)"
-                                >
-                                    <mat-option
-                                        *ngFor="let entity of filteredEntities$ | async"
-                                        [value]="entity"
-                                    >
-                                        {{ entity.name }}
-                                    </mat-option>
-                                </mat-autocomplete> -->
+                            
                               <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
                                 <mat-select formControlName="entityCgr" placeholder="Nombre de la entidad">
                                     <mat-option *ngFor="let entity of entityOptions" [value]="entity.id">

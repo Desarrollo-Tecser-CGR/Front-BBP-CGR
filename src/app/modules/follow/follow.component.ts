@@ -40,5 +40,5 @@ export class FollowComponent implements OnInit {
         return [3, 5, 10];
     }
 
-    navegar(): void { this.router.navigate(['/assignRole']); }
+    browse(): void { this.router.navigate(['/assignRole']); }
 }

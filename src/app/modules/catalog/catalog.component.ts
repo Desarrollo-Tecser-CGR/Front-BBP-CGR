@@ -1,33 +1,50 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { CatalogService } from './catalog.service';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { RouterModule, Routes } from '@angular/router';
-import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 
-
-// Definición de rutas
-const routes: Routes = [
-    { path: 'characterization', component: CharacterizationComponent },
-    { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
-];
+interface Usuario {
+  id: number;
+  name: string;
+  email: string;
+  cargo: string;
+  estado: string;
+}
 
 @Component({
-    selector     : 'catalog',
-    standalone   : true,
-    templateUrl  : './catalog.component.html',
-    styleUrl     : './catalog.component.scss',
-    encapsulation: ViewEncapsulation.None,
-    imports: [
-        MatIconModule,
-        MatTableModule,
-        MatMenuModule,
-        RouterModule
-    ]
+  selector: 'catalog',
+  templateUrl: './catalog.component.html',
+  styleUrls: ['./catalog.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatIconModule
+  ]
 })
-export class CatalogComponent {
-    /**
-     * Constructor
-     */
-    constructor() {}
+export class CatalogComponent implements OnInit {
+  columns: string[] = ['id', 'name', 'email', 'cargo', 'estado'];
+  dataSource!: MatTableDataSource<Usuario>;
+  
+  constructor(private catalogService: CatalogService) {}
+
+  ngOnInit() {
+    this.catalogService.getUsuarios().subscribe(data => {
+      this.dataSource = new MatTableDataSource(data);
+    });
+  }
+
+  filter(event: Event) {
+    const filter = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filter.trim().toLowerCase();
+  }
+  
 }

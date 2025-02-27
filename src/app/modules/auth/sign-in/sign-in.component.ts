@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 import { AuthService } from 'app/core/auth/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'auth-sign-in',
@@ -22,9 +23,11 @@ import { AuthService } from 'app/core/auth/auth.service';
         FuseAlertComponent,
         MatButtonModule,
         MatInputModule,
-        CommonModule
+        CommonModule,
+        MatIconModule
     ],
 })
+
 export class AuthSignInComponent implements OnInit {
     signInForm: UntypedFormGroup;
     alert: { type: string; message: string } | null = null;

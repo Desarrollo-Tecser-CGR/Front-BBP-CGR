@@ -52,11 +52,41 @@
                 <!-- Password field -->
                 <mat-form-field class="w-full">
                     <mat-label class="font-bold">Contraseña</mat-label>
-                    <input id="password" matInput type="password" formControlName="password" />
+                    <input
+                        id="password"
+                        matInput
+                        type="password"
+                        formControlName="password"
+                        #passwordField
+                    />
+                    <button
+                        mat-icon-button
+                        type="button"
+                        (click)="
+                            passwordField.type === 'password'
+                                ? (passwordField.type = 'text')
+                                : (passwordField.type = 'password')
+                        "
+                        matSuffix
+                    >
+                        @if (passwordField.type === 'password') {
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:eye'"
+                            ></mat-icon>
+                        }
+                        @if (passwordField.type === 'text') {
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:eye-slash'"
+                            ></mat-icon>
+                        }
+                    </button>
                     <mat-error *ngIf="signInForm.get('password')?.hasError('required')">
                         Contraseña requerida
                     </mat-error>
                 </mat-form-field>
+                
 
                 <div class="mt-0 inline-flex w-full items-center justify-between">
                     <a

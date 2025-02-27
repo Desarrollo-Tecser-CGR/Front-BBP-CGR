@@ -1,3 +1,51 @@
-<div class="container">
-    <h1>Catalogar</h1>
+<div class="mr-5 ml-5 flex flex-col w-full">
+    <h1 class="type-text">Buscar Usuarios</h1>
+    <mat-form-field>
+        <mat-label></mat-label>
+        <input type="text" matInput (keyup)="filter($event)" placeholder="Buscar...">
+        <mat-icon svgIcon="heroicons_outline:magnifying-glass-circle"></mat-icon>
+    </mat-form-field>
+
+    <div class="count">
+        Registros encontrados: {{ dataSource.filteredData.length }}
+    </div>
+
+    <div class="flex flex-col flex-grow ml-4 pt-6 pr-3 w-full">
+        <div class="overflow-hidden border rounded-lg">
+            <table mat-table [dataSource]="dataSource" class="min-w-full rounded-xl divide-y divide-gray-30">
+
+                <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef>ID</th>
+                    <td mat-cell *matCellDef="let usuario">{{ usuario.id }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                    <td mat-cell *matCellDef="let usuario">{{ usuario.name }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef>Email</th>
+                    <td mat-cell *matCellDef="let usuario">{{ usuario.email }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cargo">
+                    <th mat-header-cell *matHeaderCellDef>Cargo</th>
+                    <td mat-cell *matCellDef="let usuario">{{ usuario.cargo }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef>Estado</th>
+                    <td mat-cell *matCellDef="let usuario">
+                        <span [ngStyle]="{ 'color': usuario.estado ? 'green' : 'red', 'font-weight': 'bold' }">
+                            {{ usuario.estado ? 'activo' : 'inactivo' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="columns"></tr>
+                <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+            </table>
+        </div>
+    </div>
 </div>

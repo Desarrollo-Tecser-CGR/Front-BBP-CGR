@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule, Routes } from '@angular/router';
 import { UsersComponent } from '../../optionsDropdown/users/users.component';
-import { CatalogComponent } from './../../catalog/catalog.component';
 import { CharacterizationComponent } from '../../optionsDropdown/characterization/characterization.component';
 import { PublicationComponent } from '../../optionsDropdown/publication/publication.component';
 import { RolesServicesComponent } from '../../optionsDropdown/rolesServices/rolesServices.component';
@@ -15,7 +14,6 @@ import { CommonModule } from '@angular/common';
 // Definición de rutas
 const routes: Routes = [
     { path: 'users', component: UsersComponent },
-    { path: 'catalog', component: CatalogComponent },
     { path: 'characterization', component: CharacterizationComponent },
     { path: 'publication', component: PublicationComponent },
     { path: 'rolesServices', component: RolesServicesComponent },
