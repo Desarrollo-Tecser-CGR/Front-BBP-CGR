@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
+import { WebSocketNotificationService } from './webSocketNotification.service';
  
 @Component({
     selector: 'notifications',
@@ -55,8 +56,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _notificationsService: NotificationsService,
+        private _webSocketService: WebSocketNotificationService, 
         private _overlay: Overlay,
-        private _viewContainerRef: ViewContainerRef
+        private _viewContainerRef: ViewContainerRef,
+        // private wsService: WebSocketNotificationService
     ) {
     }
  
@@ -70,68 +73,72 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.roles = JSON.parse(localStorage.getItem('accessRoles'));
         this.rol = this.roles[0];
-        this._notificationsService._notifications.asObservable();
+        // this._notificationsService._notifications.asObservable();
+        // this._webSocketService.getGlobalNotifications().subscribe(
+        //     notification=>{
+        //         this.notifications = [...this.notifications, notification];
+        //     })
 
-        switch (this.rol) {
-            case 'validador':
-                forkJoin([
-                    this._notificationsService.getByType(1),
-                    this._notificationsService.getByType(2),
-                    this._notificationsService.getByType(6)
-                ]).subscribe(
-                    ([registerNotifications, validationNotifications, caracterizationNotifications]) => {
-                        const response = [
-                            ...registerNotifications,
-                            ...validationNotifications,
-                            ...caracterizationNotifications
-                        ];
+        // switch (this.rol) {
+        //     case 'validador':
+        //         forkJoin([
+        //             this._notificationsService.getByType(1),
+        //             this._notificationsService.getByType(2),
+        //             this._notificationsService.getByType(6)
+        //         ]).subscribe(
+        //             ([registerNotifications, validationNotifications, caracterizationNotifications]) => {
+        //                 const response = [
+        //                     ...registerNotifications,
+        //                     ...validationNotifications,
+        //                     ...caracterizationNotifications
+        //                 ];
         
-                        this._notificationsService._notifications.next(response);
-                        this.notifications = response;
+        //                 this._notificationsService._notifications.next(response);
+        //                 this.notifications = response;
         
-                        this._calculateUnreadCount();
-                        this._changeDetectorRef.markForCheck();
-                    },
-                    (error) => {
-                        console.error('Error al obtener las notificaciones:', error);
-                    }
-                );
-                break;
+        //                 this._calculateUnreadCount();
+        //                 this._changeDetectorRef.markForCheck();
+        //             },
+        //             (error) => {
+        //                 console.error('Error al obtener las notificaciones:', error);
+       //             }
+        //         );
+        //         break;
         
-            case 'caracterizador':
-                this._notificationsService.getByType(3).subscribe(
-                    (data) => {
-                        this._notificationsService._notifications.next(data);
-                        this.notifications = data;
+        //     case 'caracterizador':
+        //         this._notificationsService.getByType(3).subscribe(
+        //             (data) => {
+        //                 this._notificationsService._notifications.next(data);
+        //                 this.notifications = data;
         
-                        this._calculateUnreadCount();
-                        this._changeDetectorRef.markForCheck();
-                    },
-                    (error) => {
-                        console.error('Error al obtener las notificaciones:', error);
-                    }
-                );
-                break;
+        //                 this._calculateUnreadCount();
+        //                 this._changeDetectorRef.markForCheck();
+        //             },
+        //             (error) => {
+        //                 console.error('Error al obtener las notificaciones:', error);
+        //             }
+        //         );
+        //         break;
 
-            case 'evaluador':
-                this._notificationsService.getByType(7).subscribe(
-                    (data) => {
-                        this._notificationsService._notifications.next(data);
-                        this.notifications = data;
+        //     case 'evaluador':
+        //         this._notificationsService.getByType(7).subscribe(
+        //             (data) => {
+        //                 this._notificationsService._notifications.next(data);
+        //                 this.notifications = data;
         
-                        this._calculateUnreadCount();
-                        this._changeDetectorRef.markForCheck();
-                    },
-                    (error) => {
-                        console.error('Error al obtener las notificaciones:', error);
-                    }
-                );
-                break;
+        //                 this._calculateUnreadCount();
+        //                 this._changeDetectorRef.markForCheck();
+        //             },
+        //             (error) => {
+        //                 console.error('Error al obtener las notificaciones:', error);
+        //             }
+        //         );
+        //         break;
         
-            default:
-                console.warn(`Rol no reconocido: ${this.rol}`);
-                break;
-        }
+        //     default:
+        //         console.warn(`Rol no reconocido: ${this.rol}`);
+        //         break;
+        // }
         
     }
  
@@ -180,7 +187,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this._overlayRef.detach();
     }
  
-    /**
+    /** 
      * Mark all notifications as read
      */
     markAllAsRead(): void {

@@ -69,6 +69,7 @@ export class ResumenService {
     sendFormDataAsJson(formData: any, sAMAccountName: string): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         const apiUrlWithAccountName = `${this.apiUrl}/${sAMAccountName}`; 
+        console.log("Resume en registro:", formData);
         return this.http.post(apiUrlWithAccountName, formData, { headers }).pipe(
             map((response: any) => {
 
@@ -86,6 +87,7 @@ export class ResumenService {
     }
 
     getDataAsJson(id: string): Observable<any> {
+        console.log("Resume en buscar por id:",this.http.get<any>(this.apiUrlGet + '/' + id) )
         return this.http.get<any>(this.apiUrlGet + '/' + id);
     }
 

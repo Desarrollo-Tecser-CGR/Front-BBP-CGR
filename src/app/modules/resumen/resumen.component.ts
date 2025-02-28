@@ -840,7 +840,7 @@ export class ResumenComponent implements OnInit {
     }
 
     private shouldExcludeControl(controlName: string): boolean {
-        const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
+        const excludedControls = ['estadoFlujo','sAMAccountName', 'comentarioUsuario']; // Lista de controles a excluir
         return excludedControls.includes(controlName);
     }
 
@@ -861,7 +861,7 @@ export class ResumenComponent implements OnInit {
                 }
 
                 // Incluir controles deshabilitados si el rol es "validador"
-                if (!control.disabled || this.isValidatorRole()) {
+                if (!control.disabled || this.isValidatorRole(), this.rol === 'caracterizador') {
                     totalControls++;
                     // Contar como lleno si tiene un valor, aunque no sea obligatorio
                     if (
