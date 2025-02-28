@@ -288,26 +288,26 @@ private loadCommitteeData(id: number): void {
     }
 
  // ======================== Logica que muestra el modal en la vista ======================== //
- openModal(): void {
-    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-        width: '500px',
-        data: {
-            role: 'comiteTecnico', 
-            selectedUser: this.selectedUserFromModal, // 🔹 Enviar el usuario seleccionado previamente
-            selectedUsers: [], 
-            additionalInfo: this.additionalInfoFromModal
-        }
-    });
+    openModal(): void {
+        const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+            width: '500px',
+            data: {
+                role: 'comiteTecnico', 
+                selectedUser: this.selectedUserFromModal, // 🔹 Enviar el usuario seleccionado previamente
+                selectedUsers: [], 
+                additionalInfo: this.additionalInfoFromModal
+            }
+        });
 
-    dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-            this.selectedUserFromModal = result.selectedUser || this.selectedUserFromModal; 
-            this.additionalInfoFromModal = result.additionalInfo || this.additionalInfoFromModal; 
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.selectedUserFromModal = result.selectedUser || this.selectedUserFromModal; 
+                this.additionalInfoFromModal = result.additionalInfo || this.additionalInfoFromModal; 
 
-            // 🔹 Agregar logs para ver los valores seleccionados
-            console.log('Usuario seleccionado:', this.selectedUserFromModal);
-            console.log('Comentario ingresado:', this.additionalInfoFromModal);
-        }
-    });
+                // 🔹 Agregar logs para ver los valores seleccionados
+                console.log('Usuario seleccionado:', this.selectedUserFromModal);
+                console.log('Comentario ingresado:', this.additionalInfoFromModal);
+            }
+        });
     }
 }    
