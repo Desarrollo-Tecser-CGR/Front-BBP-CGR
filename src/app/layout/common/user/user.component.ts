@@ -1,4 +1,5 @@
 import { BooleanInput } from '@angular/cdk/coercion';
+import { NgIf, NgFor } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -24,7 +25,7 @@ import { Subject, takeUntil } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'user',
     standalone: true,
-    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule],
+    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule, NgIf,  NgFor],
 })
 export class UserComponent implements OnInit, OnDestroy {
     static ngAcceptInputType_showAvatar: BooleanInput;
@@ -41,7 +42,7 @@ export class UserComponent implements OnInit, OnDestroy {
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
         private _userService: UserService
-    ) {}
+    ) { }
 
     goToSettings(): void {
         this._router.navigate(['/settings']);
@@ -96,4 +97,20 @@ export class UserComponent implements OnInit, OnDestroy {
     private capitalizeFirstLetter(value: string): string {
         return value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '';
     }
+
+    formatCharge(charge: string | undefined): string {
+        if (!charge) return 'Cargo';
+
+        const chargeFormatted = charge.trim().toLowerCase();
+
+        switch (chargeFormatted) {
+            case 'jefeunidad':
+                return 'Jefe de Unidad';
+            case 'comitetecnico':
+                return 'Comité Técnico';
+            default:
+                return charge;
+        }
+    }
+
 }

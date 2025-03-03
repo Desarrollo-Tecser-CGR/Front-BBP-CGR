@@ -1,12 +1,12 @@
 <!-- User Toggle -->
 <button [matMenuTriggerFor]="userActions"
-    class="overflow-hidden w-[140px] h-full p-1 m-1 flex items-center justify-center rounded-full hover:bg-gray-300 hover:shadow-md transition-shadow duration-200"
+    class="overflow-hidden w-full h-full p-1 m-1 flex items-center justify-center rounded-full hover:bg-gray-200 transition-shadow duration-200"
     style="margin-right: 60px;">
     <span class="flex flex-row m-1 items-center justify-center w-full h-auto">
         <mat-icon [svgIcon]="'heroicons_outline:user-circle'" style="margin-right: 0.5em;"></mat-icon>
         <div style="margin-right: 2.0em;">
             <p style="font-size: 12px; margin: 0;">{{ user?.fullName || 'Usuario' }}</p>
-            <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ user?.cargo || 'Cargo' }}</p>
+            <p style="font-size: 10px; font-weight: bold; margin: 0;">{{ formatCharge(user?.cargo) }}</p>
         </div>
     </span>
 </button>

@@ -46,5 +46,9 @@ export class CatalogComponent implements OnInit {
     const filter = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filter.trim().toLowerCase();
   }
-  
+
+  clearFilter(input: HTMLInputElement) {
+    input.value = '';
+    this.dataSource.filter = '';
+  }
 }
