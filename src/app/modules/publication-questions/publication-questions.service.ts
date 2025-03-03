@@ -53,7 +53,7 @@ export class PublicactionQuestionService{
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
 
-    private apipreguntas = 'http://192.168.2.44:5500/api/v1/admin/questionall'
+    private apipreguntas = 'http://192.168.2.19:5500/api/v1/admin/questionall'
     
     constructor(private http :HttpClient){}
     
