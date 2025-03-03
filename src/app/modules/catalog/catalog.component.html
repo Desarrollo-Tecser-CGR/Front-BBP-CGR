@@ -1,10 +1,17 @@
 <div class="mr-5 ml-5 flex flex-col w-full">
+
     <h1 class="type-text">Buscar Usuarios</h1>
-    <mat-form-field>
-        <mat-label></mat-label>
-        <input type="text" matInput (keyup)="filter($event)" placeholder="Buscar...">
-        <mat-icon svgIcon="heroicons_outline:magnifying-glass-circle"></mat-icon>
-    </mat-form-field>
+
+    <div class="search-container">
+        <mat-form-field class="search-field">
+            <mat-label></mat-label>
+            <input type="text" matInput (keyup)="filter($event)" placeholder="Buscar..." #searchInput>
+            <mat-icon svgIcon="heroicons_outline:magnifying-glass-circle"></mat-icon>
+        </mat-form-field>
+        <button class="clear-button" (click)="clearFilter(searchInput)">
+            <mat-icon class="iconClear" svgIcon="heroicons_outline:archive-box-x-mark"></mat-icon>
+        </button>
+    </div>
 
     <div class="count">
         Registros encontrados: {{ dataSource.filteredData.length }}

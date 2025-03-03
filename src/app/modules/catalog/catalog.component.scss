@@ -96,3 +96,41 @@ td:hover {
 table {
     animation: fadeIn 0.5s ease-in-out;
 }
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-field {
+    flex: 1;
+}
+
+.clear-button {
+    border: 2px solid #2d3580;
+    background: transparent;
+    color: #2d3580;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 15px;
+}
+
+.clear-button .iconClear {
+    transition: color 0.3s ease-in-out;
+}
+
+.clear-button:hover {
+    background: #2d3580;
+    color: white;
+}
+
+.clear-button:hover .iconClear {
+    color: white !important;
+}
