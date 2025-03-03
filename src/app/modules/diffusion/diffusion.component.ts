@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, HostListener } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ResumeTableComponent } from 'app/layout/common/resume-table/resume-table.component';
 import { AuditComponent } from 'app/layout/common/audit/audit.component';
@@ -8,6 +8,9 @@ import { MatDivider } from '@angular/material/divider';
 import { MatDividerModule } from '@angular/material/divider';
 import { ResumenService } from 'app/modules/resumen/resumen.service';
 import Swal from 'sweetalert2';
+import { DialogOverviewExampleDialog } from '../../modules/common/general-modal/general-modal.component'; 
+import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-diffusion',
@@ -19,24 +22,31 @@ import Swal from 'sweetalert2';
     EmailAuditComponent,
     MatDivider,
     MatDividerModule,
+    MatButtonModule,
   ],
   templateUrl: './diffusion.component.html',
   styleUrls: ['./diffusion.component.scss']
 })
 export class DiffusionComponent {
-  @Input() Id: number;  // El valor se pasará desde el componente padre
+  @Input() Id: number;
   id: string = '';
+  selectedUserFromModal: any = null;
+  additionalInfoFromModal: string = '';
+  selectedUsersFromModal: any[] = [];
 
-  constructor(private route: ActivatedRoute, private resumenService: ResumenService) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private resumenService: ResumenService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     const idFromRoute = this.route.snapshot.paramMap.get('id');
-    this.id = idFromRoute || '';  // Asegúrate de tener un id válido
+    this.id = idFromRoute || '';
     console.log('id en difusion:', this.id);
   }
 
-  // Método para realizar la evolución
-  realizarEvolucion(): void {
+  performEvolution(): void {
     if (!this.id) {
       Swal.fire({
         title: 'Error',
@@ -47,44 +57,88 @@ export class DiffusionComponent {
       return;
     }
 
-    // Definir el nuevo estado
+    if (!this.selectedUsersFromModal.length) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Debes seleccionar al menos un usuario antes de continuar.',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    const idAsNumber = Number(this.id);
     const nuevoEstadoFlujo = 'evolucion';
 
-    // Datos que se van a actualizar
-    const updatedData = {
-      actualizaciones: {
-        estadoFlujo: nuevoEstadoFlujo, // Nuevo estado
-      },
-      sAMAccountName: 'bbp13.cgr', // Acceso al nombre de usuario
-      estadoFlujo: nuevoEstadoFlujo,
-      comentarioUsuario: '', // Puedes agregar un comentario si es necesario
-    };
+    // Recorrer cada usuario seleccionado y enviar la petición
+    this.selectedUsersFromModal.forEach(user => {
+      const updatedData = {
+        actualizaciones: {
+          estadoFlujo: nuevoEstadoFlujo, 
+        },
+        sAMAccountName: user.userName, 
+        estadoFlujo: nuevoEstadoFlujo,
+        comentarioUsuario: this.additionalInfoFromModal || '' 
+      };
 
-    console.log('Datos de usuario:', updatedData.sAMAccountName);
+      console.log('Enviando datos para usuario:', updatedData.sAMAccountName);
 
-    // Convertimos el id a número para enviarlo al servicio
-    const idAsNumber = Number(this.id);
+      this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
+        (response) => {
+          console.log(`Evolución realizada para: ${updatedData.sAMAccountName}`);
+        },
+        (error) => {
+          console.error(`Error al actualizar usuario ${updatedData.sAMAccountName}:`, error);
+        }
+      );
+    });
 
-    // Llamada al servicio para realizar la actualización
-    this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
-      (response) => {
-        Swal.fire({
-          title: '¡Evolución Realizada!',
-          text: 'El estado de flujo ha sido actualizado a "Evolución".',
-          icon: 'success',
-          confirmButtonText: 'Aceptar',
-        }).then(() => {
-          window.location.href = './example';  // Redirigir después de la actualización
-        });
-      },
-      (error) => {
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo actualizar el estado de flujo. Intenta nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
+    // Limpiar los datos después de enviar la evolución
+    this.clearSelection();
+
+    Swal.fire({
+      title: 'Proceso en curso',
+      text: 'Se están procesando los cambios, por favor espera.',
+      icon: 'info',
+      confirmButtonText: 'Aceptar',
+    }).then(() => {
+      window.location.href = './example'; 
+    });
+  }
+
+  openModal(): void {
+    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+      width: '500px',
+      data: {
+        role: 'seguimiento',
+        selectedUser: this.selectedUserFromModal, 
+        selectedUsers: this.selectedUsersFromModal || [], 
+        additionalInfo: this.additionalInfoFromModal
       }
-    );
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedUserFromModal = result.selectedUser || null;
+        this.selectedUsersFromModal = result.selectedUsers || []; 
+        this.additionalInfoFromModal = result.additionalInfo || '';
+
+        console.log('Usuarios seleccionados:', this.selectedUsersFromModal);
+        console.log('Información adicional:', this.additionalInfoFromModal);
+      }
+    });
+  }
+
+  // Método para limpiar la selección
+  clearSelection(): void {
+    this.selectedUsersFromModal = [];
+    this.additionalInfoFromModal = '';
+    console.log('Selección limpiada después de la evolución.');
+  }
+
+  // Limpiar los datos al recargar la página o cambiar de pestaña
+  @HostListener('window:beforeunload', ['$event'])
+  clearOnReload(event: Event): void {
+    this.clearSelection();
   }
 }
