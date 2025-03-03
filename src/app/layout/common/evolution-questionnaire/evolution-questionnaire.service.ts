@@ -102,6 +102,6 @@ export class QuestionnaireService{
     }
     
     saveEvaluation(data: any): Observable<any> {
-        return this.http.post('http://192.168.2.6:5500/api/v1/admin/record/list/evo', data);
+        return this.http.post('http://192.168.2.19:5500/api/v1/admin/record/list/evo', data);
     }        
 }
