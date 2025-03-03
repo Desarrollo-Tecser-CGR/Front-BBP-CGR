@@ -12,13 +12,6 @@
                 <p><strong>Cargo:</strong> {{ item.userId.cargo }}</p>
                 <p><strong>Estimación:</strong> {{ item.formEntity.estimacion }}</p>
             </div>
-
-            <!-- Información adicional -->
-            <!-- <div class="additional-info">
-                <p><strong>Estimación:</strong> {{ estimacion }}</p>
-                <p><strong>Estado de Flujo:</strong> {{ estadoFlujo }}</p>
-            </div> -->
-
             <!-- Información del Formulario -->
             <h3>Formulario: {{ item.formEntity.formName }}</h3>
 
@@ -41,22 +34,17 @@
         </div>
     </div>
 
-    <!-- Botones de Acción -->
-    
+    <footer>
+        <div class="mt-4 flex justify-end">
+            <button mat-raised-button class="yellow-color" (click)="openModal()">Usuario de Seguimiento</button>
 
-    <div class="mt-4 flex justify-end">
-        <button mat-raised-button class="yellow-color" (click)="openModal()">Usuario de Seguimiento</button>
+            <button mat-raised-button color="primary" class="space-buttons" (click)="cambiarEstadoDeFlujo()">
+                Realizar Seguimiento
+            </button>
 
-        <button mat-raised-button color="primary" class="space-buttons" (click)="cambiarEstadoDeFlujo()">
-            Realizar Seguimiento
-        </button>
-
-        <button mat-raised-button class="warn-color" (click)="dismissPractice()">
-            Desestimar Práctica
-        </button>
-    </div>
-
-    <div class="mt-4 flex justify-end">
-        
-    </div>
+            <button mat-raised-button class="warn-color" (click)="dismissPractice()">
+                Desestimar Práctica
+            </button>
+        </div>
+    </footer>
 </div>
