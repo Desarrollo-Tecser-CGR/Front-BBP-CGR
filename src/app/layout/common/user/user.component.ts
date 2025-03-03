@@ -1,4 +1,5 @@
 import { BooleanInput } from '@angular/cdk/coercion';
+import { NgIf, NgFor } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -24,7 +25,7 @@ import { Subject, takeUntil } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'user',
     standalone: true,
-    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule],
+    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule, NgIf,  NgFor],
 })
 export class UserComponent implements OnInit, OnDestroy {
     static ngAcceptInputType_showAvatar: BooleanInput;

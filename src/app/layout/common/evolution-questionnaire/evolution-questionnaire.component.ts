@@ -51,25 +51,30 @@ import { CommonModule, NgForOf } from '@angular/common';
 })
 
 export class EvaluationQuestionnaireComponent implements OnInit{
-  id: any;
+  idIdentity: any;
   data: any = {};
   questions: any[] = [];
   verticalStepperForm: FormGroup;
-
   questionsGroups$: Observable<any[]>;
   currentGroupIndex: number = 0; // Índice del grupo actual
   currentGroup: any[] = []; // Preguntas del grupo actual
   allGroups: any[] = []; // Lista de todos los grupos de preguntas
   allQuestions: any[] = []; // Lista de todas las preguntas (aplanadas)
-  answeredQuestions: { [key: string]: string } = {}; // Respuestas guardadas
+  answeredQuestions: { [key: number]: {evolution:string, use:string, benefit:string}} = {}; // Respuestas guardadas
   currentQuestionIndex: number = 0; // Índice de la pregunta actual
   groupSize: number = 3; // Número de preguntas por grupo
   formularioId: number;
-
+  userId: string='';
   estimacionTrue:string = "enviada"
   estimacionFalse: string = "malaPractica"
+  palabraCount = 0;
+  idQuestions:number[] =[]; 
+  preguntasPorPagina = 3;
+  allForms: any[] = [];
 
-  allForms: any[] = []
+  answerdEvolution: string[] = [];
+  answerdUse: string[] = [];
+  answerdBenefit: string[] = [];
   
   constructor(
     private resumenService: ResumenService,
@@ -91,20 +96,18 @@ export class EvaluationQuestionnaireComponent implements OnInit{
       // { id: 5, enunciado: '¿El rendimiento es óptimo?', respuesta: '', comentario: '' }
     ];
   
-    palabraCount = 0;
-    evolucion:string = ''; 
-    preguntasPorPagina = 3;
+    //id preg untas
+  getIdQuestions(){
+    this.idQuestions = this.preguntas.map(question => question.id);
+    console.log('Id de las preguntas', this.idQuestions);
+    return this.idQuestions;
+  }
   
-  ngOnInit(): void {
-    this.getQuestions();
-    this.getFormData(12);
-    console.log('Ejecutando getFormData...');
+  //obtener userId
+  
+  getUserAccessName(){
+    this.userId =localStorage.getItem('Iduser');
   }
-
-  getQuestions() {
-    this.updateGroup();
-  }
-
   updateGroup() {
     const start = this.currentGroupIndex * this.preguntasPorPagina;
     const end = start + this.preguntasPorPagina;
@@ -124,53 +127,111 @@ export class EvaluationQuestionnaireComponent implements OnInit{
       this.updateGroup();
     }
   }
+  ngOnInit(): void {
+    this.idIdentity = Number(this.route.snapshot.paramMap.get('id'));
+    this.updateGroup()
+    this.getFormData(12);
+    this.getUserAccessName();
+    this.getIdQuestions();
+    console.log('Ejecutando getFormData...');
+  }
 
   todasRespondidas(): boolean {
     return this.preguntas.every(q => q.respuesta !== '');
   }
-  
-  enviarFormulario() {
-    const payload = {
-        formEntity: 3,
-        user: 30046,
-        questionEntity: [62, 63, 64, 65, 66],
-        evolucion: ["evoluciona-62", "evoluciona-64"],
-        uso: ["uso-62", "uso-64"],
-        beneficio: ["beneficio-62", "beneficio-64"],
-        comentario: ["puede pasar-62"],
-        estimacion: "aprobado",
-        identity: 181,
-        enabled: 1
-    };
-
-    console.log('Payload enviado:', payload);
-
-    this.questionnaireService.saveEvaluation(payload).subscribe({
-        next: () => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Registro Exitoso',
-                text: 'El Formulario se ha enviado exitosamente',
-                showConfirmButton: false,
-                timer: 2000
-            }).then(() => {
-                window.location.href = './example';
-            });
-        },
-        error: (error) => {
-            console.error('Error al enviar formulario:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Hubo un problema al enviar el formulario',
-            });
-        }
-    });
-}
 
   onAnswerChange(question: any, answer: string) {
     question.respuesta = answer;
   }
+  getQuestionAnswered(question: any) {
+      console.log('Procesando pregunta:', question); 
+      console.log('id:', question.id);
+      if (question.respuesta === 'Sí') {
+        this.answeredQuestions = {
+          ...this.answeredQuestions, // Mantiene respuestas previas
+          [question.id]: {
+            evolution: question.evolution ?? 'null',
+            use: question.use ?? 'null',
+            benefit: question.benefit ?? 'null'
+          }
+        };
+      }
+      console.log('Preguntas respondidas:', this.answeredQuestions);
+      return this.answeredQuestions;
+  }
+  
+  saveData(){
+    this.answerdEvolution = [];
+    this.answerdUse = [];
+    this.answerdBenefit = [];
+  
+    for (const pregunta of this.preguntas) {
+      
+      this.getQuestionAnswered(pregunta);
+
+      const answerdSaved = this.answeredQuestions[pregunta.id];
+      
+      if (answerdSaved) { // Validar que exista en answeredQuestions
+        const {evolution, use, benefit} = answerdSaved;
+
+        this.answerdEvolution.push(`${evolution}-${pregunta.id}`);
+        this.answerdUse.push(`${use}-${pregunta.id}`);
+        this.answerdBenefit.push(`${benefit}-${pregunta.id}`);
+      }
+    }
+    console.log("Datos guardados temporalmente:", this.answerdEvolution, this.answerdUse, this.answerdBenefit);
+
+  }
+
+  enviarFormulario() {
+    this.saveData();
+
+    if (this.answerdEvolution.length === 0 || this.answerdUse.length === 0 || this.answerdBenefit.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Faltan datos",
+        text: "Asegúrate de guardar primero los datos antes de enviarlos.",
+      });
+      return;
+    }
+
+   
+    const payload = {
+      formEntity: 3,
+      user: Number(this.userId),
+      questionEntity: this.idQuestions,
+      evolucion: this.answerdEvolution,
+      uso: this.answerdUse,
+      beneficio: this.answerdBenefit,
+      comentario: [""],
+      estimacion: "aprobado",
+      identity: this.idIdentity,
+      enabled: 1
+    };
+  
+    console.log('Payload enviado:', payload);
+  
+    this.questionnaireService.saveEvaluation(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Registro Exitoso',
+          text: 'El Formulario se ha enviado exitosamente',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      },
+      error: (error) => {
+        console.error('Error al enviar formulario:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar el formulario',
+        });
+      }
+    });
+  }
+  
 
   getFormData(id: number = 12) {
     console.log("Ejecutando getFormData con id:", id);
@@ -190,6 +251,8 @@ export class EvaluationQuestionnaireComponent implements OnInit{
                 
                 // Actualizamos el grupo actual con las nuevas preguntas
                 this.updateGroup();
+                this.getIdQuestions();
+
             }
         },
         error: (error) => {
