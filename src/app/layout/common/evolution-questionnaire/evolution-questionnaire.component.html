@@ -1,4 +1,4 @@
-<div class="bg-white w-full p-4 pt-10">
+<div class="bg-white w-full p-4 pt-10" >
   <div class="flex flex-col justify-center">
     <h1 class="text-xl font-bold mb-4">Criterios de evaluación de la buena práctica</h1>
     <div class="flex justify-center flex-grow">
@@ -32,17 +32,24 @@
                 <label class="font-semibold">Evolución (Máx. 500 palabras)</label>
                 <textarea class="w-full p-2 border rounded-lg" 
                   placeholder="Describe la evolución..." 
-                  [(ngModel)]="evolucion" 
+                  [(ngModel)]="question.evolution"
+                  (ngModelChange)="getQuestionAnswered(question)" 
                   maxlength="5000" rows="4"></textarea>
                 <p>{{ palabraCount }}/500 palabras</p>
               </li>
               <li>
                 <label class="font-semibold">Uso (Máx. 250 palabras)</label>
-                <textarea class="w-full p-2 border rounded-lg" placeholder="Describe el uso..." [(ngModel)]="question.uso" maxlength="1250" rows="3"></textarea>
+                <textarea class="w-full p-2 border rounded-lg" placeholder="Describe el uso..." 
+                (ngModelChange)="getQuestionAnswered(question)" 
+                [(ngModel)]="question.use"
+                 maxlength="1250" rows="3"></textarea>
               </li>
               <li>
                 <label class="font-semibold">Beneficio (Máx. 250 palabras)</label>
-                <textarea class="w-full p-2 border rounded-lg" placeholder="Describe el beneficio..." [(ngModel)]="question.beneficio" maxlength="1250" rows="3"></textarea>
+                <textarea class="w-full p-2 border rounded-lg" placeholder="Describe el beneficio..."
+                (ngModelChange)="getQuestionAnswered(question)" 
+                [(ngModel)]="question.benefit"
+                 maxlength="1250" rows="3"></textarea>
               </li>
             </ul>
           </div>
