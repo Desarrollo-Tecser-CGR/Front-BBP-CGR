@@ -39,7 +39,7 @@
               {{ option.respuesta }}
             </label>
           </div>          
-          <div *ngIf="question.comment">
+          <div *ngIf="[5, 10, 15, 20, 25, 30].includes(getQuestionNumber(i))">
             <textarea placeholder="Escribe un comentario..."></textarea>
           </div>
         </div>

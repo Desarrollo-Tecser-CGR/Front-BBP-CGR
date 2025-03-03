@@ -34,6 +34,7 @@ export class CommitteeComponent implements OnInit {
     usuarios: any[] = [];
     selectedUserFromModal: any = null;
     additionalInfoFromModal: string = '';
+    selectedUsersFromModal: any[] = [];
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -136,7 +137,7 @@ private loadCommitteeData(id: number): void {
             return;
         }
     
-        if (!this.selectedUserFromModal) {
+        if (!this.selectedUsersFromModal || this.selectedUsersFromModal.length === 0) { 
             Swal.fire({
                 title: 'Error',
                 text: 'Debe seleccionar un usuario antes de cambiar el estado de flujo.',
@@ -146,47 +147,51 @@ private loadCommitteeData(id: number): void {
             return;
         }
     
-        const nuevoEstadoFlujo = 'seguimiento';
-        const accessName = this.selectedUserFromModal?.userName || 'defaultUser'; // 🔹 Usuario seleccionado en el modal
-        const comentario = this.additionalInfoFromModal || ''; // 🔹 Comentario ingresado
-    
-        const updatedData = {
-            actualizaciones: {
-                estadoFlujo: nuevoEstadoFlujo,
-            },
-            sAMAccountName: accessName, // 🔹 Enviar el usuario seleccionado
-            estadoFlujo: nuevoEstadoFlujo,
-            comentarioUsuario: comentario // 🔹 Enviar el comentario
-        };
-    
-        console.log('Datos a enviar:', updatedData); // 🔹 Log para verificar los datos antes de enviarlos
-    
         const idAsNumber = Number(this.id);
+        const nuevoEstadoFlujo = 'seguimiento';
     
-        this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
-            (response) => {
-                Swal.fire({
-                    title: '¡Estado de Flujo Actualizado!',
-                    text: 'El estado de flujo ha sido actualizado a "seguimiento".',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                }).then(() => {
-                    window.location.href = './example';
-                });
-            },
-            (error) => {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo actualizar el estado de flujo. Intenta nuevamente.',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                });
-            }
-        );
+        // 🔹 Recorrer cada usuario seleccionado y enviar la petición
+        this.selectedUsersFromModal.forEach(user => {
+            const updatedData = {
+                actualizaciones: {
+                    estadoFlujo: nuevoEstadoFlujo, 
+                },
+                sAMAccountName: user.userName, // ✅ Usar el mismo campo que en performEvolution
+                estadoFlujo: nuevoEstadoFlujo,
+                comentarioUsuario: this.additionalInfoFromModal || ''
+            };
+    
+            console.log('Enviando datos para usuario:', updatedData.sAMAccountName);
+    
+            this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
+                (response) => {
+                    console.log(`Seguimiento asignado a: ${updatedData.sAMAccountName}`);
+                },
+                (error) => {
+                    console.error(`Error al actualizar usuario ${updatedData.sAMAccountName}:`, error);
+                }
+            );
+        });
+    
+        // Limpiar selección después de enviar los datos
+        this.clearSelection();
+    
+        Swal.fire({
+            title: '¡Éxito!',
+            text: 'El estado de flujo ha sido actualizado correctamente.',
+            icon: 'success', // ✅ Chulito verde
+            confirmButtonText: 'Aceptar',
+        }).then(() => {
+            window.location.href = './example'; 
+        });        
+    }
+
+    clearSelection(): void {
+        this.selectedUsersFromModal = [];  // Limpiar la lista de usuarios seleccionados
+        this.additionalInfoFromModal = ''; // Limpiar el comentario ingresado
     }
     
     
-
     getBoxClass(estimacion: string): string {
         if (estimacion === 'malaPractica') {
             return 'border-red';  // Rojo
@@ -292,22 +297,25 @@ private loadCommitteeData(id: number): void {
         const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
             width: '500px',
             data: {
-                role: 'comiteTecnico', 
-                selectedUser: this.selectedUserFromModal, // 🔹 Enviar el usuario seleccionado previamente
-                selectedUsers: [], 
-                additionalInfo: this.additionalInfoFromModal
+            role: 'comiteTecnico',
+            selectedUser: this.selectedUserFromModal, 
+            selectedUsers: this.selectedUsersFromModal || [], 
+            additionalInfo: this.additionalInfoFromModal
             }
         });
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
                 this.selectedUserFromModal = result.selectedUser || this.selectedUserFromModal; 
+                this.selectedUsersFromModal = result.selectedUsers || this.selectedUsersFromModal; // <-- Agregar esto
                 this.additionalInfoFromModal = result.additionalInfo || this.additionalInfoFromModal; 
 
-                // 🔹 Agregar logs para ver los valores seleccionados
+                // 🔹 Agregar logs para verificar valores seleccionados
                 console.log('Usuario seleccionado:', this.selectedUserFromModal);
+                console.log('Usuarios seleccionados (seguimiento):', this.selectedUsersFromModal);
                 console.log('Comentario ingresado:', this.additionalInfoFromModal);
             }
         });
     }
+    
 }    

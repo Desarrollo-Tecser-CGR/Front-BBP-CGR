@@ -109,27 +109,27 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   }
 
   // Método para seleccionar un formulario por su índice en el array
-selectForm(index: number) {
-  const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
-  
-  this.formularioId = selectedForm.id; // Guardamos su ID
-  this.allQuestions = selectedForm.questions.map((q: any) => ({
-    ...q,
-    respuesta: '', // Inicializamos respuesta en vacío
-  }));
+  selectForm(index: number) {
+    const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
+    
+    this.formularioId = selectedForm.id; // Guardamos su ID
+    this.allQuestions = selectedForm.questions.map((q: any) => ({
+      ...q,
+      respuesta: '', // Inicializamos respuesta en vacío
+    }));
 
-  // Inicializar el objeto de seguimiento de respuestas
-  this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
-    acc[q.id] = false;
-    return acc;
-  }, {} as { [key: string]: boolean });
+    // Inicializar el objeto de seguimiento de respuestas
+    this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
+      acc[q.id] = false;
+      return acc;
+    }, {} as { [key: string]: boolean });
 
-  // Agrupar preguntas en conjuntos del tamaño deseado
-  this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
+    // Agrupar preguntas en conjuntos del tamaño deseado
+    this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
 
-  // Cargar el primer grupo de preguntas
-  this.loadGroup(this.currentGroupIndex);
-}
+    // Cargar el primer grupo de preguntas
+    this.loadGroup(this.currentGroupIndex);
+  }
 
   chunkArray(arr: any[], size: number): any[][] {
     if (!arr || size <= 0) return []; // Evita divisiones por 0 o valores inválidos
@@ -237,7 +237,7 @@ selectForm(index: number) {
 
     const fechaActual = this.formatDate(new Date());
     const comentario = this.additionalInfoFromModal || ""; // Obtener comentario desde el modal
-
+{}
     // Crear lista de peticiones a enviar
     const traceabilityRequests = [];
 
