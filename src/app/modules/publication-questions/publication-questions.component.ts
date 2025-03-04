@@ -5,10 +5,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, Router, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../optionsDropdown/characterization/characterization.component';
 import { ResumenService } from '../resumen/resumen.service';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { QuestionnaireService } from 'app/layout/common/evaluation-questionnaire/evaluation-questionnaire.service';
 import { PublicactionService } from 'app/modules/publication/publication.service';
 import { Observable } from 'rxjs';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { PublicactionQuestionService } from './publication-questions.service';
@@ -36,20 +38,16 @@ const routes: Routes = [
       FormsModule,
       MatIconModule,
       ReactiveFormsModule,
-      DragDropModule
+      DragDropModule,
+      MatInputModule,
+      MatFormFieldModule
   ]
 })
 export class PublicationComponent {
 
-  preguntas = [
-    { id: 1, enunciado: '¿Necesita un aumento de recursos?', respuesta: '', comentario: '' },
-    { id: 2, enunciado: '¿Se realizaran cambios en la gestions de los recursos?', respuesta: '', comentario: '' },
-    { id: 3, enunciado: '¿Como se distribuyeron los recursos?', respuesta: '', comentario: '' },
-    { id: 4, enunciado: '¿Como se han asigando los recursos y cuales son los resultados?', respuesta: '', comentario: '' },
-    { id: 5, enunciado: '¿Mitigacion de malas practicas?', respuesta: '', comentario: '' }
-  ];
-
-  preguntasOriginales: any[] = []
+  formCreateform : UntypedFormGroup;
+  preguntas: any[] = [];
+  preguntasOriginales: any[] = [];
   palabraCount = 0;
   evolucion:string = ''; 
   currentGroupIndex = 0;
@@ -58,7 +56,8 @@ export class PublicationComponent {
   modalAbierto: boolean = false; 
   nuevaPregunta: any = { enunciado: '' };
   preguntasSeleccionadas: any[] = [];
-
+  formName:string = '';
+  idQuestions: number[] = [];
 
   constructor(
     private resumenService: ResumenService,
@@ -67,23 +66,31 @@ export class PublicationComponent {
     private publicationQuestion: PublicactionQuestionService,
     private router:Router,
     private cdr: ChangeDetectorRef,
+    private _formBuilder: UntypedFormBuilder
   ) {}
 
   ngOnInit(): void {
     this.getQuestions();
     this.preguntasSeleccionadas = []; // Inicializar la lista de preguntas seleccionadas
-    console.log('preguntas :', this.preguntasSeleccionadas)
-
-    this.preguntasOriginales = [...this.preguntas]
+    console.log('preguntas :', this.preguntasSeleccionadas);
+    this.preguntasOriginales = [...this.preguntas];
 
     const token:any = localStorage.getItem('accessToken')
-    console.log(token)
-    const preguntas = this.publicationQuestion.getQuestionAll(token).subscribe(
+    this.publicationQuestion.getQuestionAll(token).subscribe(
       response => {
         console.log(response)
+        return this.preguntasOriginales = response.data;
       }
     )
-    console.log(preguntas)
+    console.log('Preguntas despues del token',this.preguntas);
+    this.formCreateform = this._formBuilder.group({
+      formName: [this.formName],
+      roleFormId :[12],
+      enabled :[1],
+      idQuestions: [this.idQuestions, Validators.required],
+      idAnswers:[]
+
+    })
   }
 
    // Método para abrir el modal
@@ -138,6 +145,10 @@ export class PublicationComponent {
     }
   
     this.cdr.detectChanges(); // Forzar actualización en la vista
+
+    this.idQuestions = this.preguntasSeleccionadas.map((q)=> q.id);
+    this.formCreateform.get('idQuestions').setValue(this.idQuestions);
+    console.log('id questions:', this.idQuestions);
   }      
 
   guardarPregunta() {
@@ -148,7 +159,7 @@ export class PublicationComponent {
   }
 
   limpiarLista(){
-    this.preguntasOriginales = [...this.preguntas];
+    this.preguntasOriginales = [...this.preguntasOriginales];
 
     // Limpiar el array de preguntas seleccionadas
     this.preguntasSeleccionadas = [];
@@ -157,16 +168,40 @@ export class PublicationComponent {
     console.log("Preguntas seleccionadas:", this.preguntasSeleccionadas);
   }
 
+  generateFormPayload():any{
+    const formValue = this.formCreateform.value;
+    const payload = {
+      formName : formValue.formName,
+      roleFormId : Number(formValue.roleFormId),
+      enabled : Number(formValue.enabled),
+      idQuestions: formValue.idQuestions,
+      idAnswers: formValue.idAnswers
+    };
+    console.log('Payload:',payload);
+    return payload;
+  }
   enviarFormulario() {
-    Swal.fire({
-      icon: 'success',
-      title: 'Registro Exitoso',
-      text: 'El Formulario se ha enviado exitosamente',
-      showConfirmButton: false,
-      timer: 2000
-    }).then(() => {
-      window.location.href = './example';
-    });
+    return this.publicationQuestion.createForm(this.generateFormPayload()).subscribe(
+      (response)=>{
+        Swal.fire({
+          icon: 'success',
+          title: 'Registro Exitoso',
+          text: 'El Formulario se ha enviado exitosamente',
+          showConfirmButton: false,
+          timer: 2000
+        })
+      },
+      (error) =>{
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Error al crear formulario, ${error.data}`,
+          showConfirmButton: false,
+          timer: 2000
+        })
+      },
+    )
+    
   }
 
   onAnswerChange(question: any, answer: string) {

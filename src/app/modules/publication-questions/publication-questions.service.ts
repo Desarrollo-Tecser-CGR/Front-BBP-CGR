@@ -52,8 +52,8 @@ export class PublicactionQuestionService{
     private apiUrlPostQuestion = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
-
-    private apipreguntas = 'http://192.168.2.44:5500/api/v1/admin/questionall'
+    private apiForm = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form`;
+    private apipreguntas = `${GlobalConstants.API_BASE_URL}/api/v1/admin/questionall`;
     
     constructor(private http :HttpClient){}
     
@@ -86,5 +86,8 @@ export class PublicactionQuestionService{
         }
 
         return this.http.post<any>(url, params)
+    }
+    createForm(form:any):Observable<any>{
+        return this.http.post<any>(this.apiForm, form);
     }
 }
