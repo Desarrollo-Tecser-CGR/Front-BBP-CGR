@@ -75,7 +75,8 @@ export class AuditComponent implements AfterViewInit{
   total:number = 0;
   active:number = 0;
   inactive:number = 0;
-  counts:any[]=[]
+  counts:any[]=[];
+  currentDate: Date = new Date(); 
 
   ngAfterViewInit(): void {
       

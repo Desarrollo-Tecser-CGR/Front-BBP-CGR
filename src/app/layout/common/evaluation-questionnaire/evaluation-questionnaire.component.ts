@@ -101,7 +101,7 @@ export class EvaluationQuestionnaireComponent implements OnInit{
 
   getQuestions() {
     this.questionnaireService.getQuestion().subscribe(groups => {
-      console.log(groups)
+      console.log(groups);
       this.allForms = groups.data; // Guardamos todos los formularios
       this.selectForm(0); // Inicializamos con el primer formulario (índice 0)
     });

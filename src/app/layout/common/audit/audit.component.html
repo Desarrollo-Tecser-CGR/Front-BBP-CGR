@@ -14,7 +14,7 @@
       </div>
       <div class="bg-stone-300 p-5 rounded-md flex flex-col ">
         <h1 class="text-xl font-bold mb-2">Auditorias</h1>
-        <p class="text-indigo-900 font-bold mb-4">Febrero 2025</p>
+        <p class="text-indigo-900 font-bold mb-4">{{ currentDate | date:'MMMM-yyyy':'es-ES'}}</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
           <div *ngFor="let count of counts" class="bg-white rounded-md p-4 w-full shadow-md">
             <div class="flex">
