@@ -26,14 +26,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link: '/catalog',
         roles: ['administrador']
     },
-    // {
-    //     id   : 'assessment',
-    //     title: 'Evaluación',
-    //     type : 'basic',
-    //     icon : 'heroicons_outline:queue-list',
-    //     link : '/assessment',
-    //     roles: ['administrador', 'evaluador']
-    // },
+    {
+        id   : 'caracterization',
+        title: 'Perfil',
+        type : 'basic',
+        icon : 'heroicons_outline:queue-list',
+        link : '/caracterization',
+        roles: ['administrador']
+    },
 
     // {
     //     id   : 'evolution-questionnaire',
