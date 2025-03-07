@@ -156,7 +156,7 @@ private loadCommitteeData(id: number): void {
                 actualizaciones: {
                     estadoFlujo: nuevoEstadoFlujo, 
                 },
-                sAMAccountName: user.userName, // ✅ Usar el mismo campo que en performEvolution
+                sAMAccountName: user.userName, // Usar el mismo campo que en performEvolution
                 estadoFlujo: nuevoEstadoFlujo,
                 comentarioUsuario: this.additionalInfoFromModal || ''
             };
@@ -179,7 +179,7 @@ private loadCommitteeData(id: number): void {
         Swal.fire({
             title: '¡Éxito!',
             text: 'El estado de flujo ha sido actualizado correctamente.',
-            icon: 'success', // ✅ Chulito verde
+            icon: 'success', 
             confirmButtonText: 'Aceptar',
         }).then(() => {
             window.location.href = './example'; 

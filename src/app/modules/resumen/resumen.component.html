@@ -22,7 +22,7 @@
                     <mat-step [formGroupName]="'step1'" [stepControl]="horizontalStepperForm.get('step1')"
                         #horizontalStepperStep1>
                         @if (isReadOnly) {} @else {
-                            <ng-template matStepLabel>Fecha de diligenciamiento</ng-template>
+                            <ng-template matStepLabel>Identificación</ng-template>
                         }
                         <div class="flex">
                             <mat-form-field class="flex-auto" appearance="fill">
@@ -54,7 +54,7 @@
                         </div>
                         <div class="flex justify-end">
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
@@ -62,7 +62,7 @@
                     <mat-step [formGroupName]="'step2'" [stepControl]="horizontalStepperForm.get('step2')"
                         #horizontalStepperStep2>
                         @if (isReadOnly) {} @else {
-                            <ng-template matStepLabel>Fuente (Proponente)</ng-template>
+                            <ng-template matStepLabel>Persona responsable</ng-template>
                         <p class="my-6 font-medium">
                             Por favor, proporciona la información de contacto del proponente.
                         </p>
@@ -99,17 +99,17 @@
                         <div class="flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
 
                     <mat-step [formGroupName]="'step3'" [stepControl]="horizontalStepperForm.get('step3')">
                         @if (isReadOnly) {} @else {
-                        <ng-template matStepLabel>Trámite registro</ng-template>
+                        <ng-template matStepLabel>Tipo de práctica</ng-template>
                         <p class="my-6 font-medium">
                             Por favor, complete los detalles de la buena práctica.
                         </p>
@@ -190,16 +190,16 @@
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
                     <mat-step [formGroupName]="'step4'" [stepControl]="horizontalStepperForm.get('step4')">
                         @if (isReadOnly) {} @else {
-                            <ng-template matStepLabel>Caracterización</ng-template>
+                            <ng-template matStepLabel></ng-template>
                             <p class="my-6 font-medium">
                                 Por favor, complete los datos de la Caracterización.
                             </p>
@@ -262,10 +262,10 @@
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
@@ -273,7 +273,7 @@
 
                     <mat-step [formGroupName]="'step5'" [stepControl]="horizontalStepperForm.get('step4')">
                         @if (isReadOnly) {} @else {
-                            <ng-template matStepLabel>Gestión</ng-template>
+                            <ng-template matStepLabel></ng-template>
                             <p class="my-6 font-medium">
                                 Por favor, complete los datos de la Gestión.
                             </p>
@@ -342,7 +342,7 @@
 
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button" matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             @if (isEdit) {
                                 <button 
@@ -352,7 +352,7 @@
                                 type="button" 
                                 matStepperNext 
                                 [disabled]="!canProceed()">
-                                Next
+                                Siguiente
                             </button>
                             } @else{
                                 <button 
@@ -362,7 +362,7 @@
                                 type="button" 
                                 matStepperNext 
                                 [disabled]="isDisabled">
-                                Next
+                                Siguiente
                             </button>
                             }                           
                         </div>

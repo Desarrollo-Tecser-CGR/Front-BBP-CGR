@@ -74,7 +74,11 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   estimacionFalse: string = "malaPractica"
 
   allForms: any[] = [];
-
+  filteredForms: any[] = []; // Lista filtrada que se muestra en el select
+  searchTerm: string = '';
+  isDropdownVisible: boolean = false;
+  isExpanded: boolean = false;
+  
   selectedUserFromModal: any = null;
   selectedUsersFromModal: any[] = [];
   additionalInfoFromModal: string = '';
@@ -98,38 +102,79 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     this.id = this.route.snapshot.paramMap.get('id');
     this.getQuestions();
     this.getRolesYUsuarios();
+    this.searchTerm = ''; // 🔹 Limpia solo al cargar
   }
+  
 
   getQuestions() {
     this.questionnaireService.getQuestion().subscribe(groups => {
-      console.log(groups)
+      console.log(groups);
       this.allForms = groups.data; // Guardamos todos los formularios
-      this.selectForm(0); // Inicializamos con el primer formulario (índice 0)
+      this.filteredForms = [...this.allForms];
+  
+      this.searchTerm = ''; // 🔹 Limpia el campo solo al inicio
+  
+      this.selectForm(0, true); // 🔹 Llamamos con "true" para evitar que escriba en el input
     });
   }
+  // Expande el input cuando se hace clic
+  toggleExpand(expand: boolean) {
+    this.isExpanded = expand;
+    if (expand) {
+      this.filteredForms = [...this.allForms]; // Restaurar opciones
+    }
+  }
+  // Mostrar el dropdown al hacer clic en el input
+  // toggleDropdown(show: boolean) {
+  //   this.isDropdownVisible = show;
+  //   if (show) {
+  //     this.filteredForms = [...this.allForms]; // Mostrar todos los formularios al hacer clic
+  //   }
+  // }
+  // Ocultar el dropdown con un pequeño retraso para permitir la selección con el mouse
+  hideDropdownWithDelay() {
+    setTimeout(() => this.isExpanded  = false, 200);
+  }
 
-  // Método para seleccionar un formulario por su índice en el array
-  selectForm(index: number) {
-    const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
-    
-    this.formularioId = selectedForm.id; // Guardamos su ID
+  // Filtrar formularios mientras el usuario escribe
+  filterForms() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredForms = this.allForms.filter(form =>
+      form.formName.toLowerCase().includes(term)
+    );
+
+    // Si el usuario borra el texto, se restauran todos los formularios
+    this.isExpanded = this.filteredForms.length > 0;
+  }
+
+  // Método para seleccionar un formulario
+  selectForm(index: number, isInit: boolean = false) {
+    const selectedForm = this.filteredForms[index];
+    if (!selectedForm) return;
+  
+    this.formularioId = selectedForm.id;
     this.allQuestions = selectedForm.questions.map((q: any) => ({
       ...q,
-      respuesta: '', // Inicializamos respuesta en vacío
+      respuesta: '',
     }));
-
-    // Inicializar el objeto de seguimiento de respuestas
+  
     this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
       acc[q.id] = false;
       return acc;
     }, {} as { [key: string]: boolean });
-
-    // Agrupar preguntas en conjuntos del tamaño deseado
+  
     this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
-
-    // Cargar el primer grupo de preguntas
     this.loadGroup(this.currentGroupIndex);
+  
+    // 🔹 Solo cambia el input si NO es la carga inicial
+    if (!isInit) {
+      this.searchTerm = selectedForm.formName;
+    }
+  
+    this.isExpanded = false;
   }
+  
+
 
   chunkArray(arr: any[], size: number): any[][] {
     if (!arr || size <= 0) return []; // Evita divisiones por 0 o valores inválidos
@@ -178,12 +223,14 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     this.answeredQuestions[questionId] = selectedOption;
   
     // Buscar la pregunta y actualizar su campo 'respuesta'
-    const question = this.allQuestions.find(q => q.id === questionId);
-    if (question) {
-      question.respuesta = selectedOption;
+    const questionIndex = this.allQuestions.findIndex(q => q.id === questionId);
+    if (questionIndex !== -1) {
+      this.allQuestions[questionIndex].respuesta = selectedOption;
+      
+      // Llamar la función para desplazar la barra
+      this.scrollToQuestion(questionIndex);
     }
-  }  
-
+  }
   // Calcular el número de pregunta correcto
   getQuestionNumber(indexInGroup: number): number {
     return (this.currentGroupIndex * this.groupSize) + (indexInGroup + 1);
@@ -241,7 +288,7 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     // Crear lista de peticiones a enviar
     const traceabilityRequests = [];
 
-    // ✅ Enviar trazabilidad a TODOS los comités técnicos (ahora en un array)
+    // Enviar trazabilidad a TODOS los comités técnicos (ahora en un array)
     if (this.comiteTecnicoUserIds.length > 0) {
         this.comiteTecnicoUserIds.forEach(id => {
             traceabilityRequests.push(this.createTraceabilityRequest(String(id), fechaActual, comentario));
@@ -250,12 +297,12 @@ export class EvaluationQuestionnaireComponent implements OnInit{
         console.warn("No se encontraron usuarios con cargo 'comiteTecnico' para enviar trazabilidad.");
     }
 
-    // ✅ Agregar cada evaluador seleccionado a la lista de envíos
+    // Agregar cada evaluador seleccionado a la lista de envíos
     this.selectedUsersFromModal.forEach(evaluador => {
         traceabilityRequests.push(this.createTraceabilityRequest(evaluador.idUser, fechaActual, comentario));
     });
 
-    // ✅ Ejecutar todas las peticiones en paralelo
+    // Ejecutar todas las peticiones en paralelo
     forkJoin(traceabilityRequests).subscribe({
         next: (responses) => {
             console.log('Trazabilidad enviada con éxito para todos:', responses);
@@ -285,6 +332,41 @@ formatDate(date: Date): string {
   const month = ('0' + (date.getMonth() + 1)).slice(-2);
   const day = ('0' + date.getDate()).slice(-2);
   return `${year}-${month}-${day}`;
+}
+
+
+// ======================== Funciones de next y back en cambos numericos ======================== //
+scrollLeft() {
+  const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+  if (container) {
+    container.scrollBy({ left: -200, behavior: 'smooth' });
+  }
+}
+
+scrollRight() {
+  const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+  if (container) {
+    container.scrollBy({ left: 200, behavior: 'smooth' });
+  }
+}
+
+scrollToQuestion(index: number) {
+  setTimeout(() => {
+    const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+    const activeElement = container?.querySelector(`.progress-step:nth-child(${index + 1})`) as HTMLElement;
+
+    if (container && activeElement) {
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = activeElement.getBoundingClientRect();
+
+      if (elementRect.left < containerRect.left || elementRect.right > containerRect.right) {
+        container.scrollBy({ 
+          left: elementRect.left - containerRect.left - container.clientWidth / 3, 
+          behavior: 'smooth' 
+        });
+      }
+    }
+  }, 100);
 }
 
 // ======================== Método para ver los datos del endpoint ======================== //
