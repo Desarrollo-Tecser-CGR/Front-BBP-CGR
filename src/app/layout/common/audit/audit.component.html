@@ -1,21 +1,21 @@
 <!-- barra -->
- <div>
-    <div class="grid grid-cols-[70%_30%] gap-4 min-w-0">
-      <div class="w-full flex flex-col items-start  p-4 bg-white shadow-md rounded-lg col-span-2">
-        <h1 class="text-xl font-semibold text-gray-800 ">Grupos</h1>
-        <mat-radio-group [(ngModel)]="btnRadio" (change)="onRadioChecked($event.value)" class="btn-radio flex bg-indigo-800 rounded-md text-white align-center px-2">
-            <mat-radio-button [value]="'all'" class="btn-radio text-white" color="white"> 
-              Todas
-            </mat-radio-button>
-            <mat-radio-button *ngFor="let group of groups" [value]="group.name" class="text-white hover:bg-white-200"  color="white"> 
-              {{ group.name }}
-            </mat-radio-button>
-        </mat-radio-group>
-      </div>
-      <div class="bg-stone-300 p-5 rounded-md flex flex-col ">
+ <div class="max-w-full gap-2">
+  <div class="w-full flex flex-col items-start p-2 bg-white shadow-md rounded-lg col-span-2 min-w-1/2">
+    <h1 class="text-xl font-semibold text-gray-800 ">Grupos</h1>
+    <mat-radio-group [(ngModel)]="btnRadio" (change)="onRadioChecked($event.value)" class="btn-radio flex flex-col sm:flex-row gap-2 bg-indigo-800 rounded-md text-white px-2 py-1">
+        <mat-radio-button [value]="'all'" class="btn-radio text-white" color="white"> 
+          Todas
+        </mat-radio-button>
+        <mat-radio-button *ngFor="let group of groups" [value]="group.name" class="text-white hover:bg-white-200"  color="white"> 
+          {{ group.name }}
+        </mat-radio-button>
+    </mat-radio-group>
+  </div>
+    <div class="grid grid-cols-[60%_40%] sm:grid-col-1 gap-2 min-w-0 overflow-hidden w-full justify-center items-center p-4">
+      <div class="bg-blue-100 p-5 rounded-md flex flex-col w-full gap-4">
         <h1 class="text-xl font-bold mb-2">Auditorias</h1>
         <p class="text-indigo-900 font-bold mb-4">{{ currentDate | date:'MMMM-yyyy':'es-ES'}}</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 rounded-xl lg:rounded-2xl">
           <div *ngFor="let count of counts" class="bg-white rounded-md p-4 w-full shadow-md">
             <div class="flex">
               <mat-icon [svgIcon]="count.icon" [style.color]="count.color"></mat-icon>
@@ -29,65 +29,85 @@
         </div>
       </div>
       <!-- grafica de progreso -->
-      <div class="flex items-center p-4 bg-white shadow-md rounded-lg align-center"> 
+      <div class="relative bg-white shadow-md rounded-lg justify-stretch items-stretch "> 
         <app-progress-audit [idAudit]="idAudit" [CodeAudit]="codeAudit"></app-progress-audit>
       </div>
     </div>
-    
- </div>
+
+
  <!-- tabla de auditorias -->
-  <div class="p-4">
+  <div class="py-2 items-center">
     <h1>Auditorias</h1>
-      <div class="h-60 overflow-y-auto border border-gray-300 rounded-lg p-2">
+      <div class="w-full h-60 overflow-y-auto border border-gray-300 rounded-lg p-2">
         <table mat-table [dataSource]="dataSource" class="w-full">
           <ng-container *ngFor="let header of headers; let i = index" [matColumnDef]="i.toString()">
             <th mat-header-cell *matHeaderCellDef> {{header}}</th>
-            <td mat-cell *matCellDef="let element"> {{ element[i] }}</td>
+            <td mat-cell *matCellDef="let element" [innerHTML]="element[i]"> {{ element[i] }}</td>
+          </ng-container>
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let element" >
+              <div class="felx item-center">
+                <button mat-icon-button 
+                  class="border-2 border-solid border-gray-300 rounded-full bg-gray-100 text-gray-300 " 
+                  (click)="openFilesTab(idAudit=element[0], codeAudit=element[1])">
+                  +
+                </button>
+              </div>
+            </td>
           </ng-container>
           <!-- Encabezado y filas -->
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns"
-           class="bg-stone-200 hover:text-stone-600 cursor-pointer" (click)="onClickAudit(row)"></tr>
+           class="hover:text-stone-600 cursor-pointer" (click)="onClickAudit(row)"></tr>
         </table>
       </div>
-      <div> 
-        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2  gap-4" *ngIf="selectedAudit">
-          <div>
-            <app-files-table [IdAudit]="idAudit" [CodeAudit]="codeAudit"></app-files-table>
-          </div>
-  
-          <div>
-            <div class="w-full overflow-x-auto file-upload-container">
-              <div class="w-max">
-                <div class="custom-toggle gap-2">
-                  <button *ngFor="let day of periodicity" (click)="onClickDate(day)" [ngClass]="{'active': dateUploadSelected === day}">{{day}}</button>
-                </div>
-              </div>
-            </div>
-            <div class="file-upload-container">
-              <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
-                  <i class="upload-icon">☁️</i>
-                  <button type="button" (click)="fileInput.click()">Escoger archivos</button>
-                  <input class="submit-button" type="file" #fileInput hidden (change)="onFilesSelected($event)" [disabled]="dateUploadSelected === ''"
-                      accept=".jpeg,.png,.csv,.pdf" multiple />
-                  <p>Escoja sus archivos o arrastre y suelte aquí</p>
-                  <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
-              </div>
-                  <!-- Lista de archivos seleccionados -->
-                  <div *ngIf="selectedFiles.length > 0" class="file-info">
-                      <p><strong>Archivos seleccionados:</strong></p>
-                      <ul>
-                          <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
-                              number: '1.0-2' }} KB)</li>
-                      </ul>
-                  </div>
-                  <!-- Botón Enviar Documento -->
-                  <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
-                      (click)="submitDocumentoActuacion(idAudit)">
-                      Carga de archivos
+  </div>
+      <div *ngIf="selectedAudit" class="py-3">
+        <div class="flex flex-col items-center">
+          <h1 class="mt-2">Perodicidad</h1>
+          <div class="flex items-center p-2 w-full max-w-4xl justify-center overflow-hidden">
+            <button class="p-2" (click)="scrollLeft()">
+              <mat-icon class="custom-icon" svgIcon="heroicons_outline:chevron-left"></mat-icon>
+            </button>
+                <div class="custom-toggle flex gap-2 max-w-3x overflow-x-auto items-center">
+                  <button 
+                    *ngFor="let day of periodicity" 
+                    (click)="onClickDate(day)" 
+                    [ngClass]="{'active': dateUploadSelected === day}"
+                    class="min-w-[100px] whitespace-nowrap"
+                  >
+                    {{ day }}     
                   </button>
                 </div>
-            </div>
+            <button class="p-2 " (click)="scrollRight()">
+                <mat-icon class="custom-icon" svgIcon="heroicons_outline:chevron-right"></mat-icon>
+            </button>
           </div>
         </div>
-    </div>
+        <div class="file-upload-container" >
+          <div class="upload-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+              <i class="upload-icon">☁️</i>
+              <button type="button" (click)="fileInput.click()">Escoger archivos</button>
+              <input class="submit-button" type="file" #fileInput hidden (change)="onFilesSelected($event)" [disabled]="dateUploadSelected === ''"
+                  accept=".jpeg,.png,.csv,.pdf" multiple />
+              <p>Escoja sus archivos o arrastre y suelte aquí</p>
+              <small>JPEG, PNG, CSV y PDF menor a 50MB</small>
+          </div>
+              <!-- Lista de archivos seleccionados -->
+              <div *ngIf="selectedFiles.length > 0" class="file-info">
+                  <p><strong>Archivos seleccionados:</strong></p>
+                  <ul>
+                      <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ file.size / 1024 |
+                          number: '1.0-2' }} KB)</li>
+                  </ul>
+              </div>
+              <!-- Botón Enviar Documento -->
+              <button type="button" class="submit-button" [disabled]="selectedFiles.length === 0"
+                  (click)="submitDocumentoActuacion(idAudit)">
+                  Carga de archivos
+              </button>
+      </div>
+      </div>
+
+ </div>

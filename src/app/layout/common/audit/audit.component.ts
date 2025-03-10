@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation, ViewChild, AfterViewInit} from '@angular/core';
+import { Component, Input, ViewEncapsulation, ViewChild, AfterViewInit, inject} from '@angular/core';
 import { NgModule } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -15,11 +15,12 @@ import { MatSortModule } from '@angular/material/sort';
 import { FilesTableComponent } from "../files-table/files-table.component";
 import {MatRadioModule} from '@angular/material/radio';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import { head } from 'lodash';
+import { head, slice } from 'lodash';
 import { MatButtonModule } from '@angular/material/button';
 import { P } from '@angular/cdk/keycodes';
 import { MatIcon } from '@angular/material/icon';
 import { ProgressAuditComponent } from '../progress-audit/progress-audit.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-audit',
@@ -35,7 +36,6 @@ import { ProgressAuditComponent } from '../progress-audit/progress-audit.compone
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    FilesTableComponent,
     MatRadioModule,
     MatButtonToggleModule,
     MatButtonModule,
@@ -77,6 +77,7 @@ export class AuditComponent implements AfterViewInit{
   inactive:number = 0;
   counts:any[]=[];
   currentDate: Date = new Date(); 
+  readonly dialog = inject(MatDialog)
 
   ngAfterViewInit(): void {
       
@@ -86,7 +87,15 @@ export class AuditComponent implements AfterViewInit{
     private resumenService:ResumenService,
     private auditService: AuditService,
   ){}
-
+    openFilesTab(idAudit:number, codeAudit:string ){
+      console.log(`idAudit:${idAudit}, codeAudit:${codeAudit}`);
+      this.dialog.open(FilesTableComponent,{
+        data: {
+          idAudit:idAudit,
+          codeAudit:codeAudit
+        }
+      });
+    }
     onFilesSelected(event: Event): void {
       const input = event.target as HTMLInputElement;
       if (input.files) {
@@ -131,7 +140,7 @@ export class AuditComponent implements AfterViewInit{
             const { headers, tableData } = this.preparateTableData(this.audits, this.columns);
             this.headers = headers;    
             this.dataSource = tableData;    
-            this.displayedColumns = headers.map((_, index) => index.toString()); 
+            this.displayedColumns = [...headers.map((_, index) => index.toString()), 'acciones']; 
 
           },
           (error) => {
@@ -252,8 +261,8 @@ export class AuditComponent implements AfterViewInit{
           this.active = response.active;
           this.counts = [
             {label:'Total de auditorias', count:this.total, icon:'heroicons_outline:arrow-long-right', color:'orange'},
-            {label:'Auditorias inactivas', count:this.inactive, icon:'heroicons_outline:arrow-down-left', color:'red'},
-            {label:'Auditorias activas', count:this.active, icon:'heroicons_outline:arrow-up-right', color:'orange'},]
+            {label:'Auditorias inactivas', count:this.active, icon:'heroicons_outline:arrow-down-left', color:'red'},
+            {label:'Auditorias activas', count:this.inactive, icon:'heroicons_outline:arrow-up-right', color:'orange'},]
         },
         (error)=>{
           Swal.fire({
@@ -287,9 +296,11 @@ export class AuditComponent implements AfterViewInit{
       console.log('Columns:', columns);
       
       const headers = columns.map(col=>col.header);
+      const estadoHeader = headers.indexOf('Estado');
+
       console.log('Columnas en la tabla:', headers);
       const tableData = data.map(audit =>
-        columns.map(col=>{
+        columns.map((col, index)=>{
           const value = audit[col.key];
 
           if(Array.isArray(value)){
@@ -298,6 +309,17 @@ export class AuditComponent implements AfterViewInit{
           if (typeof value === 'object' && value !== null && 'name' in value){
             return value.name;
           }
+          if (index === estadoHeader && (value === 'activo' || value === 'inactivo')) {
+            const colorClass = value === 'activo' ? 'text-green-700' : 'text-red-700';
+            const bgColor = value === 'activo' ? 'bg-green-700' : 'bg-red-700';
+            return `
+              <div class="${colorClass} flex items-center gap-2">
+                <span class="${bgColor} w-2 h-2 rounded-full"></span>
+                <p>${String(value).charAt(0).toUpperCase() + String(value).slice(1)}</p>
+              </div>
+            `;
+          }
+      
           return value !== undefined ? value : 'N/A';
         })
       );
@@ -306,4 +328,20 @@ export class AuditComponent implements AfterViewInit{
       console.log('Tabla a mostrar:', tableData);
       return {headers, tableData};
     }
+  
+  // ======================== Funciones de next y back en cambos numericos ======================== //
+scrollLeft() {
+  const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+  if (container) {
+    container.scrollBy({ left: -200, behavior: 'smooth' });
   }
+}
+
+scrollRight() {
+  const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+  if (container) {
+    container.scrollBy({ left: 200, behavior: 'smooth' });
+  }
+}
+}
+
