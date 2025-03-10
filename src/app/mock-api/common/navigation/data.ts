@@ -100,6 +100,15 @@ export const defaultNavigation: FuseNavigationItem[] = [
         roles: ['administrador']
 
     },
+    {
+        id: 'Entidades',
+        title: 'Creación de Entidades',
+        type: 'basic',
+        icon: 'heroicons_outline:newspaper',
+        link: '/entities',
+        roles: ['administrador']
+
+    }
 ];
 export const compactNavigation: FuseNavigationItem[] = [
     {
