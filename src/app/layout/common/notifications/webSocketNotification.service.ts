@@ -1,117 +1,143 @@
-import { over } from 'lodash';
-// notifications.service.ts
-
 import { Injectable } from '@angular/core';
-import { RxStomp, RxStompConfig } from '@stomp/rx-stomp';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Client, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebSocketNotificationService {
-  private socket: any;
-  private stompClient: any;
-  private notificationSubscription: any;
+  private stompClient!: Client;
+  private socketUrl = 'http://localhost:5500/ws';
   private reconnectDelay: number = 5000;
+  private notificationSubscription!: StompSubscription | null;
+  private isConnecting: boolean = false;
 
-   constructor() {
+  // ✅ Subject para manejar notificaciones en tiempo real
+  private notificationSubject = new BehaviorSubject<string | null>(null);
+
+  // ✅ Observable que expone las notificaciones para los componentes
+  public notification$: Observable<string | null> = this.notificationSubject.asObservable();
+
+  constructor() {
     this.connect();
   }
 
   private connect(): void {
-    // Inicializa la conexión con SockJS
-    const token =`${this.getToken()}`;
-    this.socket = new SockJS(`http://localhost:5500/ws`);
+    const token = this.getToken();
+    console.log('Intentando conectar con el token:', token);
 
-    this.stompClient = Stomp.over(this.socket);
+    if (!token) {
+      console.error("❌ No se encontró un token válido.");
+      return;
+    }
 
-    // Opcional: desactivar logs de debug si se desea
-    this.stompClient.debug = () => {};
+    const socket = new SockJS(`http://localhost:5500/ws?token=${token}`); 
 
-    // Conecta al servidor con callbacks de conexión y error
-    this.stompClient.connect(
-      // { 'Authorization': `Bearer ${token}` },
-      (frame: any) => {
-        console.log('Connected:', frame);
-        this.subscribeToNotifications();
-        this.reconnectDelay;
+    this.stompClient = new Client({
+      webSocketFactory: () => socket, 
+      connectHeaders: {
+        Authorization: `Bearer ${token}` // ✅ Se envía el token en los headers
       },
-      (error: any) => {
-        console.error('STOMP error:', error);
-        setTimeout(() => {
-          console.log('Attempting to reconnect...');
-          this.connect();
-          
-        }, this.reconnectDelay);
-        // Aquí podrías implementar una lógica de reconexión si es necesario
-      }
-    );
-  }
-
-  private subscribeToNotifications(): void {
-    // Se suscribe al tópico de notificaciones y guarda la suscripción para poder cancelar luego
-    this.notificationSubscription = this.stompClient.subscribe('/topic/notifications', (message: any) => {
-      console.log('New notification:', message.body);
-      // Procesa el mensaje recibido según la lógica de tu aplicación
+      debug: (str) => console.log('Debug STOMP:', str),
+      reconnectDelay: this.reconnectDelay,
     });
+
+    this.stompClient.onConnect = (frame) => {
+      console.log('✅ WebSocket conectado con éxito:', frame);
+      this.isConnecting = false;
+      this.subscribeToNotifications();
+    };
+
+    this.stompClient.onWebSocketError = (error) => {
+      console.error('❌ Error en WebSocket:', error);
+      this.isConnecting = false;
+      this.handleReconnection();
+    };
+
+    this.stompClient.onStompError = (frame) => {
+      console.error('❌ Error en STOMP:', frame);
+      this.isConnecting = false;
+      this.handleReconnection();
+    };
+
+    if (!this.stompClient.active) {
+      this.stompClient.activate();
+    }
   }
 
-  // public disconnect(): void {
-  //   // Cancela la suscripción si existe
-  //   if (this.notificationSubscription) {
-  //     this.notificationSubscription.unsubscribe();
-  //     console.log('Unsubscribed from notifications.');
-  //   }
-  //   // Desconecta el cliente STOMP si está conectado
-  //   if (this.stompClient) {
-  //     this.stompClient.disconnect(() => {
-  //       console.log('Disconnected from WebSocket.');
-  //     });
-  //   }
-  // }
+  // 🔄 Maneja la reconexión automática evitando múltiples intentos simultáneos
+  private handleReconnection(): void {
+    if (this.isConnecting) {
+      console.log('Ya hay un intento de reconexión en curso.');
+      return;
+    }
 
-  // // Configura la conexión RxStomp con el token en la URL
-  // private configure(): void {
-  //   const token = this.getToken();
-  //   // Construir el token con el prefijo Bearer y codificarlo para la URL
-  //   const bearerToken = encodeURIComponent(`Bearer${token}`);
-  //   const config: RxStompConfig = {
-  //     brokerURL: `https://localhost:5500/ws`,
-  //   //   connectHeaders: {
-  //   //     Authorization: bearerToken
-  //   //   },
-  //     heartbeatIncoming: 0,
-  //     heartbeatOutgoing: 20000,
-  //     reconnectDelay: 5000,
-  //     debug: (msg: string): void => {
-  //       console.log(new Date(), msg);
-  //     }
-  //   };
-  //   this.rxStomp.configure(config);
-  // }
+    this.isConnecting = true;
+    console.log(`🔄 Intentando reconectar en ${this.reconnectDelay / 1000} segundos...`);
+    setTimeout(() => {
+      this.connect();
+    }, this.reconnectDelay);
+  }
 
-  // // Activa la conexión y escucha el estado de conexión
-  // private activate(): void {
-  //   this.rxStomp.activate();
-  //   this.rxStomp.connected$.subscribe(connected => {
-  //     console.log('WebSocket connected: ', connected ? 'Conectado' : 'Desconectado');
-  //   });
-  // }
+  // 🔔 Suscripción a notificaciones en WebSockets
+  private subscribeToNotifications(): void {
+    if (!this.stompClient || !this.stompClient.active) {
+      console.warn('⚠️ No se puede suscribir porque WebSocket no está activo.');
+      setTimeout(() => this.subscribeToNotifications(), 5000);
+      return;
+    }
+  
+    if (this.notificationSubscription) {
+      console.log('🔄 Ya existe una suscripción activa. Cancelando la anterior.');
+      this.notificationSubscription.unsubscribe();
+      this.notificationSubscription = null;
+    }
+  
+    try {
+      // ✅ Suscribirse al canal general `/topic/notifications`
+      this.notificationSubscription = this.stompClient.subscribe(`/topic/notifications`, (message) => {
+        try {
+          console.log('📩 Mensaje recibido:', message.body);
+          
+          // 📜 Convertir el mensaje de JSON a objeto
+          const parsedMessage = JSON.parse(message.body);
+          console.log('📜 Mensaje decodificado:', parsedMessage);
+  
+          // 🔍 Filtrar la notificación según el usuario actual
+          if (parsedMessage.user === this.getUser()) {
+            console.log('✅ Notificación relevante para el usuario:', parsedMessage);
+            this.notificationSubject.next(parsedMessage.message);
+          } else {
+            console.log('⚠️ Notificación para otro usuario, ignorando...');
+          }
+  
+        } catch (error) {
+          console.error('❌ Error al procesar el mensaje WebSocket:', error);
+        }
+      });
+  
+      console.log('✅ Suscripción WebSocket activa en /topic/notifications');
+  
+    } catch (error) {
+      console.error('❌ Error al suscribirse a WebSocket:', error);
+      setTimeout(() => this.subscribeToNotifications(), 5000);
+    }
+  }
+  
+  
 
-  // Obtiene el token desde localStorage o algún servicio de autenticación
+  // 🔑 Obtiene el token desde localStorage
   private getToken(): string {
     const token = localStorage.getItem('accessToken') || '';
-    console.log('Token obtenido:', token);
+    console.log('🔑 Token obtenido:', token);
     return token;
   }
 
-  // // Método para suscribirse a notificaciones globales a través de STOMP
-  // public getGlobalNotifications(): Observable<string> {
-  //   return this.rxStomp.watch('/topic/notifications').pipe(
-  //     map(message => message.body)
-  //   );
-  // }
+  // 🔑 Obtiene el token desde localStorage
+  private getUser(): string {
+    const user = localStorage.getItem('accessName') || '';
+    console.log('🔑 Usuario obtenido:', user);
+    return user;
+  }
 }

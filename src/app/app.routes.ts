@@ -359,5 +359,20 @@ export const appRoutes: Route[] = [
                 data: { requiredRoles: ['administrador', 'evolucionador'], module: '' }
             },
         ]
-    }
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'entities', loadChildren: () =>
+                import('app/modules/entities/entities.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
+            },
+        ]
+    },
 ];
