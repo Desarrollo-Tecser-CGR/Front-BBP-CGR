@@ -158,7 +158,7 @@ export class AuditComponent implements AfterViewInit{
               const { headers, tableData } = this.preparateTableData(this.audits, this.columns);
               this.headers = headers;    
               this.dataSource = tableData;    
-              this.displayedColumns = headers.map((_, index) => index.toString()); 
+              this.displayedColumns = [...headers.map((_, index) => index.toString()), 'acciones']; 
             },
             (error)=>{
               Swal.fire({
