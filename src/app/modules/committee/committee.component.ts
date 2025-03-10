@@ -8,6 +8,9 @@ import { ResumenService } from '../resumen/resumen.service';
 import Swal from 'sweetalert2';
 import { MatButtonModule } from '@angular/material/button';
 import {GenaralModalService} from '../../modules/common/general-modal/general-modal.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogOverviewExampleDialog } from '../../modules/common/general-modal/general-modal.component'; 
+
 
 @Component({
     selector: 'committee',
@@ -29,6 +32,9 @@ export class CommitteeComponent implements OnInit {
     showAnswers: boolean = false;
     roles: any[] = [];
     usuarios: any[] = [];
+    selectedUserFromModal: any = null;
+    additionalInfoFromModal: string = '';
+    selectedUsersFromModal: any[] = [];
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -36,6 +42,7 @@ export class CommitteeComponent implements OnInit {
         private resumenService: ResumenService,
         private cdRef: ChangeDetectorRef,
         private genaralModalService: GenaralModalService,
+        private dialog: MatDialog
     ) {}
 
     ngOnInit(): void {
@@ -130,49 +137,61 @@ private loadCommitteeData(id: number): void {
             return;
         }
     
-        // Aquí definimos el nuevo estado de flujo
+        if (!this.selectedUsersFromModal || this.selectedUsersFromModal.length === 0) { 
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un usuario antes de cambiar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
+            return;
+        }
+    
+        const idAsNumber = Number(this.id);
         const nuevoEstadoFlujo = 'seguimiento';
     
-        // Accedemos al 'userName' desde el objeto 'committeeData.userId.userName'
-        const accessName = this.committeeData.userId?.userName || 'defaultUser'; // Si no existe, usar 'defaultUser'
-
-        // Creamos el objeto con la actualización que solo incluye el estado de flujo
-        const updatedData = {
-            actualizaciones: {
-                estadoFlujo: nuevoEstadoFlujo, // Estado de flujo actualizado
-            },
-            sAMAccountName: 'bbp16.cgr', // Usamos 'accessName' como 'userName'
-            estadoFlujo: nuevoEstadoFlujo, // Estado de flujo actualizado
-            comentarioUsuario: '', // Comentario adicional desde el modal
-        };
-        console.log('datos de user', accessName);
-        // Convertimos el 'id' a number antes de pasarlo al servicio
-        const idAsNumber = Number(this.id);
+        // 🔹 Recorrer cada usuario seleccionado y enviar la petición
+        this.selectedUsersFromModal.forEach(user => {
+            const updatedData = {
+                actualizaciones: {
+                    estadoFlujo: nuevoEstadoFlujo, 
+                },
+                sAMAccountName: user.userName, // Usar el mismo campo que en performEvolution
+                estadoFlujo: nuevoEstadoFlujo,
+                comentarioUsuario: this.additionalInfoFromModal || ''
+            };
     
-        // Llamamos al servicio para enviar el PATCH con la estructura JSON correcta
-        this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
-            (response) => {
-                Swal.fire({
-                    title: '¡Estado de Flujo Actualizado!',
-                    text: 'El estado de flujo ha sido actualizado a "seguimiento".',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                }).then(() => {
-                    window.location.href = './example';
-                });
-            },
-            (error) => {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo actualizar el estado de flujo. Intenta nuevamente.',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                });
-            }
-        );
+            console.log('Enviando datos para usuario:', updatedData.sAMAccountName);
+    
+            this.resumenService.updateDataAsJson(idAsNumber, updatedData).subscribe(
+                (response) => {
+                    console.log(`Seguimiento asignado a: ${updatedData.sAMAccountName}`);
+                },
+                (error) => {
+                    console.error(`Error al actualizar usuario ${updatedData.sAMAccountName}:`, error);
+                }
+            );
+        });
+    
+        // Limpiar selección después de enviar los datos
+        this.clearSelection();
+    
+        Swal.fire({
+            title: '¡Éxito!',
+            text: 'El estado de flujo ha sido actualizado correctamente.',
+            icon: 'success', 
+            confirmButtonText: 'Aceptar',
+        }).then(() => {
+            window.location.href = './example'; 
+        });        
+    }
+
+    clearSelection(): void {
+        this.selectedUsersFromModal = [];  // Limpiar la lista de usuarios seleccionados
+        this.additionalInfoFromModal = ''; // Limpiar el comentario ingresado
     }
     
-
+    
     getBoxClass(estimacion: string): string {
         if (estimacion === 'malaPractica') {
             return 'border-red';  // Rojo
@@ -272,5 +291,31 @@ private loadCommitteeData(id: number): void {
             }
         );
     }
-}    
 
+ // ======================== Logica que muestra el modal en la vista ======================== //
+    openModal(): void {
+        const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+            width: '500px',
+            data: {
+            role: 'comiteTecnico',
+            selectedUser: this.selectedUserFromModal, 
+            selectedUsers: this.selectedUsersFromModal || [], 
+            additionalInfo: this.additionalInfoFromModal
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.selectedUserFromModal = result.selectedUser || this.selectedUserFromModal; 
+                this.selectedUsersFromModal = result.selectedUsers || this.selectedUsersFromModal; // <-- Agregar esto
+                this.additionalInfoFromModal = result.additionalInfo || this.additionalInfoFromModal; 
+
+                // 🔹 Agregar logs para verificar valores seleccionados
+                console.log('Usuario seleccionado:', this.selectedUserFromModal);
+                console.log('Usuarios seleccionados (seguimiento):', this.selectedUsersFromModal);
+                console.log('Comentario ingresado:', this.additionalInfoFromModal);
+            }
+        });
+    }
+    
+}    

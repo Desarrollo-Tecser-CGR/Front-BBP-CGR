@@ -3,11 +3,14 @@
     <div class="flex-auto p-6 sm:p-10">
         <div class="flex items-center justify-between mt-2">
             <!-- Título -->
-            <h2 class="truncate text-3xl font-extrabold leading-7 tracking-tight sm:leading-10 md:text-4xl">
+            <h1>
                 Inbox
-            </h2>
+            </h1>
             <!-- Botón alineado -->
-            <button mat-button mat-raised-button style="background: #2D3580; color: white;" (click)="pageLoad()"><mat-icon svgIcon="heroicons_outline:arrow-path-rounded-square"></mat-icon></button>
+            <button mat-button mat-raised-button style="background: #2D3580; color: white;"
+                (click)="pageLoad()">
+                <mat-icon svgIcon="heroicons_outline:arrow-path-rounded-square"></mat-icon>
+            </button>
         </div>
         <div class="max-w-3x mt-4">
             <app-generic-table [data]="data" [columns]="columns" [buttons]="buttons"></app-generic-table>

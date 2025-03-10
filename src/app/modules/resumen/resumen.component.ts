@@ -263,17 +263,16 @@ export class ResumenComponent implements OnInit {
                 }
             }
 
-
                 //Lógica para jefeUnidad cambiar el estado de flujo si el rol es 'caracterizador_JU'
                 if (currentRole === 'jefeunidad' && flattenedValues.estadoFlujo === 'caracterizada_JU') {
                     console.log('Cambiando estado de caracterizada_JU a caracterizada para Jefe de Unidad');
-
+                
                     // Se actualiza el estado de flujo
                     flattenedValues.estadoFlujo = 'caracterizada';
-
+                
                     // Se obtiene el formulario completo
                     const formValues = this.horizontalStepperForm.getRawValue();
-
+                
                     // Se construyen los datos que se enviarán
                     const patchData = {
                         actualizaciones: {
@@ -286,7 +285,7 @@ export class ResumenComponent implements OnInit {
                             typeStrategyIdentification: formValues.step3.typeStrategyIdentification || null,
                             typePractice: formValues.step3.typePractice || null,
                             typology: formValues.step3.typology || null,
-                            estadoFlujo: 'caracterizada',  // Aquí se cambia a 'caracterizada'
+                            estadoFlujo: 'caracterizada',  
                             levelGoodPractice: formValues.step3.levelGoodPractice || null,
                             nombreDescriptivoBuenaPractica: formValues.step3.nombreDescriptivoBuenaPractica || '',
                             propositoPractica: formValues.step3.propositoPractica || '',
@@ -307,18 +306,25 @@ export class ResumenComponent implements OnInit {
                             descripcionResultados: formValues.step5.descripcionResultados || ''
                         },
                         sAMAccountName: '', // Se asignará después con el userName del endpoint
-                        estadoFlujo: 'caracterizada',  // Cambio de estado
+                        estadoFlujo: 'caracterizada',  
                         comentarioUsuario: '', 
                     };
-
+                
                     // Llamada al servicio para obtener los datos de trazabilidad
                     this.resumenService.getTraceabilityData(this.Id, 4).subscribe(
                         data => {
-                            console.log(' Datos de trazabilidad:', data);
-
+                            console.log('Datos de trazabilidad recibidos:', data);
+                
+                            if (!data.data || !data.data.userName) {
+                                console.error('Error: userName no disponible en la trazabilidad.');
+                                return; // Evitar el envío con datos incorrectos
+                            }
+                
                             // Asignamos el userName del endpoint al campo sAMAccountName
-                            patchData.sAMAccountName = data.data.userName; // Asigna el valor de userName
-
+                            patchData.sAMAccountName = data.data.userName; 
+                
+                            console.log("Enviando datos a updateDataAsJson:", JSON.stringify(patchData, null, 2));
+                
                             // Ahora que tenemos el userName, podemos continuar con la actualización
                             this.resumenService.updateDataAsJson(this.Id, patchData).subscribe(
                                 () => {
@@ -329,7 +335,8 @@ export class ResumenComponent implements OnInit {
                                         confirmButtonText: 'Aceptar',
                                     }).then(() => window.location.href = './example');
                                 },
-                                () => {
+                                (error) => {
+                                    console.error('Error en updateDataAsJson:', error);
                                     Swal.fire({
                                         title: 'Error',
                                         text: 'No se pudo actualizar el formulario.',
@@ -338,17 +345,20 @@ export class ResumenComponent implements OnInit {
                                     });
                                 }
                             );
-
+                
                             // Se envía la notificación
-                            // this.notificationService.sendNotification(this.Id, patchData.sAMAccountName, 6);
-
+                            this.notificationService.sendNotification(this.Id, patchData.sAMAccountName, 6);
+                
                             console.log('Estado de flujo actualizado para Jefe de Unidad:', flattenedValues.estadoFlujo);
                         },
                         error => {
-                            console.error(' Error en la solicitud:', error);
+                            console.error('Error en la solicitud de trazabilidad:', error);
                         }
                     );
+                
+                    return; // Salir para evitar llamada extra a updateDataAsJson
                 }
+                
 
                 delete flattenedValues.fechaDiligenciamiento;
                 // Llamar al servicio de actualización
@@ -840,7 +850,8 @@ export class ResumenComponent implements OnInit {
     }
 
     private shouldExcludeControl(controlName: string): boolean {
-        const excludedControls = ['estadoFlujo','sAMAccountName', 'comentarioUsuario']; // Lista de controles a excluir
+        const excludedControls = []; // Lista de controles a excluir aqui irian estas cosas 'estadoFlujo', 'codigoPractica', 'documentoActuacion' pero ya no se deben excluir
+        
         return excludedControls.includes(controlName);
     }
 
@@ -848,42 +859,48 @@ export class ResumenComponent implements OnInit {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
         let filledControls = 0;
-
+    
+        //console.log("📌 Iniciando cálculo de progreso...");
+    
         formGroups.forEach((step) => {
             const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
             if (group) {
                 const controls = group.controls;
-
-                 Object.entries(controls).forEach(([controlName, control]) => {
-                // Excluir controles específicos
-                if (this.shouldExcludeControl(controlName)) {
-                    return;
-                }
-
-                // Incluir controles deshabilitados si el rol es "validador"
-                if (!control.disabled || this.isValidatorRole(), this.rol === 'caracterizador') {
+    
+                Object.entries(controls).forEach(([controlName, control]) => {
+                    // Excluir controles específicos SOLO para el caracterizador
+                    if (this.shouldExcludeControl(controlName)) {
+                        //console.log(` Excluyendo: ${controlName}`);
+                        return;
+                    }
+    
+                    // 🔥 Contar controles aunque estén deshabilitados (pero sin cambiar su estado)
                     totalControls++;
-                    // Contar como lleno si tiene un valor, aunque no sea obligatorio
-                    if (
-                        control.value &&
-                        control.value.toString().trim() !== ''
-                    ) {
+                    //console.log(`✅ Contando: ${controlName} - Valor: "${control.value}" - Deshabilitado: ${control.disabled}`);
+    
+                    // Contar como lleno si tiene un valor
+                    if (control.value && control.value.toString().trim() !== '') {
                         filledControls++;
-                        }
+                        //console.log(`✔️ Lleno: ${controlName}`);
                     }
                 });
             }
         });
-
+    
         // Evitar dividir por cero
         if (totalControls === 0) {
+            //console.log("⚠️ No hay controles a contar. Progreso: 0%");
             return 0;
         }
-
+    
         // Calcular progreso
         const progressValue = Math.round((filledControls / totalControls) * 100);
+        //console.log(`📊 Total controles: ${totalControls}, Llenos: ${filledControls}, Progreso: ${progressValue}%`);
+    
         return progressValue;
     }
+    
+    
 
     get progressColor(): string {
         if (this.progress <= 30) {

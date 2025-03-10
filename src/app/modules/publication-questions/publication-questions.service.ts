@@ -52,6 +52,7 @@ export class PublicactionQuestionService{
     private apiUrlPostQuestion = `${GlobalConstants.API_BASE_URL}/api/v1/admin/question`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
+
     private apiForm = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form`;
     private apipreguntas = `${GlobalConstants.API_BASE_URL}/api/v1/admin/questionall`;
     

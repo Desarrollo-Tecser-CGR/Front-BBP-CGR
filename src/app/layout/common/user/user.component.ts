@@ -1,4 +1,5 @@
 import { BooleanInput } from '@angular/cdk/coercion';
+import { NgIf, NgFor } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -24,51 +25,45 @@ import { Subject, takeUntil } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'user',
     standalone: true,
-    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule],
+    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule, NgIf,  NgFor],
 })
 export class UserComponent implements OnInit, OnDestroy {
-    /* eslint-disable @typescript-eslint/naming-convention */
     static ngAcceptInputType_showAvatar: BooleanInput;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     @Input() showAvatar: boolean = true;
-    user: User = {
-        fullName: '', // Inicialización con valores predeterminados
-        cargo: '',
-        id: ''
-    };
+    user: User | null = null;
+    userRoles: string[] = [];
+    selectedRole: string = 'Sin Rol';
+    userImage: string | null = null;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-    /**
-     * Constructor
-     */
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
         private _userService: UserService
-    ) {}
+    ) { }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Lifecycle hooks
-    // -----------------------------------------------------------------------------------------------------
+    goToSettings(): void {
+        this._router.navigate(['/settings']);
+    }
 
-    /**
-     * On init
-     */
     ngOnInit(): void {
         // Recuperar datos desde el localStorage
         const fullName = localStorage.getItem('accessName') || 'Usuario';
         const roles = localStorage.getItem('accessRoles');
         const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
-        const id = localStorage.getItem('accessId');
+        const id = localStorage.getItem('accessId') || 'Sin ID';
+
+        // Recuperar imagen de perfil en base64 (si existe)
+        this.userImage = localStorage.getItem('userImage') || null;
 
         // Inicializar `this.user` con datos del Local Storage
-        this.user = {
-            fullName: fullName,
-            cargo: cargo,
-            id: id
-        };
+        this.user = { fullName, cargo, id };
+
+        // Recuperar roles
+        this.userRoles = roles ? JSON.parse(roles) : [];
+        this.selectedRole = this.userRoles.length > 0 ? this.userRoles[0] : 'Sin Rol';
 
         // Marcar para detección de cambios
         this._changeDetectorRef.markForCheck();
@@ -77,58 +72,45 @@ export class UserComponent implements OnInit, OnDestroy {
         this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user: User) => {
-                this.user = {
-                    ...this.user, // Conservar datos existentes
-                    ...user, // Actualizar con datos recibidos del servicio
-                };
-
-                // Marcar para detección de cambios
+                this.user = { ...this.user, ...user };
                 this._changeDetectorRef.markForCheck();
             });
     }
 
-    /**
-     * On destroy
-     */
     ngOnDestroy(): void {
-        // Desuscribirse de todas las suscripciones
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Update the user status
-     *
-     * @param status
-     */
     updateUserStatus(status: string): void {
-        // Retornar si el usuario no está disponible
         if (!this.user) {
             return;
         }
 
-        // Actualizar el estado del usuario
-        this._userService
-            .update({
-                ...this.user,
-                status,
-            })
-            .subscribe();
+        this._userService.update({ ...this.user, status }).subscribe();
     }
 
-    /**
-     * Sign out
-     */
     signOut(): void {
         this._router.navigate(['/sign-out']);
     }
 
     private capitalizeFirstLetter(value: string): string {
-        if (!value) return '';
-        return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        return value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '';
     }
+
+    formatCharge(charge: string | undefined): string {
+        if (!charge) return 'Cargo';
+
+        const chargeFormatted = charge.trim().toLowerCase();
+
+        switch (chargeFormatted) {
+            case 'jefeunidad':
+                return 'Jefe de Unidad';
+            case 'comitetecnico':
+                return 'Comité Técnico';
+            default:
+                return charge;
+        }
+    }
+
 }

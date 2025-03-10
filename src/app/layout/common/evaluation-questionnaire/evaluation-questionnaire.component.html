@@ -4,19 +4,57 @@
       <resumen [Id]="id" [isReadOnly]="true" ></resumen>
     </div>
   </div>
-  <div class="flex-auto">
-    <select (change)="selectForm($event.target.value)" class="block w-full px-4 py-2 mt-2 mb-4 text-base text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-      <option *ngFor="let form of allForms; let i = index" [value]="i">
-        {{ form.formName || 'Formulario ' + (i + 1) }}
-      </option>
-    </select>
-    <h1 class="">Criterios de evaluación de la buena práctica.</h1>
-    <div class="max-w-3x">
-      <div class="progress-indicator mb-4">
-        <div *ngFor="let question of allQuestions; let i = index" class="progress-step" [class.active]="i === currentQuestionIndex" [class.answered]="answeredQuestions[question.id]"(click)="goToQuestion(i)">
-            {{ i + 1 }}
+  <div class="relative w-full">
+    <!-- Contenedor que se expande -->
+    <div class="border-2 border-gray-300 rounded-lg shadow-sm transition-all duration-300 overflow-hidden bg-class"
+         [ngClass]="{ 'h-[170px]': isExpanded, 'h-[40px]': !isExpanded } ">
+      
+      <!-- Input de búsqueda (Siempre arriba) -->
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="filterForms()" 
+        (focus)="toggleExpand(true)" 
+        (blur)="hideDropdownWithDelay()" 
+        placeholder="Buscar formulario..." 
+        class="block w-full px-4 py-2 text-base text-gray-700 focus:outline-none bg-class">
+  
+      <!-- Lista de formularios (con límite de altura para no salirse) -->
+      <div *ngIf="isExpanded && filteredForms.length > 0"
+           class="max-h-[100px] overflow-y-auto mt-2 px-4 bg-class">
+        <div *ngFor="let form of filteredForms; let i = index" 
+             (mousedown)="selectForm(i)" 
+             class="block py-2 text-gray-700 cursor-pointer hover:bg-gray-200 bg-class">
+          {{ form.formName || 'Formulario ' + (i + 1) }}
         </div>
       </div>
+    </div>
+  
+  
+    <h1 class="mt-2">Criterios de evaluación de la buena práctica.</h1>
+    <div class="max-w-3x">
+      <div class="flex items-center">
+        <button class="p-2 mb-2" (click)="scrollLeft()">
+          <mat-icon class="custom-icon" svgIcon="heroicons_outline:chevron-left"></mat-icon>
+        </button>
+      
+        <div class="max-w-3x overflow-x-auto flex space-x-2 whitespace-nowrap">
+          <div *ngFor="let question of allQuestions; let i = index" 
+               class="progress-step px-4 py-2 rounded-md cursor-pointer mb-2"
+               [class.active]="i === currentQuestionIndex" 
+               [class.answered]="answeredQuestions[question.id]" 
+               (click)="goToQuestion(i)">
+            {{ i + 1 }}
+          </div>
+        </div>
+      
+        <button class="p-2 mb-2" (click)="scrollRight()">
+          <mat-icon class="custom-icon" svgIcon="heroicons_outline:chevron-right"></mat-icon>
+        </button>
+      </div>
+      
+      
+      
       <div *ngIf="currentGroup.length > 0">
         <div *ngFor="let question of currentGroup; let i = index" class="question bg-gray-100 p-3 rounded-xl">
           <div class="mb-4 flex justify-between">
@@ -39,65 +77,60 @@
               {{ option.respuesta }}
             </label>
           </div>          
-          <div *ngIf="question.comment">
+          <!-- Esto estaba antes, se debe crear un campo nuevo en la base de datos question_entity de texto, ahi se almacenara cuales preguntas llevan un campo de texto extra
+           y posterior mente se debe ver como traer ese dato y pintarlos, luego se debe tener en cuanta que se si va a guardar el campo es opcional pero se debe mostrar aqui-->
+          <!-- <div *ngIf="question.comment">
+            <textarea placeholder="Escribe un comentario..."></textarea>
+          </div> -->
+          <div *ngIf="[5, 10, 15, 20, 25, 30].includes(getQuestionNumber(i))">
             <textarea placeholder="Escribe un comentario..."></textarea>
           </div>
         </div>
         <div class="navigation flex items-center justify-center">
-          <div>
+          <div class="flex flex-col gap-y-2">
+            <!-- Enviar Evaluación ahora está arriba -->
             <button [disabled]="!todasRespondidas"
               [ngClass]="{
                 'bg-gray-400 cursor-not-allowed': !todasRespondidas,
-                'bg-blue-500 hover:bg-blue-600 cursor-pointer': todasRespondidas
+                'btn-enviar': todasRespondidas
               }"
-              class="text-white p-3 w-40 rounded-xl transition duration-300 ease-in-out"
+              class="text-white p-3 w-36 rounded-xl transition duration-300 ease-in-out border-buttons"
               [title]="!todasRespondidas ? 'Debes responder todas las preguntas antes de enviar' : ''"
-              (click)="enviarFormulario(estimacionFalse)"
-              >
-              Practica desetimada
-            </button>
-          </div>
-          <div>
-            <button class="p-3 bg-red-500 rounded-xl text-white w-22" (click)="previousGroup()" [disabled]="currentGroupIndex === 0">Volver</button>
-            <button class="p-3 bg-blue-600 rounded-xl text-white w-22" (click)="nextGroup()">Siguiente</button>
-          </div>
-          <div>
-            <button [disabled]="!todasRespondidas"
-              [ngClass]="{
-                'bg-gray-400 cursor-not-allowed': !todasRespondidas,
-                'bg-blue-500 hover:bg-blue-600 cursor-pointer': todasRespondidas
-              }"
-              class="text-white p-3 w-36 rounded-xl transition duration-300 ease-in-out"
-              [title]="!todasRespondidas ? 'Debes responder todas las preguntas antes de enviar' : ''"
-              (click)="enviarFormulario(estimacionTrue)"
-              >
+              (click)="enviarFormulario(estimacionTrue)">
               Enviar Evaluación
             </button>
-            <!-- <button mat-button color="primary" (click)="dismissPractice()">
-              Cambiar Estado de Flujo
-            </button> -->
-            <button mat-raised-button color="primary" (click)="openCaracterizationModal()">
-              Abrir Caracterización
+        
+            <!-- Practica Desestimada debajo -->
+            <button [disabled]="!todasRespondidas"
+              [ngClass]="{
+                'bg-gray-400 cursor-not-allowed': !todasRespondidas,
+                'btn-desestimar': todasRespondidas
+              }"
+              class="text-white p-3 w-36 rounded-xl transition duration-300 ease-in-out border-buttons"
+              [title]="!todasRespondidas ? 'Debes responder todas las preguntas antes de enviar' : ''"
+              (click)="enviarFormulario(estimacionFalse)">
+              Desestimar
             </button>
-            
-            <!-- Mostrar usuarios seleccionados -->
-            <!-- <div *ngIf="selectedUsersFromModal.length > 0">
-              <h3>Usuarios Seleccionados:</h3>
-              <ul>
-                <li *ngFor="let user of selectedUsersFromModal">
-                  {{ user.fullName }} - {{ user.cargo }}
-                </li>
-              </ul>
-            </div> -->
-            
-            <!-- Mostrar información adicional -->
-            <!-- <div *ngIf="additionalInfoFromModal">
-              <h3>Información Adicional:</h3>
-              <p>{{ additionalInfoFromModal }}</p>
-            </div>
-             -->
           </div>
-        </div>  
+        
+          <div class="flex flex-col gap-y-2">
+            <button class="p-3 bg-gray-500 rounded-xl text-white w-22 border-buttons"
+              (click)="previousGroup()" [disabled]="currentGroupIndex === 0">
+              Volver
+            </button>
+            <button class="p-3 bg-blue-600 rounded-xl text-white w-22 border-buttons"
+              (click)="nextGroup()">
+              Siguiente
+            </button>
+          </div>
+        
+          <div>
+            <button mat-raised-button class="yellow-color" (click)="openCaracterizationModal()">
+              Solicitar Ayuda
+            </button>
+          </div>
+        </div>
+        
       </div>
       <div *ngIf="currentGroup.length === 0">
         <p>No hay más preguntas.</p>

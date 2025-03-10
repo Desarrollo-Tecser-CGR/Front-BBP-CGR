@@ -9,6 +9,7 @@ body {
     min-height: 100vh;
     overflow-y: auto;
 }
+
 .container {
     background-color: white;
     border-radius: 10px;
@@ -16,24 +17,28 @@ body {
     padding: 20px;
     width: 100%;
 }
+
 h1 {
     font-size: 24px;
     margin-bottom: 10px;
-    text-align: center;
     color: #24197a;
-    margin-right: 350px;
     font-weight: bold;
+    text-align: center;
+    width: 100%;
 }
+
 h2 {
     font-size: 18px;
     margin-bottom: 10px;
 }
+
 h5 {
     margin-left: 25px;
     font-size: 25px;
     margin-bottom: 10px;
     color: #24197a;
 }
+
 @media (min-width: 1600px) {
     .container h1 {
         margin-right: 60%;

@@ -55,10 +55,11 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
      */
     constructor(
         private _activatedRoute: ActivatedRoute,
-        private _router: Router,
+        private router: Router,
         private _navigationService: NavigationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService
+        
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -72,6 +73,9 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         return new Date().getFullYear();
     }
 
+    view() {
+        this.router.navigate(['./example']); // Cambia el nombre de la ruta según corresponda
+    }
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------

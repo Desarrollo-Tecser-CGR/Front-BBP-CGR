@@ -51,30 +51,42 @@ export class DialogOverviewExampleDialog {
   loadUsers(): void {
     this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
       (dataRes) => {
+        console.log("Respuesta completa del servicio:", dataRes); // Ver toda la respuesta
         let response = dataRes.data;
+  
         if (Array.isArray(response)) {
+          console.log("Usuarios antes del filtro:", response);
           this.users = this.filterUsersByRole(response);
         } else if (response.usuarios && Array.isArray(response.usuarios)) {
+          console.log("Usuarios antes del filtro:", response.usuarios);
           this.users = this.filterUsersByRole(response.usuarios);
         } else {
           this.users = [];
         }
+  
+        console.log("Usuarios filtrados por rol:", this.users); // Ver los usuarios que se muestran en el modal
       },
       (error) => {
+        console.error("Error al cargar usuarios:", error);
       }
     );
   }
+  
 
   filterUsersByRole(users: Usuario[]): Usuario[] {
     if (this.currentRole === 'administrador') {
-      return users; // No se aplica filtro
+      return users;
     } else if (this.currentRole === 'validador') {
       return users.filter((user) => user.cargo === 'caracterizador');
     } else if (this.currentRole === 'evaluador') {
       return users.filter((user) => user.cargo === 'evaluador');
     } else if (this.currentRole === 'caracterizador') {
       return users.filter((user) => user.cargo === 'evaluador' || user.cargo === 'jefeUnidad');
-    }
+    } else if (this.currentRole === 'comiteTecnico') {
+      return users.filter((user) => user.cargo === 'seguimiento');
+    } else if (this.currentRole === 'seguimiento') {
+      return users.filter((user) => user.cargo && user.cargo.toLowerCase().trim() === 'evolucionador');
+    }    
     return [];
   }
 
@@ -92,9 +104,12 @@ export class DialogOverviewExampleDialog {
     }
     
     // Si el rol es 'validador' y hay más de un usuario seleccionado, permitimos seleccionar solo uno
-    if (this.currentRole === 'validador' && this.selectedUsers.length > 1) {
+    if ((this.currentRole === 'validador' || this.currentRole === 'comiteTecnico') && this.selectedUsers.length > 1) {
       this.selectedUsers = [this.selectedUsers[0]]; // Solo permite un usuario si es 'validador'
     }
+    if (this.currentRole === 'seguimiento') {
+      this.selectedUsers = this.selectedUsers.filter(user => user.cargo === 'evolucionador');
+  }
   }
 
   confirmSelection(): void {

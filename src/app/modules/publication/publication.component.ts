@@ -15,26 +15,26 @@ import Swal from 'sweetalert2';
 
 // Definición de rutas
 const routes: Routes = [
-    { path: 'characterization', component: CharacterizationComponent },
-    { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
+  { path: 'characterization', component: CharacterizationComponent },
+  { path: '', redirectTo: '/users', pathMatch: 'full' } // Ruta por defecto
 ];
 
 @Component({
-    selector     : 'publication',
-    standalone   : true,
-    templateUrl  : './publication.component.html',
-    styleUrl     : './publication.component.scss',
-    encapsulation: ViewEncapsulation.None,
-    imports: [
-        MatIconModule,
-        MatTableModule,
-        MatMenuModule,
-        RouterModule,
-        CommonModule,
-        FormsModule,
-        MatIconModule,
-        ReactiveFormsModule
-    ]
+  selector: 'publication',
+  standalone: true,
+  templateUrl: './publication.component.html',
+  styleUrl: './publication.component.scss',
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    MatIconModule,
+    MatTableModule,
+    MatMenuModule,
+    RouterModule,
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    ReactiveFormsModule
+  ]
 })
 export class PublicationComponent {
 
@@ -47,7 +47,7 @@ export class PublicationComponent {
   allQuestions: any[] = [];
   customFormQuestions: any[] = [];
 
-   // Variables de paginación
+  // Variables de paginación
   currentPageAllQuestions = 1;
   currentPageCustomForm = 1;
   itemsPerPage = 6;
@@ -92,17 +92,17 @@ export class PublicationComponent {
   }
 
   getQuestionid(id: number) {
-  const token: any = localStorage.getItem('accessToken');
-  this.publicationService.getQuestionId(id, token).subscribe(response => {
-    console.log('Pregunta del back:', response);
+    const token: any = localStorage.getItem('accessToken');
+    this.publicationService.getQuestionId(id, token).subscribe(response => {
+      console.log('Pregunta del back:', response);
 
-    if (response && response.data) {
-      this.selectedQuestion = response.data; // Guardar la pregunta seleccionada
-      this.customFormQuestions.push(response.data); // Agregar la pregunta al cuestionario personalizado
-      console.log('customFormQuestions después de agregar:', this.customFormQuestions); // Verificar el array
-      this.showAnswerModal = true; // Mostrar el modal de respuestas
-    }
-  },error => {
+      if (response && response.data) {
+        this.selectedQuestion = response.data; // Guardar la pregunta seleccionada
+        this.customFormQuestions.push(response.data); // Agregar la pregunta al cuestionario personalizado
+        console.log('customFormQuestions después de agregar:', this.customFormQuestions); // Verificar el array
+        this.showAnswerModal = true; // Mostrar el modal de respuestas
+      }
+    }, error => {
       console.error("Error obteniendo la pregunta:", error);
     });
   }
@@ -116,7 +116,7 @@ export class PublicationComponent {
       const idQuestions = this.customFormQuestions.map(question => question.id);
       const idAnswers = idQuestions.map(questionId => {
         const answer = this.tempAnswers.find(a => a.questionId === questionId);
-        
+
         // Convertir "Sí" a 1 y "No" a 2
         if (answer) {
           return answer.answer === "Sí" ? 1 : 2;
@@ -125,28 +125,28 @@ export class PublicationComponent {
         }
       });
 
-       // Construir el objeto JSON
-    const formData = {
-      formName: nombreCuestionario,
-      roleFormId: roleFormId,
-      enabled: enabled,
-      idQuestions: idQuestions,
-      idAnswers: idAnswers
-    };
+      // Construir el objeto JSON
+      const formData = {
+        formName: nombreCuestionario,
+        roleFormId: roleFormId,
+        enabled: enabled,
+        idQuestions: idQuestions,
+        idAnswers: idAnswers
+      };
 
-    console.log('Datos del formulario a guardar:', formData);
+      console.log('Datos del formulario a guardar:', formData);
 
-    this.publicationService.saveQuestionary(formData).subscribe(
-      response => {
-        console.log('Formulario guardado con éxito:', response);
-        this.closeSaveModal();
-        setTimeout(() => {
-          this.alert();
-        }, 3000);
-      },
-      (error) => {
-        console.error('Error al guardar el formulario:', error);
-      });
+      this.publicationService.saveQuestionary(formData).subscribe(
+        response => {
+          console.log('Formulario guardado con éxito:', response);
+          this.closeSaveModal();
+          setTimeout(() => {
+            this.alert();
+          }, 3000);
+        },
+        (error) => {
+          console.error('Error al guardar el formulario:', error);
+        });
     } else {
       // Marcar el campo como tocado para que muestre el mensaje de error
       this.saveForm.controls['nombreCuestionario'].markAsTouched();
@@ -181,7 +181,7 @@ export class PublicationComponent {
         },
         (error) => {
           console.error('Error al guardar la pregunta:', error);
-      });
+        });
     }
   }
 
@@ -189,7 +189,7 @@ export class PublicationComponent {
     if (this.selectedQuestion) {
       // Buscar si ya existe una respuesta para esta pregunta
       const existingAnswerIndex = this.tempAnswers.findIndex(a => a.questionId === this.selectedQuestion.id);
-  
+
       if (existingAnswerIndex !== -1) {
         // Si ya existe, actualizar la respuesta
         this.tempAnswers[existingAnswerIndex].answer = selectedAnswer;
@@ -200,7 +200,7 @@ export class PublicationComponent {
           answer: selectedAnswer
         });
       }
-  
+
       console.log('Respuestas temporales:', this.tempAnswers);
       this.showAnswerModal = false; // Cerrar el modal después de guardar
     }
@@ -211,7 +211,7 @@ export class PublicationComponent {
     return answer ? answer.answer : 'No seleccionada'; // Devuelve la respuesta o un mensaje por defecto
   }
 
-  getQuestions(){
+  getQuestions() {
     this.publicationService.getQuestion().subscribe(groups => {
       console.log(groups);
       this.allQuestions = groups.data;
@@ -252,7 +252,7 @@ export class PublicationComponent {
       this.currentPageCustomForm++;
     }
   }
-  
+
   previousPage(tab: string) {
     if (tab === 'allQuestions' && this.currentPageAllQuestions > 1) {
       this.currentPageAllQuestions--;
@@ -264,7 +264,7 @@ export class PublicationComponent {
   // Cambiar de pestaña
   changeTab(tab: 'allQuestions' | 'customForm'): void {
     this.activeTab = tab;
-    this.updateTotalPagesArray(); 
+    this.updateTotalPagesArray();
   }
 
   addToCustomForm(questionId: number) {
@@ -334,15 +334,19 @@ export class PublicationComponent {
     this.questionForm.reset();
   }
 
-  alert(){
-      Swal.fire({
-        icon: 'success',
-        title: 'Creacion de Formulario',
-        text: `El Formulario se ah creado Exitosamente`,
-        showConfirmButton: false,
-        timer: 2000
-      }).then(() => {
-        window.location.href = './example';
-      })
-    }
+  alert() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Creacion de Formulario',
+      text: `El Formulario se ah creado Exitosamente`,
+      showConfirmButton: false,
+      timer: 2000
+    }).then(() => {
+      window.location.href = './example';
+    })
+  }
+
+  pageLoad(): void {
+    window.location.reload()
+  }
 }

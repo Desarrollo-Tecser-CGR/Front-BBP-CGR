@@ -14,12 +14,14 @@
         <!-- Logo -->
         <div class="h-20">
             <img
-                class="hidden dark:flex"
+                class="hidden dark:flex cursor-pointer"
                 src="images/logo/logotipoContraloria.svg"
                 alt="Logo image"
                 style="width: 70%; margin-top: 20px;"
+                (click)="view()"
             />
         </div>
+        
         <hr class="divider">
     </ng-container>
 </fuse-vertical-navigation>
@@ -43,7 +45,7 @@
             <!-- <shortcuts></shortcuts> -->
             <!-- <messages></messages> -->
             <notifications></notifications>
-            <app-button-menu></app-button-menu>
+            <!-- <app-button-menu></app-button-menu> -->
             <!-- <button
                 class="lg:hidden"
                 mat-icon-button

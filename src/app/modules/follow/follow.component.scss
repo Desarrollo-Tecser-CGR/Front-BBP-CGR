@@ -10,11 +10,13 @@ body {
 }
 
 body {
-    overflow-y: scroll;  /* Permite el scroll vertical */
+    overflow-y: scroll;
+    /* Permite el scroll vertical */
 }
 
 body::-webkit-scrollbar {
-    display: none; /* Oculta la barra de desplazamiento */
+    display: none;
+    /* Oculta la barra de desplazamiento */
 }
 
 .container {
@@ -26,13 +28,17 @@ body::-webkit-scrollbar {
 }
 
 h1 {
-    font-size: 35px;
-    margin-bottom: 5px;
-    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #24197a;
     font-weight: bold;
-    margin-left: 20px;
+    text-align: center;
+    width: 100%;
 }
 
+.icon{
+    color: white;
+}
 
 .table-container {
     overflow-x: auto;

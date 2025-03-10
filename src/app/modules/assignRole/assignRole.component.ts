@@ -23,7 +23,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import Swal from 'sweetalert2';
-
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'assignRole',
@@ -57,7 +57,7 @@ export class AssignRoleComponent implements OnInit {
     selectedRoleIds: number[] = [];
     filteredOptions!: Observable<string[]>;
 
-    constructor(private _formBuilder: UntypedFormBuilder, private http: HttpClient) { }
+    constructor(private _formBuilder: UntypedFormBuilder, private router: Router, private http: HttpClient) { }
 
     ngOnInit(): void {
         this.loadUsers();
@@ -178,4 +178,6 @@ export class AssignRoleComponent implements OnInit {
             option.toLowerCase().includes(filterValue)
         );
     }
+
+    browse(): void { this.router.navigate(['/follow']); }
 }

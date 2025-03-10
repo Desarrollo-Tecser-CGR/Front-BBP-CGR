@@ -1,42 +1,60 @@
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 24px;
+    margin: 10px 0;
+    color: #24197a;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+}
+
+/* Estilos de Tarjetas */
 .card {
     background-color: #fff;
     margin-bottom: 20px;
-}
-
-.card h2 {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.card p {
-    margin: 10px 0;
-    font-size: 16px;
-}
-
-.question {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f9f9f9;
+    padding: 20px;
     border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.question h4 {
-    font-size: 18px;
-    font-weight: bold;
+/* Información del Evaluador */
+.info-box {
+    border-left: 5px solid green;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    width: 100%;
 }
 
-.question ul {
-    list-style-type: none;
-    padding: 0;
+/* Ajuste para textos dentro de la caja de información */
+.user-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    background: #f1f1f1;
+    border-radius: 5px;
 }
 
-.question ul li {
-    margin-bottom: 5px;
+/* Texto responsivo en la información del usuario */
+.user-info p {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Contenedor de preguntas con scroll */
 .scroll-container {
-    max-height: 300px; /* Ajusta el tamaño visible antes del scroll */
-    overflow-y: auto; /* Scroll solo si hay muchas respuestas */
+    max-height: 300px;
+    overflow-y: auto;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -44,77 +62,24 @@
     background: #f9f9f9;
 }
 
-/* Cada respuesta dentro del scroll-container */
-.question-card {
-    border: 1px solid #ddd; /* Bordes suaves para cada respuesta */
-    padding: 10px;
-    margin-bottom: 10px; /* Espaciado entre respuestas */
-    border-radius: 5px;
-    background: #fff; /* Fondo blanco para resaltar */
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-}
-
-.user-info {
-    display: flex; /* Organiza los elementos en fila */
-    justify-content: space-between; /* Distribuye el espacio entre los elementos */
-    align-items: center; /* Alinea verticalmente */
-    flex-wrap: wrap; /* Permite que los elementos bajen de línea si la pantalla es pequeña */
-    padding: 10px;
-    background: #f1f1f1; /* Un fondo suave para resaltar */
-    border-radius: 5px;
-}
-
-/* Opcional: Si quieres que los textos tengan espacio uniforme */
-.user-info p {
-    flex: 1; /* Cada párrafo ocupa un espacio igual */
-    margin: 0 10px; /* Espaciado horizontal */
-    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
-    overflow: hidden; /* Oculta texto largo */
-    text-overflow: ellipsis; /* Muestra "..." si el texto es muy largo */
-}
-
-.user-info, .additional-info {
+/* Botones */
+.mt-4 {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
-    padding: 4px;
-    background: #f1f1f1;
-    border-radius: 5px;
-    margin-bottom: 8px; /* 🔹 Separación entre cuadros */
+    gap: 10px;
+    justify-content: center;
+    margin-right: 50px;
+    margin-top: 90px !important;
 }
 
-.additional-info {
-    background: #e3e3e3; /* 🔹 Diferente color para distinguir */
-}
-
-.styled-button {
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 24px;
-    border-radius: 8px;
-    text-transform: uppercase;
-    background-color: #1976D2 !important; /* Azul Material Design */
-    color: white !important; /* Texto blanco */
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Pequeña sombra */
-    transition: background-color 0.3s ease;
-}
-
-.styled-button:hover {
-    background-color: #1565C0 !important; /* Azul más oscuro al pasar el mouse */
+.yellow-color {
+    background-color: #F0BA41 !important;
+    color: white !important;
 }
 
 .warn-color {
     background-color: #D63421 !important;
     color: white !important;
-}
-
-.info-box {
-    border-left: 5px solid blue;
-    padding: 10px;
-    background: #f9f9f9;
-    border-radius: 8px;
-    margin-bottom: 15px;
 }
 
 .border-red {
@@ -130,5 +95,66 @@
 }
 
 .border-blue {
-    border-left: 5px solid blue;  // Azul por defecto
+    border-left: 5px solid blue; // Azul por defecto
+}
+
+
+
+/* 📱 Dispositivos pequeños (teléfonos) */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    .info-box {
+        padding: 15px;
+    }
+
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-info p {
+        width: 100%;
+        text-align: left;
+    }
+
+    .mt-4 {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* 📟 Tablets y pantallas medianas */
+@media (max-width: 1024px) {
+    .container {
+        width: 85%;
+    }
+
+    .info-box {
+        padding: 20px;
+    }
+
+    .mt-4 {
+        justify-content: space-between;
+    }
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 📱 Responsivo para dispositivos pequeños */
+@media (max-width: 768px) {
+    .mt-4 {
+        flex-direction: column;
+        align-items: center;
+    }
 }

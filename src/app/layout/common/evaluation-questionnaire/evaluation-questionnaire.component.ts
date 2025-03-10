@@ -23,6 +23,7 @@ import { QuestionnaireService } from './evaluation-questionnaire.service';
 import { CommonModule, NgForOf } from '@angular/common'; 
 import {GenaralModalService} from '../../../modules/common/general-modal/general-modal.service';
 import { DialogOverviewExampleDialog } from '../../../modules/common/general-modal/general-modal.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-evaluation-questionnaire',
@@ -73,7 +74,11 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   estimacionFalse: string = "malaPractica"
 
   allForms: any[] = [];
-
+  filteredForms: any[] = []; // Lista filtrada que se muestra en el select
+  searchTerm: string = '';
+  isDropdownVisible: boolean = false;
+  isExpanded: boolean = false;
+  
   selectedUserFromModal: any = null;
   selectedUsersFromModal: any[] = [];
   additionalInfoFromModal: string = '';
@@ -97,38 +102,79 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     this.id = this.route.snapshot.paramMap.get('id');
     this.getQuestions();
     this.getRolesYUsuarios();
+    this.searchTerm = ''; // 🔹 Limpia solo al cargar
   }
+  
 
   getQuestions() {
     this.questionnaireService.getQuestion().subscribe(groups => {
       console.log(groups);
       this.allForms = groups.data; // Guardamos todos los formularios
-      this.selectForm(0); // Inicializamos con el primer formulario (índice 0)
+      this.filteredForms = [...this.allForms];
+  
+      this.searchTerm = ''; // 🔹 Limpia el campo solo al inicio
+  
+      this.selectForm(0, true); // 🔹 Llamamos con "true" para evitar que escriba en el input
     });
   }
+  // Expande el input cuando se hace clic
+  toggleExpand(expand: boolean) {
+    this.isExpanded = expand;
+    if (expand) {
+      this.filteredForms = [...this.allForms]; // Restaurar opciones
+    }
+  }
+  // Mostrar el dropdown al hacer clic en el input
+  // toggleDropdown(show: boolean) {
+  //   this.isDropdownVisible = show;
+  //   if (show) {
+  //     this.filteredForms = [...this.allForms]; // Mostrar todos los formularios al hacer clic
+  //   }
+  // }
+  // Ocultar el dropdown con un pequeño retraso para permitir la selección con el mouse
+  hideDropdownWithDelay() {
+    setTimeout(() => this.isExpanded  = false, 200);
+  }
 
-  // Método para seleccionar un formulario por su índice en el array
-selectForm(index: number) {
-  const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
+  // Filtrar formularios mientras el usuario escribe
+  filterForms() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredForms = this.allForms.filter(form =>
+      form.formName.toLowerCase().includes(term)
+    );
+
+    // Si el usuario borra el texto, se restauran todos los formularios
+    this.isExpanded = this.filteredForms.length > 0;
+  }
+
+  // Método para seleccionar un formulario
+  selectForm(index: number, isInit: boolean = false) {
+    const selectedForm = this.filteredForms[index];
+    if (!selectedForm) return;
   
-  this.formularioId = selectedForm.id; // Guardamos su ID
-  this.allQuestions = selectedForm.questions.map((q: any) => ({
-    ...q,
-    respuesta: '', // Inicializamos respuesta en vacío
-  }));
+    this.formularioId = selectedForm.id;
+    this.allQuestions = selectedForm.questions.map((q: any) => ({
+      ...q,
+      respuesta: '',
+    }));
+  
+    this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
+      acc[q.id] = false;
+      return acc;
+    }, {} as { [key: string]: boolean });
+  
+    this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
+    this.loadGroup(this.currentGroupIndex);
+  
+    // 🔹 Solo cambia el input si NO es la carga inicial
+    if (!isInit) {
+      this.searchTerm = selectedForm.formName;
+    }
+  
+    this.isExpanded = false;
+  }
+  
 
-  // Inicializar el objeto de seguimiento de respuestas
-  this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
-    acc[q.id] = false;
-    return acc;
-  }, {} as { [key: string]: boolean });
-
-  // Agrupar preguntas en conjuntos del tamaño deseado
-  this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
-
-  // Cargar el primer grupo de preguntas
-  this.loadGroup(this.currentGroupIndex);
-}
 
   chunkArray(arr: any[], size: number): any[][] {
     if (!arr || size <= 0) return []; // Evita divisiones por 0 o valores inválidos
@@ -177,12 +223,14 @@ selectForm(index: number) {
     this.answeredQuestions[questionId] = selectedOption;
   
     // Buscar la pregunta y actualizar su campo 'respuesta'
-    const question = this.allQuestions.find(q => q.id === questionId);
-    if (question) {
-      question.respuesta = selectedOption;
+    const questionIndex = this.allQuestions.findIndex(q => q.id === questionId);
+    if (questionIndex !== -1) {
+      this.allQuestions[questionIndex].respuesta = selectedOption;
+      
+      // Llamar la función para desplazar la barra
+      this.scrollToQuestion(questionIndex);
     }
-  }  
-
+  }
   // Calcular el número de pregunta correcto
   getQuestionNumber(indexInGroup: number): number {
     return (this.currentGroupIndex * this.groupSize) + (indexInGroup + 1);
@@ -228,34 +276,55 @@ selectForm(index: number) {
     })
   }
 
-
   dismissPractice() {
-    if (!this.comiteTecnicoUserId) {
-        console.error("No se pudo obtener el idUser del comité técnico.");
-        return;
-    }
-
-    if (!this.id) {  // Verificar que se tiene el ID correcto
+    if (!this.id) {
         console.error("No se encontró un ID válido para identity.");
         return;
     }
 
-    const requestBody = {
-        user: this.comiteTecnicoUserId, // ID del usuario comité técnico
-        identity: this.id, // Tomamos el ID dinámicamente
-        stateFlow: "evaluacion",
-        fechaDiligenciamiento: this.formatDate(new Date()), // Fecha actual en formato YYYY-MM-DD
-        comentarioUsuario: "" // Por ahora vacío
-    };
+    const fechaActual = this.formatDate(new Date());
+    const comentario = this.additionalInfoFromModal || ""; // Obtener comentario desde el modal
+{}
+    // Crear lista de peticiones a enviar
+    const traceabilityRequests = [];
 
-    this.questionnaireService.sendTraceability(requestBody).subscribe({
-        next: (response) => {
-            console.log('Trazabilidad enviada con éxito:', response);
+    // Enviar trazabilidad a TODOS los comités técnicos (ahora en un array)
+    if (this.comiteTecnicoUserIds.length > 0) {
+        this.comiteTecnicoUserIds.forEach(id => {
+            traceabilityRequests.push(this.createTraceabilityRequest(String(id), fechaActual, comentario));
+        });
+    } else {
+        console.warn("No se encontraron usuarios con cargo 'comiteTecnico' para enviar trazabilidad.");
+    }
+
+    // Agregar cada evaluador seleccionado a la lista de envíos
+    this.selectedUsersFromModal.forEach(evaluador => {
+        traceabilityRequests.push(this.createTraceabilityRequest(evaluador.idUser, fechaActual, comentario));
+    });
+
+    // Ejecutar todas las peticiones en paralelo
+    forkJoin(traceabilityRequests).subscribe({
+        next: (responses) => {
+            console.log('Trazabilidad enviada con éxito para todos:', responses);
         },
         error: (error) => {
             console.error('Error al enviar trazabilidad:', error);
         }
     });
+}
+
+
+// Método para crear la petición de trazabilidad con comentario
+private createTraceabilityRequest(userId: string, fecha: string, comentario: string) {
+    const requestBody = {
+        user: userId, // ID del usuario (puede ser comité técnico o evaluador)
+        identity: this.id, // Tomamos el ID dinámicamente
+        stateFlow: "evaluacion",
+        fechaDiligenciamiento: fecha, // Fecha actual en formato YYYY-MM-DD
+        comentarioUsuario: comentario // Comentario obtenido del modal
+    };
+
+    return this.questionnaireService.sendTraceability(requestBody);
 }
 
 formatDate(date: Date): string {
@@ -264,34 +333,70 @@ formatDate(date: Date): string {
   const day = ('0' + date.getDate()).slice(-2);
   return `${year}-${month}-${day}`;
 }
-  
+
+
+// ======================== Funciones de next y back en cambos numericos ======================== //
+scrollLeft() {
+  const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+  if (container) {
+    container.scrollBy({ left: -200, behavior: 'smooth' });
+  }
+}
+
+scrollRight() {
+  const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+  if (container) {
+    container.scrollBy({ left: 200, behavior: 'smooth' });
+  }
+}
+
+scrollToQuestion(index: number) {
+  setTimeout(() => {
+    const container = document.querySelector('.max-w-3x.overflow-x-auto') as HTMLElement;
+    const activeElement = container?.querySelector(`.progress-step:nth-child(${index + 1})`) as HTMLElement;
+
+    if (container && activeElement) {
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = activeElement.getBoundingClientRect();
+
+      if (elementRect.left < containerRect.left || elementRect.right > containerRect.right) {
+        container.scrollBy({ 
+          left: elementRect.left - containerRect.left - container.clientWidth / 3, 
+          behavior: 'smooth' 
+        });
+      }
+    }
+  }, 100);
+}
 
 // ======================== Método para ver los datos del endpoint ======================== //
-  comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
+comiteTecnicoUserIds: number[] = []; // Cambiar a un array para múltiples IDs
 
-  getRolesYUsuarios() {
-      this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
-          (response) => {
-              console.log('Usuarios y roles obtenidos:', response);
+getRolesYUsuarios() {
+    this.genaralModalService.getDataAsJson({ rol: 'Administrador' }).subscribe(
+        (response) => {
+            console.log('Usuarios y roles obtenidos:', response);
 
-              if (response && Array.isArray(response.data)) {
-                  const comiteTecnico = response.data.find(user => user.cargo === "comiteTecnico");
+            if (response && Array.isArray(response.data)) {
+                // Filtrar TODOS los usuarios con cargo "comiteTecnico"
+                const comiteTecnicoUsers = response.data.filter(user => user.cargo === "comiteTecnico");
 
-                  if (comiteTecnico) {
-                      this.comiteTecnicoUserId = comiteTecnico.idUser; // Guardamos el idUser del comité técnico
-                      console.log('ID del usuario del comité técnico encontrado:', this.comiteTecnicoUserId);
-                  } else {
-                      console.warn("No se encontró un usuario con cargo 'comiteTecnico'.");
-                  }
-              } else {
-                  console.error("La respuesta no es un array válido:", response);
-              }
-          },
-          (error) => {
-              console.error('Error al obtener roles y usuarios:', error);
-          }
-      );
-  }
+                if (comiteTecnicoUsers.length > 0) {
+                    this.comiteTecnicoUserIds = comiteTecnicoUsers.map(user => user.idUser);
+                    console.log('IDs de los usuarios del comité técnico encontrados:', this.comiteTecnicoUserIds);
+                } else {
+                    console.warn("No se encontraron usuarios con cargo 'comiteTecnico'.");
+                }
+            } else {
+                console.error("La respuesta no es un array válido:", response);
+            }
+        },
+        (error) => {
+            console.error('Error al obtener roles y usuarios:', error);
+        }
+    );
+}
+
 
   // ======================== Logica que muestra el modal en la vista ======================== //
   openCaracterizationModal(): void {
