@@ -32,7 +32,7 @@ width: 100%;
   height: 150px;
   border-radius: 100%;
   border: 7px solid #2d3580;
-  background: url("http://meredithcnn.images.worldnow.com/images/10389401_G.jpg");
+  background: none;
   background-size: cover;
   background-position: center;
 }
@@ -51,7 +51,7 @@ width: 100%;
   transform: translate(-50%, -50%);
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  border: 2px solid #fff;
+  border: 1.6px solid #fff;
 }
 
 .btn-upload i {
