@@ -53,9 +53,7 @@
             class="bg-card relative flex flex-auto flex-col divide-y overflow-y-auto sm:max-h-120"
         >
             <!-- Notifications -->
-            @for (
-                notification of notifications;
-                track trackByFn($index, notification)
+            @for (notification of notifications; track trackByFn
             ) {
                 <div
                     class="group flex hover:bg-gray-50 dark:hover:bg-black dark:hover:bg-opacity-5"
@@ -157,16 +155,16 @@
                     }
                     <!-- Title, description & time -->
                     <div class="flex flex-auto flex-col">
-                        @if (notification.title) {
+                        @if (notification.userId) {
                             <div
                                 class="line-clamp-1 font-semibold"
-                                [innerHTML]="notification.title"
+                                [innerHTML]="notification.userId"
                             ></div>
                         }
-                        @if (notification.description) {
+                        @if (notification.message) {
                             <div
                                 class="line-clamp-2"
-                                [innerHTML]="notification.description"
+                                [innerHTML]="notification.message"
                             ></div>
                         }
                         <div class="text-secondary mt-2 text-sm leading-none">
