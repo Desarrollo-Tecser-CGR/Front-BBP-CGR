@@ -1,0 +1,50 @@
+<div class="container">
+    <h1>Comité</h1>
+
+    <!-- Sección de Tarjetas -->
+    <div *ngFor="let item of committeeData" class="card">
+        <div class="info-box" [ngClass]="getBoxClass(item.formEntity.estimacion)">
+            <!-- Información del Evaluador -->
+            <h2>Información del Evaluador</h2>
+            <div class="user-info">
+                <p><strong>Nombre de Usuario:</strong> {{ item.userId.userName }}</p>
+                <p><strong>Email:</strong> {{ item.userId.email }}</p>
+                <p><strong>Cargo:</strong> {{ item.userId.cargo }}</p>
+                <p><strong>Estimación:</strong> {{ item.formEntity.estimacion }}</p>
+            </div>
+            <!-- Información del Formulario -->
+            <h3>Formulario: {{ item.formEntity.formName }}</h3>
+
+            <!-- Botón para Expandir Respuestas -->
+            <button (click)="toggleAnswers(item)" mat-icon-button>
+                <mat-icon>{{ item.showAnswers ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+        </div>
+
+        <!-- Contenedor con Scroll para Respuestas -->
+        <div *ngIf="item.showAnswers" class="scroll-container">
+            <div *ngFor="let question of item.formEntity.questions" class="question-card">
+                <h4>{{ question.id }}. {{ question.enunciado }}</h4>
+                <p>
+                    <strong>Respuesta Seleccionada:</strong>
+                    {{ question.answer?.respuesta || 'No hay respuesta seleccionada' }}
+                </p>
+                <p><strong>Comentario:</strong> {{ question.comentario }}</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="mt-4 flex justify-end">
+            <button mat-raised-button class="yellow-color" (click)="openModal()">Usuario de Seguimiento</button>
+
+            <button mat-raised-button color="primary" class="space-buttons" (click)="cambiarEstadoDeFlujo()">
+                Realizar Seguimiento
+            </button>
+
+            <button mat-raised-button class="warn-color" (click)="dismissPractice()">
+                Desestimar Práctica
+            </button>
+        </div>
+    </footer>
+</div>

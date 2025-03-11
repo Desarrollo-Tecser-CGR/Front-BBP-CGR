@@ -14,12 +14,14 @@
         <!-- Logo -->
         <div class="h-20">
             <img
-                class="hidden dark:flex"
+                class="hidden dark:flex cursor-pointer"
                 src="images/logo/logotipoContraloria.svg"
                 alt="Logo image"
                 style="width: 70%; margin-top: 20px;"
+                (click)="view()"
             />
         </div>
+        
         <hr class="divider">
     </ng-container>
 </fuse-vertical-navigation>
@@ -28,7 +30,7 @@
 <div class="flex w-full min-w-0 flex-auto flex-col">
     <!-- Header -->
     <div
-        class="bg-card relative z-49 flex h-16 w-full flex-0 items-center px-4 shadow dark:border-b dark:bg-transparent dark:shadow-none md:px-6 print:hidden"
+        class="bg-card relative z-49 flex h-16 w-full flex-0 items-center px-4 shadow dark:border-b dark:bg-transparent dark:shadow-none md:px-6 print:hidden justify-start" 
     >
         <!-- Navigation toggle button -->
         <button mat-icon-button (click)="toggleNavigation('mainNavigation')">
@@ -37,12 +39,13 @@
         <search [appearance]="'bar'"></search>
         
         <!-- Components -->
-        <div class="ml-auto flex items-center space-x-0.5 pl-2 sm:space-x-2">
+        <div class="ml-auto flex items-center  space-x-2">
             <!-- <languages></languages> -->
             <!-- <fuse-fullscreen class="hidden md:block"></fuse-fullscreen> -->
-            <!-- <shortcuts></shortcuts> -->
+            <shortcuts></shortcuts>
             <!-- <messages></messages> -->
             <notifications></notifications>
+            <!-- <app-button-menu></app-button-menu> -->
             <!-- <button
                 class="lg:hidden"
                 mat-icon-button

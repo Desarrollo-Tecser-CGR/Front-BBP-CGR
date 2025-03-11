@@ -1,0 +1,25 @@
+.divider-text {
+    text-align: center;
+    margin: 1rem 0;
+    font-weight: bold;
+  }
+
+  // .custom-border {
+  //   border: 2px solid #2D3580; /* Aquí puedes poner el color que prefieras */
+  //   border-radius: 4px;  /* Opcional: para bordes redondeados */
+  // }
+  
+  .custom-border:hover {
+    border-color: #2D3580; /* Cambia el color del borde al pasar el ratón */
+  }
+  
+  .yellow-color {
+    background-color: #F0BA41 !important;
+    color: white !important;
+    margin: 0px 10px 0 0;
+    border-radius: 20px;
+  }
+
+  .send{
+    border-radius: 20px;
+  }

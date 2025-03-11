@@ -19,11 +19,13 @@ import { SearchComponent } from 'app/layout/common/search/search.component';
 import { ShortcutsComponent } from 'app/layout/common/shortcuts/shortcuts.component';
 import { UserComponent } from 'app/layout/common/user/user.component';
 import { Subject, takeUntil } from 'rxjs';
+import { ButtonMenuComponent } from 'app/layout/common/buttonMenu/buttonMenu.component';
+import { EvaluationQuestionnaireComponent } from "../../../common/evaluation-questionnaire/evaluation-questionnaire.component";
 
 @Component({
     selector: 'classic-layout',
     templateUrl: './classic.component.html',
-    styleUrl : './classic.component.scss',
+    styleUrl: './classic.component.scss',
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [
@@ -39,7 +41,8 @@ import { Subject, takeUntil } from 'rxjs';
         NotificationsComponent,
         UserComponent,
         RouterOutlet,
-        // QuickChatComponent,
+        ButtonMenuComponent,
+        EvaluationQuestionnaireComponent
     ],
 })
 export class ClassicLayoutComponent implements OnInit, OnDestroy {
@@ -52,11 +55,12 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
      */
     constructor(
         private _activatedRoute: ActivatedRoute,
-        private _router: Router,
+        private router: Router,
         private _navigationService: NavigationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService
-    ) {}
+
+    ) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
@@ -69,6 +73,9 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         return new Date().getFullYear();
     }
 
+    view() {
+        this.router.navigate(['./example']); // Cambia el nombre de la ruta según corresponda
+    }
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------
@@ -101,10 +108,6 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
-
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * Toggle navigation

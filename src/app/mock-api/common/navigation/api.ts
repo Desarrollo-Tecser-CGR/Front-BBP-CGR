@@ -36,44 +36,45 @@ export class NavigationMockApi {
      * Register Mock API handlers
      */
     registerHandlers(): void {
-        // -----------------------------------------------------------------------------------------------------
-        // @ Navigation - GET
-        // -----------------------------------------------------------------------------------------------------
         this._fuseMockApiService.onGet('api/common/navigation').reply(() => {
-            // Fill compact navigation children using the default navigation
+            // Obtener el rol del usuario desde localStorage
+            const userRole = localStorage.getItem('accessRoles')
+                ? JSON.parse(localStorage.getItem('accessRoles')!)[0]
+                : 'default';
+
+            // Buscar el ítem "Inbox" y actualizar su ícono según el rol
+            this._defaultNavigation.forEach((item) => {
+                if (item.id === 'inbox') {
+                    item.icon = this.getInboxIcon(userRole);
+                }
+            });
+
+            // Llenar los otros tipos de navegación
             this._compactNavigation.forEach((compactNavItem) => {
                 this._defaultNavigation.forEach((defaultNavItem) => {
                     if (defaultNavItem.id === compactNavItem.id) {
-                        compactNavItem.children = cloneDeep(
-                            defaultNavItem.children
-                        );
+                        compactNavItem.children = cloneDeep(defaultNavItem.children);
                     }
                 });
             });
 
-            // Fill futuristic navigation children using the default navigation
             this._futuristicNavigation.forEach((futuristicNavItem) => {
                 this._defaultNavigation.forEach((defaultNavItem) => {
                     if (defaultNavItem.id === futuristicNavItem.id) {
-                        futuristicNavItem.children = cloneDeep(
-                            defaultNavItem.children
-                        );
+                        futuristicNavItem.children = cloneDeep(defaultNavItem.children);
                     }
                 });
             });
 
-            // Fill horizontal navigation children using the default navigation
             this._horizontalNavigation.forEach((horizontalNavItem) => {
                 this._defaultNavigation.forEach((defaultNavItem) => {
                     if (defaultNavItem.id === horizontalNavItem.id) {
-                        horizontalNavItem.children = cloneDeep(
-                            defaultNavItem.children
-                        );
+                        horizontalNavItem.children = cloneDeep(defaultNavItem.children);
                     }
                 });
             });
 
-            // Return the response
+            // Retornar la navegación actualizada
             return [
                 200,
                 {
@@ -84,5 +85,21 @@ export class NavigationMockApi {
                 },
             ];
         });
+    }
+
+    /**
+     * Devuelve el icono del Inbox según el rol del usuario
+     */
+    private getInboxIcon(role: string): string {
+        switch (role.toLowerCase()) {
+            case 'validador':
+                return 'heroicons_outline:check-badge';
+            case 'caracterizador':
+                return 'heroicons_outline:inbox-arrow-down';
+            case 'evaluador':
+                return 'heroicons_outline:document-check';
+            default:
+                return 'heroicons_outline:inbox'; // Ícono por defecto
+        }
     }
 }

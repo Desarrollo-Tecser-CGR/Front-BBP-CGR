@@ -1,0 +1,90 @@
+<div class="bg-white w-full p-4 pt-10" >
+  <div class="flex flex-col justify-center">
+    <h1 class="text-xl font-bold mb-4">Criterios de evaluación de la buena práctica</h1>
+    <div class="flex justify-center flex-grow">
+      <div *ngIf="currentGroup.length > 0">
+        <div *ngFor="let question of currentGroup; let i = index" class="question bg-gray-100 p-3 rounded-xl">
+          <div class="mb-4 flex justify-between">
+            <strong>Pregunta {{ (currentGroupIndex * preguntasPorPagina) + i + 1 }} / {{ preguntas.length }}</strong>
+          </div>
+          <h3>{{ question.enunciado }}</h3>
+          <div class="mb-2">
+            <label class="flex items-center space-x-2">
+              <input type="radio" 
+                     [name]="'question' + ((currentGroupIndex * preguntasPorPagina) + i)" 
+                     [value]="'Sí'" 
+                     [(ngModel)]="question.respuesta"
+                     (change)="onAnswerChange(question, 'Sí')">
+              Sí
+            </label>
+            <label class="flex items-center space-x-2">
+              <input type="radio" 
+                     [name]="'question' + ((currentGroupIndex * preguntasPorPagina) + i)" 
+                     [value]="'No'" 
+                     [(ngModel)]="question.respuesta"
+                     (change)="onAnswerChange(question, 'No')">
+              No
+            </label>
+          </div>
+          <div *ngIf="question.respuesta === 'Sí'">
+            <ul class="mt-2 border-l-4 border-blue-500 pl-3 space-y-3">
+              <li>
+                <label class="font-semibold">Evolución (Máx. 500 palabras)</label>
+                <textarea class="w-full p-2 border rounded-lg" 
+                  placeholder="Describe la evolución..." 
+                  [(ngModel)]="question.evolution"
+                  (ngModelChange)="getQuestionAnswered(question)" 
+                  maxlength="5000" rows="4"></textarea>
+                <p>{{ palabraCount }}/500 palabras</p>
+              </li>
+              <li>
+                <label class="font-semibold">Uso (Máx. 250 palabras)</label>
+                <textarea class="w-full p-2 border rounded-lg" placeholder="Describe el uso..." 
+                (ngModelChange)="getQuestionAnswered(question)" 
+                [(ngModel)]="question.use"
+                 maxlength="1250" rows="3"></textarea>
+              </li>
+              <li>
+                <label class="font-semibold">Beneficio (Máx. 250 palabras)</label>
+                <textarea class="w-full p-2 border rounded-lg" placeholder="Describe el beneficio..."
+                (ngModelChange)="getQuestionAnswered(question)" 
+                [(ngModel)]="question.benefit"
+                 maxlength="1250" rows="3"></textarea>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Botones de navegación -->
+        <div class="navigation flex items-center justify-center mt-4">
+          <button class="p-3 bg-red-500 rounded-xl text-white w-22 mr-2"
+                  (click)="previousGroup()"
+                  [disabled]="currentGroupIndex === 0">
+            Volver
+          </button>
+          <button class="p-3 bg-blue-600 rounded-xl text-white w-22"
+                  (click)="nextGroup()"
+                  [disabled]="(currentGroupIndex + 1) * preguntasPorPagina >= preguntas.length">
+            Siguiente
+          </button>
+        </div>
+
+        <div class="flex justify-center mt-4">
+          <button [disabled]="!todasRespondidas()"
+            [ngClass]="{
+              'bg-gray-400 cursor-not-allowed': !todasRespondidas(),
+              'bg-blue-500 hover:bg-blue-600 cursor-pointer': todasRespondidas()
+            }"
+            class="text-white p-3 w-36 rounded-xl transition duration-300 ease-in-out"
+            (click)="enviarFormulario()">
+            Enviar Evaluación
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="currentGroup.length === 0">
+        <p>No hay más preguntas.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -9,13 +9,9 @@ import { Users } from './user.type';
 })
 export class GenaralModalService {
 
-    private apiUrl = `${GlobalConstants.API_BASE_URL}user`;
+    private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/user`;
 
     constructor(private http: HttpClient) { }
-
-    // getDataAsJson(requestBody: { rol: string }): Observable<Users> {
-    //     return this.http.post<Users>(this.apiUrl, requestBody); // Enviar cuerpo de la solicitud
-    // }
 
     getDataAsJson(requestBody: { rol: string }): Observable<any> {
         return this.http.get<Users>(this.apiUrl); // Enviar cuerpo de la solicitud

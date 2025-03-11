@@ -1,26 +1,32 @@
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Component, OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { GenericTableComponent } from './../generic-table/generic-table.component';
 import { InboxService } from './inbox.service';
-import { MatDialog } from '@angular/material/dialog';
-// import { DialogOverviewExampleDialog } from '../general-modal/general-modal.component';
-import { rol } from 'app/mock-api/common/rol/data';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { FilterService } from 'app/layout/common/advanced-search-modal/FilterService';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @Component({
   selector: 'app-inbox',
   standalone: true,
   templateUrl: './inbox.component.html',
-  styleUrls: ['./inbox.component.scss'], // Corrección: Usar styleUrls
-  imports: [GenericTableComponent, MatDatepickerModule], // Corrección: Mover MatDatepickerModule a imports //// , DialogOverviewExampleDialog
+  styleUrls: ['./inbox.component.scss'],
+  imports: [
+    GenericTableComponent,
+    MatDatepickerModule,
+    MatButtonModule,
+    MatIconModule
+  ],
 })
 export class InboxComponent implements OnInit {
   data: any[] = []; // Datos para la tabla genérica
   columns: { key: string; label: string }[] = []; // Configuración dinámica de las columnas
   cargo: string;
-
+  fullName: string;
   buttons = [
     {
       // label: 'Edit',
@@ -29,26 +35,67 @@ export class InboxComponent implements OnInit {
       action: (row: any) => this.editRow(row),
     },
     {
-      // label: 'Delete',
+      // label: 'Validate',
       icon: 'heroicons_outline:document-check',
       color: 'accent',
       action: (row: any) => this.validateRow(row),
     },
-    // {
-    //   label: 'Open Modal',
-    //   color: 'accent', // Puedes elegir un color diferente
-    //   action: (row: any) => this.openCaracterizationModal(row), // Enviar datos de la fila al modal
-    // },
+    // 
   ]; // Botones dinámicos
   private _router: any;
 
-  constructor(private inboxService: InboxService, private router: Router) { } // , private dialog: MatDialog
+  constructor(private filterService: FilterService, private inboxService: InboxService, private router: Router, private notificationsService: NotificationsService) { } // , private dialog: MatDialog
 
   ngOnInit(): void {
     const roles = localStorage.getItem('accessRoles');
     this.cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+    this.fullName = localStorage.getItem('accessName') || 'Usuario';
+    console.log('Fullname inbox', this.fullName);
   
     // Definir botones dinámicamente según el rol
+
+ switch (this.cargo) {
+  case 'evaluador':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.evaluatePractice(row),
+      },
+    ];
+    break;
+
+  case 'comiteTecnico':
+    this.buttons = [
+      {
+        icon: 'feather:check-square',
+        color: 'primary',
+        action: (row: any) => this.openCommittee(row),
+      },
+    ];
+    break;
+
+  case 'seguimiento':
+    this.buttons = [
+      {
+        icon: 'heroicons_outline:users',
+        color: 'primary',
+        action: (row: any) => this.auditPractice(row),
+      },
+    ];
+    break;
+
+    case 'evolucionador':
+      this.buttons = [
+        {
+          icon: 'feather:check-square',
+          color: 'primary',
+          action: (row: any) => this.evoluationPractice(row),
+        },
+      ];
+      break;
+
+  default:
     this.buttons = [
       {
         icon: 'heroicons_outline:pencil-square',
@@ -56,6 +103,11 @@ export class InboxComponent implements OnInit {
         action: (row: any) => this.editRow(row),
       },
     ];
+    break;
+}
+
+    
+
   
     // Agregar el botón de validación solo para validador y administrador
     if (['validador', 'administrador'].includes(this.cargo)) {
@@ -65,16 +117,33 @@ export class InboxComponent implements OnInit {
         action: (row: any) => this.validateRow(row),
       });
     }
-  
+    this.filterService.filter$.subscribe((filters) => {
+      if (filters) {
+        this.loadData(filters); // Siempre carga datos con los filtros emitidos
+      }
+    });
     this.loadData();
   }
   
 
-  loadData(): void {
-    if (this.cargo === 'validador', 'administrador' , 'caracterizador') {
-      const requestBody = { rol: this.cargo }; // Cuerpo de la solicitud
+  loadData(filters?: any): void {
+ 
+    if (['validador', 'administrador', 'caracterizador', "jefeUnidad", 'evaluador', 'seguimiento', 'comiteTecnico', 'evolucionador'].includes(this.cargo)) {
+      const requestBody = {
+        rol: this.cargo,
+        sAMAccountName: this.fullName,
+        ...filters, // Agrega los filtros si están definidos
+ 
+      };
+      
+      console.log('datos cargados:', filters)
+
       this.inboxService.getDataAsJson(requestBody).subscribe(
         (dataRes) => {
+          console.log('Cuerpo de la petición:', dataRes);
+ 
+          console.log('Cuerpo de la petición:', requestBody);
+
           let response = dataRes.data;
           if (response.length > 0) {
             // Extraer las columnas dinámicamente de la primera fila
@@ -97,15 +166,30 @@ export class InboxComponent implements OnInit {
       );
     }
     else {
-
+ 
+    }
+  }
+  auditPractice(row:any):void{
+    if(this.cargo === 'seguimiento'){
+      this.router.navigateByUrl('/diffusion/' + row.id)
+    }
+  }
+  evaluatePractice(row:any):void{
+    if(this.cargo === 'evaluador', 'administrador'){
+      this.router.navigateByUrl('/evaluation-questionnaire/' + row.id);
+      console.log('id en validacion', row.id);
     }
   }
 
+  evoluationPractice(row:any):void{
+    if (row && row.id) {
+      this.router.navigate(['/evolution-questionnaire', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
+    }
+  }
 
   editRow(row: any): void {
-    console.log('Estado del flujo:', row.estadoFlujo);
-    console.log('Rol actual:', this.cargo);
-
     // Condición de prueba
     if (this.cargo === 'validador' && row.estadoFlujo !== 'validacion') {
         Swal.fire({
@@ -116,64 +200,65 @@ export class InboxComponent implements OnInit {
         });
         return;
     }
-
-    // Si cumple, permite la edición
     this.router.navigateByUrl('/resumen-edit/' + row.id);
-}
-
+    // Lógica para editar una fila
+  }
 
   deleteRow(row: any): void {
-    console.log('Delete row:', row);
     // Lógica para eliminar una fila
   }
 
   validateRow(row: any): void {
     const requestBody = { rol: this.cargo, id: row.id }; // Cuerpo de la solicitud
-    this.inboxService.setValidateStatus(requestBody).subscribe(
-      (response) => {
-        if (response.length > 0) {
-          this.columns = Object.keys(response[0]).map((key) => ({
-            key: key,
-            label: this.formatLabel(key), // Opcional: Formatea las etiquetas
-          }));
+    const accessName = localStorage.getItem('accessName'); // Obtener el accessName del localStorage
+
+    if (!accessName) {
+        return; // Finaliza si no hay accessName
+    }
+
+    // Llamar al endpoint con el accessName
+    this.inboxService.setValidateStatus(requestBody, accessName).subscribe(
+        (response) => {
+            if (response.length > 0) {
+                this.columns = Object.keys(response[0]).map((key) => ({
+                    key: key,
+                    label: this.formatLabel(key), // Opcional: Formatea las etiquetas
+                }));
+            }
+            this.data = response;
+
+            Swal.fire({
+                title: '¡Registro Actualizado!',
+                text: 'El registro ha sido actualizado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+            }).then(() => {
+                this.loadData(); // Recargar los datos después de la operación
+            });
+        },
+        (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al actualizar el estado de flujo.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+            });
         }
-        this.data = response;
-        Swal.fire({
-          title: '¡Registro Actualizado!',
-          text: 'El registro ha sido actualizado con éxito.',
-          icon: 'success',
-          confirmButtonText: 'Aceptar',
-        }).then(() => {
-          // // Recargar la ruta actual
-          // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          //   this.router.navigate([this.router.url]);
-          // });
-          this.loadData();
-        });
-      },
-      (error) => {
-        Swal.fire({
-          title: 'Error',
-          text: 'Hubo un problema al cargar la información. Intenta nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-      }
     );
+}
+
+  openCommittee(row: any): void {
+    if (row && row.id) {
+      this.router.navigate(['/committee', row.id]); // Redirige con el ID de la fila
+    } else {
+      console.warn('No se pudo abrir Comité, el ID es inválido.');
+    }
   }
-  // ======================== Logica que muestra el modal en la vista ======================== //
 
-  //  openCaracterizationModal(row: any): void {
-  //    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-  //      width: '500px',
-  //      data: { name: row?.name || '', animal: row?.animal || '' }, // Pasa los datos de la fila
-  //    });
+  pageLoad(): void {
+    window.location.reload()
+  }
 
-  //    dialogRef.afterClosed().subscribe((result) => {
-  //      console.log('Modal cerrado con:', result);
-  //      // Puedes actualizar la fila o realizar otra lógica aquí si es necesario
-  //    });
-  //  }  
   private formatLabel(key: string): string {
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
 

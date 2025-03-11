@@ -1,10 +1,11 @@
 import { AfterViewInit, Component, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { NgFor, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorIntlEs } from './mat-paginator-intl-es.service';
 
 @Component({
   selector: 'app-generic-table',
@@ -18,8 +19,11 @@ import { MatIconModule } from '@angular/material/icon';
     NgFor, NgIf,
     MatIconModule, // Importa directivas comunes
   ],
+  providers: [
+    { provide: MatPaginatorIntl, useClass: MatPaginatorIntlEs },
+  ],
 })
-export class  GenericTableComponent<T> implements OnInit, AfterViewInit {
+export class GenericTableComponent<T> implements OnInit, AfterViewInit {
   @Input() data: T[] = [];
   @Input() columns: { key: string; label: string }[] = [];
   @Input() buttons: { label?: string; icon?: string; color?: string; action: (row: T) => void }[] = [];
@@ -28,32 +32,27 @@ export class  GenericTableComponent<T> implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<T>();
   expandedRow: T | null = null;
 
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-    ngOnInit(): void {
-        this.initializeTable();
+  ngOnInit(): void {
+    this.initializeTable();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+
+    if (changes.data || changes.columns) {
+      this.initializeTable();
     }
+  }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        console.log('ngOnChanges - data:', changes.data?.currentValue);
-        console.log('ngOnChanges - columns:', changes.columns?.currentValue);
+  initializeTable(): void {
+    if (this.data.length > 0 && this.columns.length > 0) {
 
-        if (changes.data || changes.columns) {
-            this.initializeTable();
-        }
+      this.displayedColumns = [...this.columns.map((col) => col.key), 'actions'];
+      this.dataSource.data = this.data;
+    } else {
     }
-
-    initializeTable(): void {
-        if (this.data.length > 0 && this.columns.length > 0) {
-            console.log('Initializing table with data:', this.data);
-            console.log('Initializing table with columns:', this.columns);
-
-            this.displayedColumns = [...this.columns.map((col) => col.key), 'actions'];
-            this.dataSource.data = this.data;
-        } else {
-            console.warn('No data or columns provided to the table');
-        }
-    }
+  }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -63,5 +62,5 @@ export class  GenericTableComponent<T> implements OnInit, AfterViewInit {
     // Alterna entre expandir y colapsar la mini pestaña de la fila
     this.expandedRow = this.expandedRow === row ? null : row;
   }
-  
+
 }

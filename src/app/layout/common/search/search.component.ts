@@ -1,5 +1,5 @@
 import { Overlay } from '@angular/cdk/overlay';
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgForOf, NgTemplateOutlet, NgIf } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { GlobalConstants } from 'app/core/constants/GlobalConstants';
 import {
@@ -33,11 +33,12 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
+import { RouterLink,  Router, RouterModule  } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations/public-api';
 import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
 import { AdvancedSearchModalComponent } from '../advanced-search-modal/advanced-search-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { User } from 'app/core/user/user.types';
 
 @Component({
     selector: 'search',
@@ -59,6 +60,9 @@ import { MatDialog } from '@angular/material/dialog';
         MatFormFieldModule,
         MatInputModule,
         NgClass,
+        RouterModule,
+        NgForOf,
+        NgIf
     ],
     providers: [
         {
@@ -73,6 +77,7 @@ import { MatDialog } from '@angular/material/dialog';
 export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     @Input() appearance: 'bar' | 'basic' = 'bar';
     @Input() debounce: number = 300;
+    user: User | null = null;
     @Input() minLength: number = 2;
     @Output() search: EventEmitter<any> = new EventEmitter<any>();
 
@@ -82,6 +87,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     private _matAutocomplete: MatAutocomplete;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
+    
+
     /**
      * Constructor
      */
@@ -89,7 +96,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
         private _elementRef: ElementRef,
         private _httpClient: HttpClient,
         private _renderer2: Renderer2,
-        private _dialog: MatDialog
+        private _dialog: MatDialog,
+        private router: Router,
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -157,7 +165,10 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        // Subscribe to the search field value changes
+        const roles = localStorage.getItem('accessRoles');
+        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+        this.user = { cargo } as User;
+
         this.searchControl.valueChanges
             .pipe(
                 debounceTime(this.debounce),
@@ -174,21 +185,19 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
                 filter((value) => value && value.length >= this.minLength)
             )
             .subscribe((value) => {
-                const endpoint = `${GlobalConstants.API_BASE_URL}/api/v1/hojadevida/getIdentity`;
+                const endpoint = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`;
     
                 // Llamada GET con parámetros en la URL
                 this._httpClient
                     .get(endpoint, { params: { query: value } }) // Pasa el valor como parámetro
                     .subscribe((resultSets: any) => {
                         
-                        console.log('Resultados de la API:', resultSets);
                         // Guarda los resultados
                         this.resultSets = resultSets;
     
                         // Emite el evento con los resultados
                         this.search.next(resultSets);
                     }, error => {
-                        console.error('Error en la llamada API:', error);
                     });
             });
     }
@@ -261,20 +270,26 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
+
     openAdvancedSearch(): void {
-        const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
-            width: '600px',
-            data: {
-                // Puedes pasar parámetros iniciales aquí si es necesario
-            },
-        });
+        this.router.navigate(['/inbox']).then(() => {
+            const dialogRef = this._dialog.open(AdvancedSearchModalComponent, {
+                width: '600px',
+                data: {
+                    // Puedes pasar parámetros iniciales aquí si es necesario
+                },
+            });
     
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                // Maneja los datos retornados del modal
-                this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
-                this.search.emit(result); // Emitir el resultado avanzado
-            }
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                    // Maneja los datos retornados del modal
+                    this.searchControl.setValue(result.query || ''); // Ejemplo: usa el resultado para buscar
+                    this.search.emit(result); // Emitir el resultado avanzado
+                }
+            });
         });
-    }    
+    }
+
+
+    
 }

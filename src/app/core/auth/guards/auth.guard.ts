@@ -28,7 +28,6 @@ export const AuthGuard: CanActivateFn | CanActivateChildFn = (route, state) => {
 
                 if (requiredRoles.length > 0) {
                     const userRoles: string[] = authService.accessRoles; // Recupera los roles del usuario
-                    console.log(requiredRoles);
                     const hasRequiredRole = requiredRoles.some((role) =>
                         userRoles.includes(role)
                     );

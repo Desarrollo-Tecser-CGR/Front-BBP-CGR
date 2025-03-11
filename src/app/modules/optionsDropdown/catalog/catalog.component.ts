@@ -40,7 +40,7 @@ const ELEMENT_DATA: PeriodicElement[] = [
 ];
 
 @Component({
-    selector     : 'catalogServices',
+    selector     : 'catalog',
     standalone   : true,
     templateUrl  : './catalog.component.html',
     styleUrl     : './catalog.component.scss',

@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 import { AuthService } from 'app/core/auth/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'auth-sign-in',
@@ -22,9 +23,11 @@ import { AuthService } from 'app/core/auth/auth.service';
         FuseAlertComponent,
         MatButtonModule,
         MatInputModule,
-        CommonModule
+        CommonModule,
+        MatIconModule
     ],
 })
+
 export class AuthSignInComponent implements OnInit {
     signInForm: UntypedFormGroup;
     alert: { type: string; message: string } | null = null;
@@ -65,8 +68,6 @@ signIn(): void {
     // Sign in
     this._authService.signIn(this.signInForm.value).subscribe(
         () => {
-
-            console.log("Prueba");
             // Set the redirect url.
             // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
             // to the correct page after a successful sign in. This way, that url can be set via
@@ -80,7 +81,6 @@ signIn(): void {
             this._router.navigateByUrl(redirectURL);
         },
         (response) => {
-            console.log(response);
             if (response.status!='success') {
 
                     // Re-enable the form
@@ -90,11 +90,6 @@ signIn(): void {
                         type: 'error',
                         message: 'Datos Incorrectos',
                     };
-
-                    // Reset the form
-                    // this.signInNgForm.resetForm();
-
-                    // Set the alert
 
             } else {
 

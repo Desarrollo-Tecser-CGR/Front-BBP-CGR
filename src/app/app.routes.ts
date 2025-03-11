@@ -3,7 +3,6 @@ import { initialDataResolver } from 'app/app.resolvers';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
-import { CharacterizationComponent } from 'app/modules/optionsDropdown/characterization/characterization.component';
 
 
 // @formatter:off
@@ -14,11 +13,6 @@ export const appRoutes: Route[] = [
     // Redirect empty path to '/example'
     {path: '', pathMatch : 'full', redirectTo: 'example'},
 
-    // Redirect signed-in user to the '/example'
-    //
-    // After the user signs in, the sign-in page will redirect the user to the 'signed-in-redirect'
-    // path. Below is another redirection for that path to redirect the user to the desired
-    // location. This is a small convenience to keep all main routes together here on this file.
     {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: 'example'},
 
     // Auth routes for guests
@@ -82,12 +76,12 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'example', loadChildren: () =>
                 import('app/modules/admin/example/example.routes'),
-                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'registro', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador', 'evolucionador'], module: '' }
             },
         ]
     },
 
-    // Caracterization routes
+    // AssignRole routes
     {
         path: '',
         canActivate: [AuthGuard],
@@ -97,12 +91,35 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'caracterization', loadChildren: () =>
-                import('app/modules/caracterization/caracterization.routes'),
-                data: { requiredRoles: ['caracterizador','administrador'], module: '' }
+            {path: 'assignRole', loadChildren: () =>
+                import('app/modules/assignRole/assignRole.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
             },
         ]
     },
+
+    // Info User routes
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'info-user', loadChildren: () =>
+                import('app/modules/info-user/info-user.routes'),
+                data: { requiredRoles: ['administrador','registro', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento', 'evolucionador'], module: '' }
+
+            // {path: 'caracterization', loadChildren: () =>
+            //     import('app/modules/caracterization/caracterization.routes'),
+            //     data: { requiredRoles: ['validador', 'administrador', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador', 'evolucionador'], module: '' }
+
+            },
+        ]
+    },
+
     // Catalog  routes
     {
         path: '',
@@ -130,7 +147,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'assessment', loadChildren: () =>
                 import('app/modules/assessment/assessment.routes'),
-                data: { requiredRoles: ['administrador'], module: '' }
+                data: { requiredRoles: ['administrador', 'evaluador'], module: '' }
             },
         ]
     },
@@ -164,6 +181,21 @@ export const appRoutes: Route[] = [
             },
         ]
     },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'publication-questions', loadChildren: () =>
+                import('app/modules/publication-questions/publication-questions.routes'),
+                data: { requiredRoles: ['administrador'], module: '' }
+            },
+        ]
+    },
     // Resumen common routes
     {
         path: '',
@@ -176,7 +208,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen', loadChildren: () =>
                 import('app/modules/resumen/resumen.routes'),
-                data: { requiredRoles: ['administrador', 'registro'], module: '' }
+                data: { requiredRoles: ['registro'], module: '' }
             },
         ]
     },
@@ -191,7 +223,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'inbox', loadChildren: () =>
                 import('app/modules/common/inbox/inbox.routes'),
-                data: { requiredRoles: ['administrador', 'validador','caracterizador'], module: '' }
+                data: { requiredRoles: ['administrador', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'seguimiento', 'comiteTecnico', 'evolucionador'], module: '' }
             },
         ]
     },
@@ -237,7 +269,6 @@ export const appRoutes: Route[] = [
             },
         ]
     },
-
     {
         path: '',
         canActivate: [AuthGuard],
@@ -249,7 +280,82 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'resumen-edit', loadChildren: () =>
                 import('app/modules/resumen-edit/resumen-edit.routes'),
-                data: { requiredRoles: ['validador','administrador' ,'caracterizador'], module: '' }
+                data: { requiredRoles: ['validador','administrador', 'caracterizador', 'jefeUnidad'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'diffusion', loadChildren: () =>
+                import('app/modules/diffusion/diffusion.routes'),
+                data: { requiredRoles: ['seguimiento'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'committee', loadChildren: () =>
+                import('app/modules/committee/committee.routes'),
+                data: { requiredRoles: ['administrador', 'comiteTecnico'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'evaluation-questionnaire', loadChildren: () =>
+                import('app/layout/common/evaluation-questionnaire/evaluation-questionnaire.component.routes'),
+                data: { requiredRoles: ['evaluador'], module: '' }
+            },
+        ]
+    },
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'evolution-questionnaire', loadChildren: () =>
+                import('app/layout/common/evolution-questionnaire/evolution-questionnaire.component.routes'),
+                data: { requiredRoles: ['administrador', 'evolucionador'], module: '' }
             },
         ]
     }

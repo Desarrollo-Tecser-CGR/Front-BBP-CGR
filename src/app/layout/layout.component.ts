@@ -20,11 +20,7 @@ import { EnterpriseLayoutComponent } from './layouts/horizontal/enterprise/enter
 import { MaterialLayoutComponent } from './layouts/horizontal/material/material.component';
 import { ModernLayoutComponent } from './layouts/horizontal/modern/modern.component';
 import { ClassicLayoutComponent } from './layouts/vertical/classic/classic.component';
-import { ClassyLayoutComponent } from './layouts/vertical/classy/classy.component';
-import { CompactLayoutComponent } from './layouts/vertical/compact/compact.component';
-import { DenseLayoutComponent } from './layouts/vertical/dense/dense.component';
-import { FuturisticLayoutComponent } from './layouts/vertical/futuristic/futuristic.component';
-import { ThinLayoutComponent } from './layouts/vertical/thin/thin.component';
+import { NotificationsService } from './common/notifications/notifications.service';
 
 @Component({
     selector: 'layout',
@@ -39,12 +35,7 @@ import { ThinLayoutComponent } from './layouts/vertical/thin/thin.component';
         MaterialLayoutComponent,
         ModernLayoutComponent,
         ClassicLayoutComponent,
-        ClassyLayoutComponent,
-        CompactLayoutComponent,
-        DenseLayoutComponent,
-        FuturisticLayoutComponent,
-        ThinLayoutComponent,
-        SettingsComponent,
+        SettingsComponent
     ],
 })
 export class LayoutComponent implements OnInit, OnDestroy {
@@ -64,7 +55,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
         private _router: Router,
         private _fuseConfigService: FuseConfigService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
-        private _fusePlatformService: FusePlatformService
+        private _fusePlatformService: FusePlatformService,
+        private _notificationsServices:NotificationsService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------

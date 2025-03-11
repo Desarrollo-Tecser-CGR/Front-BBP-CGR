@@ -3,51 +3,17 @@
     <!-- Main -->
     <div class="flex-auto p-6 sm:p-10">
         <div class="mt-2">
-            <h2 class="truncate text-3xl font-extrabold leading-7 tracking-tight sm:leading-10 md:text-4xl">
-                {{ isEdit ? 'Editar Hoja' : 'Hoja de Vida' }}
-            </h2>
+            <h1>
+                {{ isEdit ? 'Editar Hoja' : 'Hoja de vida de la práctica' }}
+            </h1>
         </div>
         <!-- Barra de progreso personalizada -->
-        <div class="progress-container">
-            <span class="progress-text">{{ progress }}%</span>
-            <div class="progress-bar" [style.width.%]="progress" [ngClass]="progressColor"></div>
-
-        </div>
-
-
-        <!-- <form [formGroup]="horizontalStepperForm.get('newFields')" class="filters-form" style="display: flex; gap: 16px;">
-        <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
-            <mat-label>Nombre de la práctica</mat-label>
-            <input matInput formControlName="nombrePractica" />
-            <mat-error *ngIf="horizontalStepperForm.get('newFields.nombrePractica')?.hasError('required')">
-                Este campo es obligatorio
-            </mat-error>
-        </mat-form-field>
- 
-        <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
-            <mat-label>Identificación</mat-label>
-            <mat-select formControlName="identificacion">
-                <mat-option value="opcion1">Opción 1</mat-option>
-                <mat-option value="opcion2">Opción 2</mat-option>
-                <mat-option value="opcion3">Opción 3</mat-option>
-            </mat-select>
-            <mat-error *ngIf="horizontalStepperForm.get('newFields.identificacion')?.hasError('required')">
-                Este campo es obligatorio
-            </mat-error>
-        </mat-form-field>
- 
-        <mat-form-field appearance="fill" class="filters-field rounded-2xl" style="flex: 1;">
-            <mat-label>Contenido</mat-label>
-            <mat-select formControlName="contenido">
-                <mat-option value="contenido1">Contenido 1</mat-option>
-                <mat-option value="contenido2">Contenido 2</mat-option>
-                <mat-option value="contenido3">Contenido 3</mat-option>
-            </mat-select>
-            <mat-error *ngIf="horizontalStepperForm.get('newFields.contenido')?.hasError('required')">
-                Este campo es obligatorio
-            </mat-error>
-        </mat-form-field>
-    </form> -->
+         @if (isReadOnly) {} @else {
+            <div class="progress-container">
+                <span class="progress-text">{{ progress }}%</span>
+                <div class="progress-bar" [style.width.%]="progress" [ngClass]="progressColor"></div>
+            </div>
+         }
 
         <div class="max-w-3x">
             <!-- Horizontal stepper -->
@@ -55,7 +21,9 @@
                 <mat-horizontal-stepper [linear]="true" #horizontalStepper>
                     <mat-step [formGroupName]="'step1'" [stepControl]="horizontalStepperForm.get('step1')"
                         #horizontalStepperStep1>
-                        <ng-template matStepLabel>Fecha de diligenciamiento</ng-template>
+                        @if (isReadOnly) {} @else {
+                            <ng-template matStepLabel>Identificación</ng-template>
+                        }
                         <div class="flex">
                             <mat-form-field class="flex-auto" appearance="fill">
                                 <input matInput formControlName="fechaDiligenciamiento"
@@ -66,14 +34,14 @@
                         </div>
 
                         <div class="gt-xs:flex-row flex flex-col">
-                           
-
-                            <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
+                            
+                              <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
                                 <mat-select formControlName="entityCgr" placeholder="Nombre de la entidad">
                                     <mat-option *ngFor="let entity of entityOptions" [value]="entity.id">
                                         {{ entity.name }}
                                     </mat-option>
                                 </mat-select>
+
                             </mat-form-field>
                             
 
@@ -86,17 +54,19 @@
                         </div>
                         <div class="flex justify-end">
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
 
                     <mat-step [formGroupName]="'step2'" [stepControl]="horizontalStepperForm.get('step2')"
                         #horizontalStepperStep2>
-                        <ng-template matStepLabel>Fuente (Proponente)</ng-template>
+                        @if (isReadOnly) {} @else {
+                            <ng-template matStepLabel>Persona responsable</ng-template>
                         <p class="my-6 font-medium">
                             Por favor, proporciona la información de contacto del proponente.
                         </p>
+                        } 
                         <div class="gt-xs:flex-row flex flex-col">
                             <mat-form-field class="gt-xs:pr-3 flex-auto w-full" appearance="fill">
                                 <input matInput [formControlName]="'nombre'" placeholder="Nombre" type="text"
@@ -129,19 +99,21 @@
                         <div class="flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
 
                     <mat-step [formGroupName]="'step3'" [stepControl]="horizontalStepperForm.get('step3')">
-                        <ng-template matStepLabel>Trámite registro</ng-template>
+                        @if (isReadOnly) {} @else {
+                        <ng-template matStepLabel>Tipo de práctica</ng-template>
                         <p class="my-6 font-medium">
                             Por favor, complete los detalles de la buena práctica.
                         </p>
+                        }
                         <div class="gt-sm:flex-row flex flex-col">
                             <div class="flex flex-col">
                                 <mat-form-field class="flex-auto">
@@ -218,18 +190,20 @@
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
                     <mat-step [formGroupName]="'step4'" [stepControl]="horizontalStepperForm.get('step4')">
-                        <ng-template matStepLabel>Caracterización</ng-template>
-                        <p class="my-6 font-medium">
-                            Por favor, complete los datos de la Caracterización.
-                        </p>
+                        @if (isReadOnly) {} @else {
+                            <ng-template matStepLabel></ng-template>
+                            <p class="my-6 font-medium">
+                                Por favor, complete los datos de la Caracterización.
+                            </p>
+                        }
                         <div class="gt-sm:flex-row flex flex-col">
                             <mat-form-field class="flex-auto">
                                 <mat-label>Impacto esperado</mat-label>
@@ -288,20 +262,22 @@
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button"
                                 matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             <button class="px-8" mat-flat-button [color]="'primary'" type="button" matStepperNext>
-                                Next
+                                Siguiente
                             </button>
                         </div>
                     </mat-step>
 
 
                     <mat-step [formGroupName]="'step5'" [stepControl]="horizontalStepperForm.get('step4')">
-                        <ng-template matStepLabel>Gestión</ng-template>
-                        <p class="my-6 font-medium">
-                            Por favor, complete los datos de la Gestión.
-                        </p>
+                        @if (isReadOnly) {} @else {
+                            <ng-template matStepLabel></ng-template>
+                            <p class="my-6 font-medium">
+                                Por favor, complete los datos de la Gestión.
+                            </p>
+                        }
                         <div class="gt-sm:flex-row flex flex-col">
                             <mat-form-field class="flex-auto">
                                 <mat-label>Tipo de material producido</mat-label>
@@ -358,23 +334,25 @@
                                 <textarea matInput formControlName="descripcionResultados" rows="5"></textarea>
                             </mat-form-field>
                         </div>
-                        <div class="mt-0 flex justify-end">
-                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons" matStepperNext [disabled]="!canProceed()">
+                        <div class="mt-0 flex justify-end" *ngIf="rol === 'registro'">
+                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
                                 Enviar Formulario
                             </button>
-                        </div>
+                        </div>                        
 
                         <div class="mt-8 flex justify-end">
                             <button class="mr-2 px-8" mat-flat-button [color]="'accent'" type="button" matStepperPrevious>
-                                Back
+                                Atras
                             </button>
                             @if (isEdit) {
                                 <button 
                                 class="px-8" 
                                 mat-flat-button 
                                 [color]="'primary'" 
-                                type="button">
-                                Next
+                                type="button" 
+                                matStepperNext 
+                                [disabled]="!canProceed()">
+                                Siguiente
                             </button>
                             } @else{
                                 <button 
@@ -384,13 +362,13 @@
                                 type="button" 
                                 matStepperNext 
                                 [disabled]="isDisabled">
-                                Next
+                                Siguiente
                             </button>
                             }                           
                         </div>
 
                         <div *ngIf="Id !== undefined" class="mt-2 flex justify-end">
-                            <button class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
+                            <button *ngIf="showButton" class="space-buttons yellow-color" type="button" mat-raised-button (click)="openCaracterizationModal()">
                                 {{ buttonText }}
                             </button>
 
@@ -399,7 +377,7 @@
                                     type="button" 
                                     mat-raised-button 
                                     class="warn-color"
-                                    (click)="desestimarPractica()"
+                                    (click)="dismissPractice()"
                                 >
                                     Desestimar Práctica
                                 </button>
@@ -410,7 +388,7 @@
                         <form [formGroup]="horizontalStepperForm.get('step6')">
                             <div class="file-upload-container">
                                 <!-- Zona de visualizacion de archivos -->
-                                 @if (isEdit === true) {
+                                 @if (isEdit === true || isReadOnly === true) {
                                     <!-- Encabezado con título y línea -->
                                         <div class="upload-header">
                                             <i class="upload-header-icon">☁️</i>
@@ -421,8 +399,14 @@
                                         <div class="max-w-3x">
                                             <app-generic-table [data]="data" [columns]="columns" [buttons]="buttons"></app-generic-table>
                                         </div>
+                                        <!-- Boton de Cambio de estado posterior a registro -->
+                                        <div class="mt-0 flex justify-end">
+                                            <button type="button" mat-raised-button color="primary" (click)="submitForm()" class="space-buttons">
+                                                Enviar Formulario
+                                            </button>
+                                        </div>
                                  }
-                                 @if (isEdit === false) {
+                                 @if (isEdit === false || isReadOnly === true) {
                                     <!-- Encabezado con título y línea -->
                                     <div class="upload-header">
                                         <i class="upload-header-icon">☁️</i>
@@ -454,7 +438,7 @@
                                     (click)="submitDocumentoActuacion(identityId)">
                                     Enviar Documentos
                                 </button>
-                                 }
+                                 } 
                             </div>
                         </form>
                     </mat-step>
@@ -503,11 +487,6 @@
             Enviar Documentos
             </button>
         </div>
-        <div class="modal-actions">
-            <button style="background: #f0ba41; color: #fff;" mat-raised-button
-                (click)="toggleModal()">Cancelar</button>
-            <button mat-raised-button color="primary" (click)="toggleModal()">Aceptar</button>
-        </div>
     </div>
 </div>
 
@@ -545,3 +524,4 @@
         <span class="internos">Workflow</span>
     </button>
 </mat-menu>
+
