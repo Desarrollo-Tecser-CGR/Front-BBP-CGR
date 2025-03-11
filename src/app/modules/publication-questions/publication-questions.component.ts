@@ -6,9 +6,6 @@ import { ActivatedRoute, Router, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../optionsDropdown/characterization/characterization.component';
 import { ResumenService } from '../resumen/resumen.service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { QuestionnaireService } from 'app/layout/common/evaluation-questionnaire/evaluation-questionnaire.service';
-import { PublicactionService } from 'app/modules/publication/publication.service';
-import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { PublicactionQuestionService } from './publication-questions.service';
@@ -37,12 +34,13 @@ const routes: Routes = [
       FormsModule,
       MatIconModule,
       ReactiveFormsModule,
-      DragDropModule
+      DragDropModule,
+      MatTooltipModule
   ]
 })
 export class PublicationComponent {
 
-  formCreateform : UntypedFormGroup;
+  formCreateform : FormGroup;
   preguntas: any[] = [];
   preguntasOriginales: any[] = [];
   palabraCount = 0;
@@ -63,7 +61,7 @@ export class PublicationComponent {
     private publicationQuestion: PublicactionQuestionService,
     private router:Router,
     private cdr: ChangeDetectorRef,
-    private _formBuilder: UntypedFormBuilder
+    private _formBuilder: FormBuilder
   ) {}
 
   ngOnInit(): void {
