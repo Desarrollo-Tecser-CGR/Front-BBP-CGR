@@ -1,5 +1,5 @@
 <!-- Notifications toggle -->
-<button mat-icon-button matTooltip="Notificaciones" matTooltipPosition="above" (click)="openPanel()" #notificationsOrigin>
+<button mat-icon-button matTooltip="Notificaciones" matTooltipPosition="above" (click)="openPanel()" #notificationsOrigin *ngIf="user?.cargo?.toLowerCase() !== 'registro'">
     @if (unreadCount > 0) {
     <span class="absolute left-0 right-0 top-0 flex h-3 items-center justify-center">
         <span
@@ -34,9 +34,7 @@
         <!-- Content -->
         <div class="bg-card relative flex flex-auto flex-col divide-y overflow-y-auto sm:max-h-120">
             <!-- Notifications -->
-            @for (
-            notification of notifications;
-            track trackByFn($index, notification)
+            @for (notification of notifications; track trackByFn
             ) {
             <div class="group flex hover:bg-gray-50 dark:hover:bg-black dark:hover:bg-opacity-5"
                 [ngClass]="{ unread: !notification.readOnly }">
@@ -85,51 +83,71 @@
                 </div>
             </div>
 
-            <!-- Notification content template -->
-            <ng-template #notificationContent>
-                <!-- Icon -->
-                @if (notification.icon && !notification.image) {
-                <div
-                    class="mr-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-                    <mat-icon class="icon-size-5" [svgIcon]="notification.icon">
-                    </mat-icon>
-                </div>
-                }
-                <!-- Image -->
-                @if (notification.image) {
-                <img class="mr-4 h-8 w-8 shrink-0 overflow-hidden rounded-full object-cover object-center"
-                    [src]="notification.image" [alt]="'Notification image'" />
-                }
-                <!-- Title, description & time -->
-                <div class="flex flex-auto flex-col">
-                    @if (notification.title) {
-                    <div class="line-clamp-1 font-semibold" [innerHTML]="notification.title"></div>
+                <!-- Notification content template -->
+                <ng-template #notificationContent>
+                    <!-- Icon -->
+                    @if (notification.icon && !notification.image) {
+                        <div
+                            class="mr-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
+                        >
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="notification.icon"
+                            >
+                            </mat-icon>
+                        </div>
                     }
-                    @if (notification.description) {
-                    <div class="line-clamp-2" [innerHTML]="notification.description"></div>
+                    <!-- Image -->
+                    @if (notification.image) {
+                        <img
+                            class="mr-4 h-8 w-8 shrink-0 overflow-hidden rounded-full object-cover object-center"
+                            [src]="notification.image"
+                            [alt]="'Notification image'"
+                        />
                     }
-                    <div class="text-secondary mt-2 text-sm leading-none">
-                        {{ notification.time | date: 'MMM dd, h:mm a' }}
+                    <!-- Title, description & time -->
+                    <div class="flex flex-auto flex-col">
+                        @if (notification.userId) {
+                            <div
+                                class="line-clamp-1 font-semibold"
+                                [innerHTML]="notification.userId"
+                            ></div>
+                        }
+                        @if (notification.message) {
+                            <div
+                                class="line-clamp-2"
+                                [innerHTML]="notification.message"
+                            ></div>
+                        }
+                        <div class="text-secondary mt-2 text-sm leading-none">
+                            {{ notification.time | date: 'MMM dd, h:mm a' }}
+                        </div>
                     </div>
-                </div>
-            </ng-template>
+                </ng-template>
             }
 
             <!-- No notifications -->
             @if (!notifications || !notifications.length) {
-            <div class="flex flex-auto flex-col items-center justify-center px-8 py-12 sm:justify-start">
                 <div
-                    class="flex h-14 w-14 flex-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-600">
-                    <mat-icon class="text-primary-700 dark:text-primary-50"
-                        [svgIcon]="'heroicons_outline:bell'"></mat-icon>
+                    class="flex flex-auto flex-col items-center justify-center px-8 py-12 sm:justify-start"
+                >
+                    <div
+                        class="flex h-14 w-14 flex-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-600"
+                    >
+                        <mat-icon
+                            class="text-primary-700 dark:text-primary-50"
+                            [svgIcon]="'heroicons_outline:bell'"
+                        ></mat-icon>
+                    </div>
+                    <div class="mt-5 text-2xl font-semibold tracking-tight">
+                        Sin notificaciones
+                    </div>
+                    <div
+                        class="text-secondary mt-1 w-full max-w-60 text-center text-md"
+                    >
+                        Cuando tengas notificaciones, apareceran aqui.
+                    </div>
                 </div>
-                <div class="mt-5 text-2xl font-semibold tracking-tight">
-                    No notifications
-                </div>
-                <div class="text-secondary mt-1 w-full max-w-60 text-center text-md">
-                    When you have notifications, they will appear here.
-                </div>
-            </div>
             }
         </div>
     </div>

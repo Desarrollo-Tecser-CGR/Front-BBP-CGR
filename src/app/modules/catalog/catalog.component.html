@@ -8,7 +8,7 @@
             <input type="text" matInput (keyup)="filter($event)" placeholder="Buscar..." #searchInput>
             <mat-icon svgIcon="heroicons_outline:magnifying-glass-circle"></mat-icon>
         </mat-form-field>
-        <button class="clear-button" (click)="clearFilter(searchInput)">
+        <button class="clear-button" matTooltip="Limpiar" matTooltipPosition="below" (click)="clearFilter(searchInput)">
             <mat-icon class="iconClear" svgIcon="heroicons_outline:archive-box-x-mark"></mat-icon>
         </button>
     </div>

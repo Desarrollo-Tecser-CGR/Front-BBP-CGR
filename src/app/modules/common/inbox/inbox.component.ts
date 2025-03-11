@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { FilterService } from 'app/layout/common/advanced-search-modal/FilterService';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-
+import { MatTooltipModule } from '@angular/material/tooltip'; 
 
 @Component({
   selector: 'app-inbox',
@@ -19,7 +19,8 @@ import { MatIconModule } from '@angular/material/icon';
     GenericTableComponent,
     MatDatepickerModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule
   ],
 })
 export class InboxComponent implements OnInit {

@@ -78,8 +78,8 @@ export class DataServices{
     }
     private columns: any[]=[
         {key:'id', label:'Id'},
-        {key:'path', label:'Path'},
-        {key:'name', label:'File name'}
+        {key:'path', label:'Ruta'},
+        {key:'name', label:'Nombre de archivo'}
     ];
     
     

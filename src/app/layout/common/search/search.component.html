@@ -3,7 +3,7 @@
    
  
     <!-- Botón de búsqueda avanzada -->
-    <button mat-icon-button aria-label="Advanced search" (click)="openAdvancedSearch()" *ngIf="user?.cargo?.toLowerCase() !== 'registro'">
+    <button mat-icon-button aria-label="Advanced search" matTooltip="Filtrar" matTooltipPosition="above" (click)="openAdvancedSearch()" *ngIf="user?.cargo?.toLowerCase() !== 'registro'">
         <mat-icon svgIcon="heroicons_solid:magnifying-glass" *ngIf="user?.cargo?.toLowerCase() !== 'registro'"></mat-icon>
     </button>
  

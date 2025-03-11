@@ -1,7 +1,7 @@
-import { Notification } from './notifications.types';
+import { Notification } from './notifications.types'; 
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
+import { CommonModule, DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -17,6 +17,7 @@ import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { User } from 'app/core/user/user.types';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
  
@@ -30,6 +31,7 @@ import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
     standalone: true,
     imports: [
         MatButtonModule,
+        CommonModule,
         MatIconModule,
         MatTooltipModule,
         NgClass,
@@ -41,6 +43,7 @@ import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
 export class NotificationsComponent implements OnInit, OnDestroy {
     @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
     @ViewChild('notificationsPanel')
+    user: User | null = null;
     private _notificationsPanel: TemplateRef<any>;
     roles: string;
     rol: string;
@@ -58,6 +61,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef
     ) {
+        console.log('Valor de user antes del render:', this.user);
     }
  
     // -----------------------------------------------------------------------------------------------------
@@ -68,8 +72,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
-        this.rol = this.roles[0];
+        const roles = localStorage.getItem('accessRoles');
+        const cargo = roles ? this.capitalizeFirstLetter(JSON.parse(roles)[0]) : 'Rol';
+        this.user = { cargo };
+
+        console.log('Cargo del usuario:', this.user.cargo);
+
         this._notificationsService._notifications.asObservable();
 
         if (this.rol === 'validador') {
@@ -210,6 +218,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     /**
      * Create the overlay
      */
+
+    private capitalizeFirstLetter(value: string): string {
+        return value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '';
+    }
+    
     private _createOverlay(): void {
         // Create the overlay
         this._overlayRef = this._overlay.create({
@@ -273,4 +286,3 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.unreadCount = count;
     }
 }
- 

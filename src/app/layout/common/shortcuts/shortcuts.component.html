@@ -1,5 +1,5 @@
 <!-- Shortcuts toggle -->
-<button mat-icon-button matTooltip="Descargar PDF" matTooltipPosition="above" (click)="generarPDF()">
+<button mat-icon-button matTooltip="Descargar PDF" matTooltipPosition="above" (click)="generarPDF()" *ngIf="user?.cargo?.toLowerCase() !== 'registro'">
     <mat-icon svgIcon="heroicons_outline:arrow-down-tray"></mat-icon>
 </button>
 

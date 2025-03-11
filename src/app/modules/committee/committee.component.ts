@@ -296,6 +296,7 @@ private loadCommitteeData(id: number): void {
     openModal(): void {
         const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
             width: '500px',
+            panelClass: 'custom-modal-class',
             data: {
             role: 'comiteTecnico',
             selectedUser: this.selectedUserFromModal, 
