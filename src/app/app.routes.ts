@@ -81,7 +81,7 @@ export const appRoutes: Route[] = [
         ]
     },
 
-    // Caracterization routes
+    // AssignRole routes
     {
         path: '',
         canActivate: [AuthGuard],
@@ -98,7 +98,7 @@ export const appRoutes: Route[] = [
         ]
     },
 
-    // Caracterization routes
+    // Info User routes
     {
         path: '',
         canActivate: [AuthGuard],
@@ -108,9 +108,9 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'caracterization', loadChildren: () =>
-                import('app/modules/caracterization/caracterization.routes'),
-                data: { requiredRoles: ['caracterizador','administrador', 'jefeUnidad'], module: '' }
+            {path: 'info-user', loadChildren: () =>
+                import('app/modules/info-user/info-user.routes'),
+                data: { requiredRoles: ['administrador','registro', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento', 'evolucionador'], module: '' }
             },
         ]
     },

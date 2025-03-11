@@ -3,7 +3,7 @@ width: 100%;
 }
 
 .header-container {
-  background-color: white; /* Fondo blanco */
+  background-color: white;
   padding: 10px 15px 0px 15px;
 }
 
@@ -13,7 +13,7 @@ width: 100%;
   height: 100%;
   border-bottom: 3px solid #fff;
   background-position: center;
-  border-radius: 10px; /* Bordes redondeados */
+  border-radius: 10px;
 }
 
 .logo {
@@ -28,13 +28,37 @@ width: 100%;
   position: relative;
   margin: auto;
   margin-top: -80px;
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   border-radius: 100%;
   border: 7px solid #2d3580;
-  background: none;
   background-size: cover;
   background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-image {
+  background-color: #e0e0e0; /* Color de fondo cuando no hay imagen */
+}
+
+.avatar-icon {
+  font-size: 120px; 
+  color: #2d3580;
+  height: 100%;
+  width: 100%;
+}
+
+@media (min-width: 1400px) {
+  .avatar {
+    margin-top: -125px;
+    width: 220px;
+    height: 220px;
+  }
+  .avatar-icon {
+    font-size: 160px; 
+  }
 }
 
 .btn-upload {
@@ -59,15 +83,16 @@ width: 100%;
   color: #fff;
 }
 
-h1{
-  top: 320px;
-  left: 100px;
-  position: absolute;
-  display: flex;
+h1 {
+  position: relative; 
   font-size: 25px;
   font-weight: bold;
   color: #000;
+  margin-top: 20px; 
+  margin-left: 10%; 
+  text-align: left;
 }
+
 
 .info-container {
   display: flex;

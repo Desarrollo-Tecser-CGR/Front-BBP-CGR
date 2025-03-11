@@ -27,12 +27,12 @@ export const defaultNavigation: FuseNavigationItem[] = [
         roles: ['administrador']
     },
     {
-        id   : 'caracterization',
+        id   : 'info-user',
         title: 'Perfil',
         type : 'basic',
         icon : 'heroicons_outline:queue-list',
-        link : '/caracterization',
-        roles: ['administrador']
+        link : '/info-user',
+        roles: ['administrador','registro', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento', 'evolucionador']
     },
 
     // {

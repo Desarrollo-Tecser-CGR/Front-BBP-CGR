@@ -1,0 +1,40 @@
+<div id="perfil">
+  <!-- Capa del Perfil -->
+  <div class="header-container">
+    <div class="header">
+      <img src="images/logo/logoPerfil.svg" />
+    </div>
+  </div>
+
+  <!-- Avatar del Usuario -->
+  <div class="avatar" [ngClass]="{'no-image': !usuario.imagenUrl}" 
+  [ngStyle]="usuario.imagenUrl ? {'background-image': 'url(' + usuario.imagenUrl + ')'} : {}">
+<ng-container *ngIf="!usuario.imagenUrl">
+ <mat-icon [svgIcon]="'heroicons_outline:user-circle'" class="avatar-icon"></mat-icon>
+</ng-container>
+
+<label for="file-upload" class="btn-upload">
+ <mat-icon svgIcon="heroicons_outline:camera" style="color: white"></mat-icon>
+</label>
+<input type="file" id="file-upload" accept="image/*" hidden (change)="uploadImage($event)" />
+</div>
+
+  
+  <h1>Datos del perfil</h1>
+
+  <div class="info-container">
+    <div class="info-box">
+      <span class="label">Nombre del usuario</span>
+      <span class="value">{{ usuario.nombres }}</span>
+    </div>
+    <div class="info-box">
+      <span class="label">Correo de usuario</span>
+      <span class="value">{{ usuario.usuario }}</span>
+    </div>
+    <div class="info-box">
+      <span class="label">Cargo del usuario</span>
+      <span class="value">{{ usuario.cargo }}</span>
+    </div>
+  </div>
+
+</div>
