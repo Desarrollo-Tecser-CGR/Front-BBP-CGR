@@ -1,0 +1,11 @@
+$transition-duration: 500ms;
+$transition-easing: ease-in-out;
+
+mat-card-content {
+    .translate-y-0{
+        transform: translateY(0);
+    }
+    .translate-y-full{
+        transform: translateY(100%);
+    }
+}
