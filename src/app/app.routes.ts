@@ -111,6 +111,11 @@ export const appRoutes: Route[] = [
             {path: 'info-user', loadChildren: () =>
                 import('app/modules/info-user/info-user.routes'),
                 data: { requiredRoles: ['administrador','registro', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento', 'evolucionador'], module: '' }
+
+            // {path: 'caracterization', loadChildren: () =>
+            //     import('app/modules/caracterization/caracterization.routes'),
+            //     data: { requiredRoles: ['validador', 'administrador', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador', 'evolucionador'], module: '' }
+
             },
         ]
     },

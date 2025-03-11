@@ -22,18 +22,19 @@ export const defaultNavigation: FuseNavigationItem[] = [
         id: 'catalog',
         title: 'Buscar usuario',
         type: 'basic',
-        icon: 'heroicons_outline:pencil-square',
+        icon: 'heroicons_outline:magnifying-glass-plus',
         link: '/catalog',
         roles: ['administrador']
     },
-    {
-        id   : 'info-user',
-        title: 'Perfil',
-        type : 'basic',
-        icon : 'heroicons_outline:queue-list',
-        link : '/info-user',
-        roles: ['administrador','registro', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento', 'evolucionador']
-    },
+
+    // {
+    //     id   : 'info-user',
+    //     title: 'Perfil',
+    //     type : 'basic',
+    //     icon : 'heroicons_outline:queue-list',
+    //     link : '/info-user',
+    //     roles: ['administrador','registro', 'validador','caracterizador', 'jefeUnidad', 'evaluador', 'comiteTecnico', 'seguimiento', 'evolucionador']
+    // },
 
     // {
     //     id   : 'evolution-questionnaire',
@@ -47,7 +48,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         id: 'follow',
         title: 'Gestión de usuarios',
         type: 'basic',
-        icon: 'heroicons_outline:presentation-chart-line',
+        icon: 'heroicons_outline:users',
         link: '/follow',
         roles: ['administrador']
     },
@@ -63,7 +64,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         id: 'publication-questions',
         title: 'Formulario de evolucionador',
         type: 'basic',
-        icon: 'heroicons_outline:bars-4',
+        icon: 'heroicons_outline:pencil-square',
         link: '/publication-questions',
         roles: ['administrador']
     },
@@ -112,3 +113,4 @@ export const horizontalNavigation: FuseNavigationItem[] = [
         link: '/example'
     }
 ];
+

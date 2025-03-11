@@ -38,6 +38,7 @@ import { fuseAnimations } from '@fuse/animations/public-api';
 import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
 import { AdvancedSearchModalComponent } from '../advanced-search-modal/advanced-search-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { User } from 'app/core/user/user.types';
 
 @Component({
     selector: 'search',
@@ -76,6 +77,7 @@ import { MatDialog } from '@angular/material/dialog';
 export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     @Input() appearance: 'bar' | 'basic' = 'bar';
     @Input() debounce: number = 300;
+    user: User | null = null;
     @Input() minLength: number = 2;
     @Output() search: EventEmitter<any> = new EventEmitter<any>();
 
@@ -84,6 +86,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     searchControl: UntypedFormControl = new UntypedFormControl();
     private _matAutocomplete: MatAutocomplete;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+
+    
 
     /**
      * Constructor
@@ -161,6 +165,9 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
+        const roles = localStorage.getItem('accessRoles');
+        const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+        this.user = { cargo } as User;
 
         this.searchControl.valueChanges
             .pipe(
@@ -282,5 +289,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
             });
         });
     }
+
+
     
 }
