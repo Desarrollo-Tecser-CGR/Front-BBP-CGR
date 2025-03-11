@@ -1,9 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Inject } from '@angular/core';
 import { GenericTableComponent } from "../../../modules/common/generic-table/generic-table.component";
 import { FilesTableServices } from './files-table.service';
 import { ChangeDetectorRef } from '@angular/core';
 import Swal from 'sweetalert2';
 import { DataServices } from 'app/modules/resumen-edit/resumen-edit.service';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+
 
 @Component({
   selector: 'app-files-table',
@@ -12,20 +14,31 @@ import { DataServices } from 'app/modules/resumen-edit/resumen-edit.service';
   templateUrl: './files-table.component.html',
   styleUrl: './files-table.component.scss',
 })
-export class FilesTableComponent implements OnChanges {
-  @Input() IdAudit:number;
-  @Input() CodeAudit:string;
-  
+export class FilesTableComponent {
+  IdAudit:number;
+  CodeAudit:string;
+  startDate: string = this.formatDate(new Date());
+  dataFiles: any;
+  columns: any;
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private filesServices: FilesTableServices, 
+    private cdr:ChangeDetectorRef,
+    private dataService: DataServices,
+  ){
+    this.IdAudit = data.idAudit;
+    this.CodeAudit = data.codeAudit;
+    this.getFiles(this.IdAudit);
+  };
+
   formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
     const day = ('0' + date.getDate()).slice(-2);
     return `${year}-${month}-${day}`;
-}
+  }
 
-  startDate: string = this.formatDate(new Date());
-  data: any;
-  columns: any;
   buttons = [
     {
         icon: 'heroicons_outline:arrow-down-tray',
@@ -40,13 +53,13 @@ export class FilesTableComponent implements OnChanges {
 ]
   ngOnInit():void{
     this.columns = this.filesServices.getColumns();
-    console.log('Mostrar archivos-columnas:',this.columns)    
+    console.log('Mostrar archivos-columnas:',this.columns);
   }
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['IdAudit'] && changes['IdAudit'].currentValue !== undefined) {
-      this.getFilesByAudit(changes['IdAudit'].currentValue).subscribe(
+  getFiles(idAudit:number) {
+      this.getFilesByAudit(idAudit).subscribe(
         (files)=>{
-          this.data=files;
+          console.log('Files:', files);
+          this.dataFiles=files;
         },
         (error) =>{
             Swal.fire({
@@ -56,15 +69,10 @@ export class FilesTableComponent implements OnChanges {
               confirmButtonText: 'Aceptar',
             });
         }
-      ); // Clonamos el array
-  
-      if (!this.data) {
-        this.data = [{ message: 'No hay archivos aún.', empty: true }]; 
-      }
-  
-      console.log('Files filtrados ts:', this.data);
+      ); 
+      console.log('Files filtrados ts:', this.dataFiles);
     }
-  }
+  
   
 
   downloadFile(row: any) {
@@ -73,11 +81,7 @@ export class FilesTableComponent implements OnChanges {
   visualizeFile(row: any) {
     this.dataService.viewFile(row.id);
   }
-  constructor(private filesServices: FilesTableServices, private cdr:ChangeDetectorRef,
-    private dataService: DataServices,
-  ){
 
-  }
   submitForm() {
   throw new Error('Method not implemented.');
   }

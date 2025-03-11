@@ -156,16 +156,17 @@ export class ResumenComponent implements OnInit {
     }
 
 
-    sendNotification(resumeId:number): void {
+    sendNotification(resumeId:number, type:number): void {
         const fullName = localStorage.getItem('accessName') || 'Usuario';
         console.log('Username',fullName);
         const progreso = this.calculateProgress();
         const mensaje = `Notificación creada: El progreso de la hoja de vida es del ${progreso}%.`;
 
-        this.notificationService.sendNotification(resumeId, fullName, 1);
+        // this.notificationService.sendNotification(resumeId, fullName, type);
         console.log(mensaje);
 
     }
+
 
     submitForm(): void {
         this.fullName = localStorage.getItem('accessName') || 'Usuario';
@@ -227,7 +228,7 @@ export class ResumenComponent implements OnInit {
 
                     // Funcionalidad para enviar datos adicionales (accesName)
                     this.handleUpdateRequest(this.Id, nuevoEstadoFlujo, 'El formulario ha sido actualizado.');
-                    this.notificationService.sendNotification(this.Id, this.fullName, 2)
+                    // this.notificationService.sendNotification(this.Id, this.fullName, 2)
                     return; // Salir después de manejar el flujo
                 }
 
@@ -403,7 +404,7 @@ export class ResumenComponent implements OnInit {
                              confirmButtonText: 'Aceptar',
                          }).then(() => {
                              this.isDisabled = false;
-                             this.sendNotification(response.data.id);
+                             this.sendNotification(response.data.id, 1);
                          });
                          this.identityId = response.data.id;
                          console.log('Id de la hv en creacion:', response.data.id);
@@ -869,7 +870,7 @@ export class ResumenComponent implements OnInit {
                 Object.entries(controls).forEach(([controlName, control]) => {
                     // Excluir controles específicos SOLO para el caracterizador
                     if (this.shouldExcludeControl(controlName)) {
-                        //console.log(`🚫 Excluyendo: ${controlName}`);
+                        //console.log(` Excluyendo: ${controlName}`);
                         return;
                     }
     
@@ -941,6 +942,7 @@ export class ResumenComponent implements OnInit {
 private handleEvaluadoresUpdate(evaluadores: any[], flattenedValues: any): void {
     console.log('Cambiando estado a evaluación');
     flattenedValues.estadoFlujo = 'evaluacion';
+    this.sendNotification(this.Id, 7);
 
     const formValues = this.horizontalStepperForm.getRawValue();
 
@@ -1005,7 +1007,8 @@ private handleEvaluadoresUpdate(evaluadores: any[], flattenedValues: any): void 
     );
 
     evaluadores.forEach(evaluador => {
-        this.notificationService.sendNotification(this.Id, evaluador.userName, 6);
+        // this.notificationService.sendNotification(this.Id, evaluador.userName, 6);
+        // this.notificationService.sendNotification(this.Id, evaluador.userName, 3);
     });
 }
 
@@ -1074,7 +1077,8 @@ private handleJefeUnidadUpdate(jefe: any, flattenedValues: any): void {
         }
     );
 
-    this.notificationService.sendNotification(this.Id, jefe.userName, 6);
+    // this.notificationService.sendNotification(this.Id, jefe.userName, 6);
+    // this.notificationService.sendNotification(this.Id, jefe.userName, 3);
 }
 
 // ======================== Logica envio de datos estructurados por PATCH ======================== //

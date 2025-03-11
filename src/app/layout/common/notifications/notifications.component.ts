@@ -18,8 +18,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
- 
+import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { WebSocketNotificationService } from './webSocketNotification.service';
+
 @Component({
     selector: 'notifications',
     templateUrl: './notifications.component.html',
@@ -39,238 +40,180 @@ import { Subject, takeUntil, filter, forkJoin, catchError } from 'rxjs';
     ],
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
-    @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
-    @ViewChild('notificationsPanel')
-    private _notificationsPanel: TemplateRef<any>;
-    roles: string;
-    rol: string;
-    notifications: any[]= [];
-    unreadCount: number = 0;
-    private _overlayRef: OverlayRef;
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
- 
-    /**
-     * Constructor
-     */
+    @ViewChild('notificationsOrigin') private _notificationsOrigin!: MatButton;
+    @ViewChild('notificationsPanel') private _notificationsPanel!: TemplateRef<any>;
+
+    notifications: Notification[] = [];
+    unreadCount = 0;
+    private _overlayRef!: OverlayRef;
+    private _unsubscribeAll = new Subject<void>();
+
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _notificationsService: NotificationsService,
+        private _webSocketService: WebSocketNotificationService,
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef
-    ) {
-    }
- 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Lifecycle hooks
-    // -----------------------------------------------------------------------------------------------------
- 
-    /**
-     * On init
-     */
+    ) {}
+
     ngOnInit(): void {
-        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
-        this.rol = this.roles[0];
-        this._notificationsService._notifications.asObservable();
-
-        if (this.rol === 'validador') {
-            forkJoin([
-                this._notificationsService.getByType(1),
-                this._notificationsService.getByType(2),
-                this._notificationsService.getByType(6)
-            ]).subscribe(
-                ([registerNotifications, validationNotifications, caracterizationNotifications])=>{
-                    const response = [
-                        ...registerNotifications,
-                        ...validationNotifications,
-                        ...caracterizationNotifications
-                    ];
-
-                    this._notificationsService._notifications.next(response);
-                    this.notifications = response;
-
-                    this._calculateUnreadCount();
-                    this._changeDetectorRef.markForCheck();
-                },
-                (error) =>{
-                    console.error('Error al obtener las notificaciones:',error);
-                    
-                }
-            )
-        } 
-        if (this.rol === 'caracterizador') {
-            this._notificationsService.getByType(3).subscribe(
-                (data) =>{
-                    this._notificationsService._notifications.next(data);
-                    this.notifications= data;
-
-                    this._calculateUnreadCount();
-                    this._changeDetectorRef.markForCheck();
-                },
-                (error)=>{
-                }
-            );
-        };
+        this._initializeNotifications();
+        this._subscribeToWebSocketNotifications();
     }
- 
-    /**
-     * On destroy
-     */
+
     ngOnDestroy(): void {
-        // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
- 
-        // Dispose the overlay
+
         if (this._overlayRef) {
             this._overlayRef.dispose();
         }
     }
- 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
- 
+
     /**
-     * Open the notifications panel
+     * Inicializa las notificaciones según el rol del usuario
      */
-    openPanel(): void {
-        // Return if the notifications panel or its origin is not defined
-        if (!this._notificationsPanel || !this._notificationsOrigin) {
+    private _initializeNotifications(): void {
+        const roles: string[] = JSON.parse(localStorage.getItem('accessRoles') || '[]');
+        const userRole = roles[0] || '';
+
+        const roleNotificationMap: { [key: string]: number[] } = {
+            validador: [1, 2, 6],
+            caracterizador: [3],
+            evaluador: [7],
+        };
+
+        const notificationTypes = roleNotificationMap[userRole];
+
+        if (!notificationTypes) {
+            console.warn(`Rol no reconocido: ${userRole}`);
             return;
         }
- 
-        // Create the overlay if it doesn't exist
-        if (!this._overlayRef) {
-            this._createOverlay();
-        }
- 
-        // Attach the portal to the overlay
-        this._overlayRef.attach(
-            new TemplatePortal(this._notificationsPanel, this._viewContainerRef)
-        );
+
+        forkJoin(notificationTypes.map((type) => this._notificationsService.getByType(type)))
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(
+                (responses) => {
+                    this.notifications = responses.flat();
+                    this._calculateUnreadCount();
+                    this._changeDetectorRef.markForCheck();
+                },
+                (error) => console.error('Error al obtener las notificaciones:', error)
+            );
     }
- 
+
     /**
-     * Close the notifications panel
+     * Suscribirse a notificaciones en tiempo real con WebSockets
+     */
+    private _subscribeToWebSocketNotifications(): void {
+        this._webSocketService.notification$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((message) => {
+                if (message) {
+                    try {
+                        console.log('Este es el mensaje: ', message);
+                        const notification = JSON.parse(message);
+                        console.log(notification);
+                        this.notifications.unshift(notification);
+                        this._calculateUnreadCount();
+                        this._changeDetectorRef.markForCheck();
+                    } catch (error) {
+                        console.error('Error al procesar la notificación WebSocket:', error);
+                    }
+                }
+            });
+    }
+
+    formatMessage(message: string): string {
+        // Expresión regular para encontrar el usuario (palabra después de "El usuario ")
+        const userRegex = /El usuario (\S+)/;
+        // Expresión regular para encontrar el ID (después de "# ")
+        const idRegex = /# (\d+)/;
+    
+        // Reemplazar el usuario con negrita
+        message = message.replace(userRegex, (match, user) => `El usuario <strong>${user}</strong>`);
+    
+        // Reemplazar el ID con negrita
+        message = message.replace(idRegex, (match, id) => `# <strong>${id}</strong>`);
+    
+        return message;
+    }
+
+    /**
+     * Abre el panel de notificaciones
+     */
+    openPanel(): void {
+        if (!this._notificationsPanel || !this._notificationsOrigin) return;
+        if (!this._overlayRef) this._createOverlay();
+        this._overlayRef.attach(new TemplatePortal(this._notificationsPanel, this._viewContainerRef));
+    }
+
+    /**
+     * Cierra el panel de notificaciones
      */
     closePanel(): void {
         this._overlayRef.detach();
     }
- 
+
     /**
-     * Mark all notifications as read
+     * Marca todas las notificaciones como leídas
      */
     markAllAsRead(): void {
-        // Mark all as read
-        this._notificationsService.markAllAsRead().subscribe();
+        this.notifications.forEach((notification) => (notification.readOnly = true));
+        this.unreadCount = 0;
+        this._changeDetectorRef.markForCheck();
     }
- 
+
     /**
-     * Toggle read status of the given notification
+     * Alternar el estado de lectura de una notificación
      */
     toggleRead(notification: Notification): void {
-        // Toggle the read status
         notification.readOnly = !notification.readOnly;
- 
-        // Update the notification
-        this._notificationsService
-            .update(notification.id)
-            .subscribe();
+        this._calculateUnreadCount();
+        this._changeDetectorRef.markForCheck();
     }
- 
-    toggleExpand(notification: Notification): void {
-        notification.expanded = !notification.expanded;
-        this._notificationsService.update(notification.id).subscribe();
-    }
-   
+
     /**
-     * Delete the given notification
+     * Elimina una notificación
      */
-    delete(id:string): void {
-        // Delete the notification
-        this._notificationsService.deleteNotification(id).subscribe({
-            
-        });
+    delete(id: string): void {
+        this.notifications = this.notifications.filter((n) => n.id !== id);
+        this._calculateUnreadCount();
+        this._changeDetectorRef.markForCheck();
     }
- 
+
     /**
-     * Track by function for ngFor loops
-     *
-     * @param index
-     * @param item
+     * Calcula el número de notificaciones no leídas
      */
-    trackByFn(index: number, item: any): any {
-        return item.id || index;
+    private _calculateUnreadCount(): void {
+        this.unreadCount = this.notifications.filter((n) => !n.readOnly).length;
     }
- 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Private methods
-    // -----------------------------------------------------------------------------------------------------
- 
+
+    trackByFn(index: number, item: Notification): string {
+        return item.id; // Usa un identificador único de la notificación
+    }
+
     /**
-     * Create the overlay
+     * Crea el overlay del panel de notificaciones
      */
     private _createOverlay(): void {
-        // Create the overlay
         this._overlayRef = this._overlay.create({
             hasBackdrop: true,
             backdropClass: 'fuse-backdrop-on-mobile',
             scrollStrategy: this._overlay.scrollStrategies.block(),
             positionStrategy: this._overlay
                 .position()
-                .flexibleConnectedTo(
-                    this._notificationsOrigin._elementRef.nativeElement
-                )
+                .flexibleConnectedTo(this._notificationsOrigin._elementRef.nativeElement)
                 .withLockedPosition(true)
                 .withPush(true)
                 .withPositions([
-                    {
-                        originX: 'start',
-                        originY: 'bottom',
-                        overlayX: 'start',
-                        overlayY: 'top',
-                    },
-                    {
-                        originX: 'start',
-                        originY: 'top',
-                        overlayX: 'start',
-                        overlayY: 'bottom',
-                    },
-                    {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                    },
-                    {
-                        originX: 'end',
-                        originY: 'top',
-                        overlayX: 'end',
-                        overlayY: 'bottom',
-                    },
+                    { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' },
+                    { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
+                    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top' },
+                    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom' },
                 ]),
         });
- 
-        // Detach the overlay from the portal on backdrop click
-        this._overlayRef.backdropClick().subscribe(() => {
-            this._overlayRef.detach();
-        });
-    }
- 
-    /**
-     * Calculate the unread count
-     *
-     * @private
-     */
-    private _calculateUnreadCount(): void {
-        let count = 0;
- 
-        if (this.notifications && this.notifications.length) {
-            count =this.notifications.filter(
-                (notification) => !notification.readOnly).length;
-        }
- 
-        this.unreadCount = count;
+
+        this._overlayRef.backdropClick().subscribe(() => this._overlayRef.detach());
     }
 }
- 

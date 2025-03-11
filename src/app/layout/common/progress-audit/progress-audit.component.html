@@ -1,13 +1,30 @@
-<div>
-    <h3 class="text-blue-800 font-bold">Progreso de la auditoria {{CodeAudit}}</h3>
-    <div class="">
-      <apx-chart 
-      [series]="[progress]" 
-      [chart]="chartOptions.chart" 
-      [plotOptions]="chartOptions.plotOptions"
-      [fill]="chartOptions.fill"
-      [labels]="chartOptions.labels"
-      >
-    </apx-chart>
+
+<div class="relative h-68 overflow-hidden ">
+  <mat-card *ngIf="graphics[currentIndex]" class="h-full p-2">
+    <div class="flex items-center justify-evenly p-4">
+      <button mat-icon-button (click)="getgraphic(2)">
+        <mat-icon svgIcon="feather:activity" class="text-green-500" ></mat-icon>
+      </button>
+      <button mat-icon-button (click)="getgraphic(1)">
+        <mat-icon svgIcon="heroicons_outline:chart-bar" class="text-orange-500" ></mat-icon>
+      </button>
+      <button mat-icon-button (click)="getgraphic(0)">
+        <mat-icon svgIcon="heroicons_outline:chart-pie" class="text-rose-500" ></mat-icon>
+      </button>
     </div>
-  </div>
+    <mat-card-content class="h-full transition-transform duration-500 ease-in-out flex wrap-2 py-2 border-2 border-solid border-white" [class]="isActive === true ? 'translate-y-0':'translate-y-full'"
+    [class.translate-y-0]="isActive"
+    [class.translate-y-0]="!isActive" >
+      <apx-chart 
+        [series]="graphics[currentIndex].chartOptions.series || [progress]" 
+        [chart]="graphics[currentIndex].chartOptions.chart" 
+        [plotOptions]="graphics[currentIndex].chartOptions.plotOptions"
+        [fill]="graphics[currentIndex].chartOptions.fill"
+        [labels]="graphics[currentIndex].chartOptions.labels"
+        >
+      </apx-chart>
+    </mat-card-content>
+    
+  </mat-card>
+</div>
+

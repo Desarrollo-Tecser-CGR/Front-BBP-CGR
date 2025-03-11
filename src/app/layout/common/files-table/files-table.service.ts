@@ -22,7 +22,7 @@ export class FilesTableServices{
     ]
     private columns: any[]=[
         {key:'id', label:'Id'},
-        {key:'name', label:'File name'}
+        {key:'name', label:'Nombre de archivo'}
     ];
     getColumns(){
         return this.columns;    

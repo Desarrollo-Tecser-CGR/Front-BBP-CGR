@@ -70,8 +70,8 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   palabraCount = 0;
   idQuestions:number[] =[]; 
   preguntasPorPagina = 3;
-  allForms: any[] = [];
 
+  allForms: any;
   answerdEvolution: string[] = [];
   answerdUse: string[] = [];
   answerdBenefit: string[] = [];
@@ -97,12 +97,84 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     ];
   
     //id preg untas
+    ngOnInit(): void {
+      this.idIdentity = Number(this.route.snapshot.paramMap.get('id'));
+      this.updateGroup()
+      this.getFormData(12);
+      this.getUserAccessName();
+      this.getIdQuestions();
+      console.log('Ejecutando getFormData...');
+    }
+  
   getIdQuestions(){
     this.idQuestions = this.preguntas.map(question => question.id);
     console.log('Id de las preguntas', this.idQuestions);
     return this.idQuestions;
   }
   
+
+  selectForm(index: number) {
+    const selectedForm = this.allForms[index]; // Obtenemos el formulario seleccionado
+    
+    this.formularioId = selectedForm.id; // Guardamos su ID
+    this.allQuestions = selectedForm.questions.map((q: any) => ({
+      ...q,
+      respuesta: '', // Inicializamos respuesta en vacío
+    }));
+  
+    // Inicializar el objeto de seguimiento de respuestas
+    this.answeredQuestions = this.allQuestions.reduce((acc, q) => {
+      acc[q.id] = false;
+      return acc;
+    }, {} as { [key: string]: boolean });
+  
+    // Agrupar preguntas en conjuntos del tamaño deseado
+    this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
+  
+    // Cargar el primer grupo de preguntas
+    this.loadGroup(this.currentGroupIndex);
+  }
+  loadGroup(currentGroupIndex: number) {
+    if (currentGroupIndex >= 0 && currentGroupIndex < this.allGroups.length) {
+      this.currentGroup = this.allGroups[currentGroupIndex]; 
+      this.currentGroupIndex = currentGroupIndex; 
+    } else {
+      console.error("Índice de grupo fuera de rango");
+    }
+  }
+  chunkArray(allQuestions: any[], groupSize: number): any[] {
+    if (!allQuestions || groupSize <= 0) return []; // Evita divisiones por 0 o valores inválidos
+    const result = Array.from({ length: Math.ceil(allQuestions.length / groupSize) }, (_, i) =>
+      allQuestions.slice(i * groupSize, i * groupSize + groupSize)
+    );
+    return result;
+  }
+  getForms(){
+    this.questionnaireService.getForms().subscribe(
+      (response)=>{
+        console.log('Formularios de evaluador', response);
+        this.allForms= response.data;
+      }
+    )
+  }
+  getQuestions() {
+    this.questionnaireService.getQuestionsGroups().subscribe(
+      (response)=>{
+        console.log('preguntas en evolucion: ', response);
+        this.preguntas = response;
+      },
+      (error)=>{
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al obtener las preguntas',
+          text: 'Errpr al obtener las preguntas del formulario,',
+          showConfirmButton: false,
+          timer: 2000
+        })
+      }
+    )
+  }
+
   //obtener userId
   
   getUserAccessName(){
@@ -126,14 +198,6 @@ export class EvaluationQuestionnaireComponent implements OnInit{
       this.currentGroupIndex--;
       this.updateGroup();
     }
-  }
-  ngOnInit(): void {
-    this.idIdentity = Number(this.route.snapshot.paramMap.get('id'));
-    this.updateGroup()
-    this.getFormData(12);
-    this.getUserAccessName();
-    this.getIdQuestions();
-    console.log('Ejecutando getFormData...');
   }
 
   todasRespondidas(): boolean {

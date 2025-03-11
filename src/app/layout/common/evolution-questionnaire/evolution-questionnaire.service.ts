@@ -48,7 +48,7 @@ export class QuestionnaireService{
     ]
     
     private apiUrl =  `${GlobalConstants.API_BASE_URL}/api/v1/admin/record/list`;
-    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/11`;
+    private apiUrlGet = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/12`;
     private apiUrlUpdate = `${GlobalConstants.API_BASE_URL}/api/v1/resume/uploadFile`;
     private apiUrlDelete = `${GlobalConstants.API_BASE_URL}/api/v1/updateIdentity`;
     private  apiForm = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/`;
@@ -65,7 +65,12 @@ export class QuestionnaireService{
 
     getQuestion():Observable<any>{
         const url = `${this.apiUrlGet}`
-        return this.http.get<any>(url)
+        return this.http.get<any>(url);
+    }
+
+    getForms():Observable<any>{
+        console.log('Formularios de evaluador:', this.apiUrlGet);
+        return this.http.get<any>(this.apiUrlGet);
     }
 
     enviarCuestionario(formEntity:number, user:number,questionAnswer:any, questionEntity
