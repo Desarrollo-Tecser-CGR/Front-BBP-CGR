@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
 import { Subject, takeUntil } from 'rxjs';
+import { MatTooltipModule } from '@angular/material/tooltip'; 
 
 @Component({
     selector: 'user',
@@ -25,7 +26,15 @@ import { Subject, takeUntil } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'user',
     standalone: true,
-    imports: [MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule, NgIf,  NgFor],
+    imports: [
+        MatButtonModule, 
+        MatMenuModule, 
+        MatIconModule, 
+        MatDividerModule, 
+        NgIf, 
+        NgFor, 
+        MatTooltipModule
+    ]
 })
 export class UserComponent implements OnInit, OnDestroy {
     static ngAcceptInputType_showAvatar: BooleanInput;
@@ -43,6 +52,10 @@ export class UserComponent implements OnInit, OnDestroy {
         private _router: Router,
         private _userService: UserService
     ) { }
+
+    goToProfile(): void {
+        this._router.navigate(['/caracterization']);
+    }
 
     goToSettings(): void {
         this._router.navigate(['/settings']);

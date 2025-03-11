@@ -1,4 +1,3 @@
-// perfil.component.ts
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';

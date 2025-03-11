@@ -80,7 +80,6 @@ export const appRoutes: Route[] = [
             },
         ]
     },
-
     // Caracterization routes
     {
         path: '',
@@ -110,7 +109,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'caracterization', loadChildren: () =>
                 import('app/modules/caracterization/caracterization.routes'),
-                data: { requiredRoles: ['caracterizador','administrador', 'jefeUnidad'], module: '' }
+                data: { requiredRoles: ['validador', 'administrador', 'caracterizador' , 'jefeUnidad', 'comiteTecnico', 'seguimiento', 'evaluador', 'evolucionador'], module: '' }
             },
         ]
     },

@@ -1,5 +1,5 @@
 <!-- User Toggle -->
-<button [matMenuTriggerFor]="userActions"
+<button [matMenuTriggerFor]="userActions" matTooltip="Opciones" matTooltipPosition="above"
     class="overflow-hidden w-full h-full p-1 m-1 flex items-center justify-center rounded-full hover:bg-gray-200 transition-shadow duration-200"
     style="margin-right: 60px;">
     <span class="flex flex-row m-1 items-center justify-center w-full h-auto">
@@ -10,37 +10,22 @@
         </div>
     </span>
 </button>
- 
+
 <!-- Menú principal -->
 <mat-menu [xPosition]="'before'" #userActions="matMenu">
-    <span
-        class="flex flex-col px-3 text-gray-700 dark:text-gray-200 leading-tight">
-        <div *ngIf="userRoles.length > 0" class="flex flex-col space-y-2">
-            <span class="text-sm font-semibold text-gray-500">Roles
-                asignados:</span>
-            <div *ngFor="let role of userRoles"
-                class="flex items-center space-x-2">
-                <mat-icon class="text-gray-500"
-                    [svgIcon]="'heroicons_outline:information-circle'"></mat-icon>
-                <span
-                    class="text-sm font-medium text-gray-800 dark:text-white">{{
-                    role.name }}</span>
-            </div>
-        </div>
-        <span *ngIf="userRoles.length === 0"
-            class="text-sm font-semibold text-gray-500">Sin roles
-            asignados</span>
-    </span>
- 
+    <mat-divider class="my-2" *ngIf="user?.cargo?.toLowerCase() !== 'registro'"></mat-divider>
+    <button mat-menu-item (click)="goToProfile()" *ngIf="user?.cargo?.toLowerCase() !== 'registro'">
+        <mat-icon [svgIcon]="'heroicons_outline:user'"></mat-icon>
+        <span>Perfil</span>
+    </button>
     <mat-divider class="my-2"></mat-divider>
     <button mat-menu-item (click)="goToSettings()">
         <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>
-        <span>Settings</span>
+        <span>Ajustes</span>
     </button>
     <mat-divider class="my-2"></mat-divider>
     <button mat-menu-item (click)="signOut()">
-        <mat-icon
-            [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"></mat-icon>
-        <span>Sign out</span>
+        <mat-icon [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"></mat-icon>
+        <span>Salir</span>
     </button>
 </mat-menu>

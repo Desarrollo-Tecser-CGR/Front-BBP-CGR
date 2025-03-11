@@ -25,25 +25,25 @@ import { EvaluationQuestionnaireComponent } from "../../../common/evaluation-que
 @Component({
     selector: 'classic-layout',
     templateUrl: './classic.component.html',
-    styleUrl : './classic.component.scss',
+    styleUrl: './classic.component.scss',
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [
-    FuseLoadingBarComponent,
-    FuseVerticalNavigationComponent,
-    MatButtonModule,
-    MatIconModule,
-    LanguagesComponent,
-    FuseFullscreenComponent,
-    SearchComponent,
-    ShortcutsComponent,
-    MessagesComponent,
-    NotificationsComponent,
-    UserComponent,
-    RouterOutlet,
-    ButtonMenuComponent,
-    EvaluationQuestionnaireComponent
-],
+        FuseLoadingBarComponent,
+        FuseVerticalNavigationComponent,
+        MatButtonModule,
+        MatIconModule,
+        LanguagesComponent,
+        FuseFullscreenComponent,
+        SearchComponent,
+        ShortcutsComponent,
+        MessagesComponent,
+        NotificationsComponent,
+        UserComponent,
+        RouterOutlet,
+        ButtonMenuComponent,
+        EvaluationQuestionnaireComponent
+    ],
 })
 export class ClassicLayoutComponent implements OnInit, OnDestroy {
     isScreenSmall: boolean;
@@ -59,8 +59,8 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         private _navigationService: NavigationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService
-        
-    ) {}
+
+    ) { }
 
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors

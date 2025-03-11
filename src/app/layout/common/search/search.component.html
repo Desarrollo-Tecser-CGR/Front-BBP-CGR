@@ -3,8 +3,8 @@
    
  
     <!-- Botón de búsqueda avanzada -->
-    <button mat-icon-button aria-label="Advanced search" (click)="openAdvancedSearch()">
-        <mat-icon svgIcon="heroicons_solid:magnifying-glass"></mat-icon>
+    <button mat-icon-button aria-label="Advanced search" (click)="openAdvancedSearch()" *ngIf="user?.cargo?.toLowerCase() !== 'registro'">
+        <mat-icon svgIcon="heroicons_solid:magnifying-glass" *ngIf="user?.cargo?.toLowerCase() !== 'registro'"></mat-icon>
     </button>
  
  
