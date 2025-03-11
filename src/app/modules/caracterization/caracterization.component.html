@@ -7,13 +7,13 @@
   </div>
 
   <!-- Avatar del Usuario -->
-  <div class="avatar">
+  <div class="avatar" [ngStyle]="usuario.imagenUrl ? {'background-image': 'url(' + usuario.imagenUrl + ')'} : {}">
     <label for="file-upload" class="btn-upload">
       <mat-icon svgIcon="heroicons_outline:camera" style="color: white"></mat-icon>
     </label>
-    <input type="file" id="file-upload" accept="image/*" hidden>
-
+    <input type="file" id="file-upload" accept="image/*" hidden (change)="cargarImagen($event)" />
   </div>
+  
   <h1>Datos del perfil</h1>
 
   <div class="info-container">

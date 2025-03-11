@@ -849,7 +849,8 @@ export class ResumenComponent implements OnInit {
     }
 
     private shouldExcludeControl(controlName: string): boolean {
-        const excludedControls = ['estadoFlujo']; // Lista de controles a excluir
+        const excludedControls = []; // Lista de controles a excluir aqui irian estas cosas 'estadoFlujo', 'codigoPractica', 'documentoActuacion' pero ya no se deben excluir
+        
         return excludedControls.includes(controlName);
     }
 
@@ -857,42 +858,48 @@ export class ResumenComponent implements OnInit {
         const formGroups = Object.keys(this.horizontalStepperForm.controls);
         let totalControls = 0;
         let filledControls = 0;
-
+    
+        //console.log("📌 Iniciando cálculo de progreso...");
+    
         formGroups.forEach((step) => {
             const group = this.horizontalStepperForm.get(step) as UntypedFormGroup;
             if (group) {
                 const controls = group.controls;
-
-                 Object.entries(controls).forEach(([controlName, control]) => {
-                // Excluir controles específicos
-                if (this.shouldExcludeControl(controlName)) {
-                    return;
-                }
-
-                // Incluir controles deshabilitados si el rol es "validador"
-                if (!control.disabled || this.isValidatorRole()) {
+    
+                Object.entries(controls).forEach(([controlName, control]) => {
+                    // Excluir controles específicos SOLO para el caracterizador
+                    if (this.shouldExcludeControl(controlName)) {
+                        //console.log(`🚫 Excluyendo: ${controlName}`);
+                        return;
+                    }
+    
+                    // 🔥 Contar controles aunque estén deshabilitados (pero sin cambiar su estado)
                     totalControls++;
-                    // Contar como lleno si tiene un valor, aunque no sea obligatorio
-                    if (
-                        control.value &&
-                        control.value.toString().trim() !== ''
-                    ) {
+                    //console.log(`✅ Contando: ${controlName} - Valor: "${control.value}" - Deshabilitado: ${control.disabled}`);
+    
+                    // Contar como lleno si tiene un valor
+                    if (control.value && control.value.toString().trim() !== '') {
                         filledControls++;
-                        }
+                        //console.log(`✔️ Lleno: ${controlName}`);
                     }
                 });
             }
         });
-
+    
         // Evitar dividir por cero
         if (totalControls === 0) {
+            //console.log("⚠️ No hay controles a contar. Progreso: 0%");
             return 0;
         }
-
+    
         // Calcular progreso
         const progressValue = Math.round((filledControls / totalControls) * 100);
+        //console.log(`📊 Total controles: ${totalControls}, Llenos: ${filledControls}, Progreso: ${progressValue}%`);
+    
         return progressValue;
     }
+    
+    
 
     get progressColor(): string {
         if (this.progress <= 30) {
