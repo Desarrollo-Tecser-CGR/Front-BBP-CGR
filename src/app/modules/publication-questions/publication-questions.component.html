@@ -1,126 +1,116 @@
 <div class="bg-white w-full p-4 pt-10 0">
   <h1>Gestión de Preguntas</h1>
-  <div class="gap-4 mb-4">
-    <form [formGroup]="formCreateform">
-      <div class="flex flex-col gap-4 ">
-        <mat-form-field class="w-full" appearance="outline" >
-          <mat-label>Nombre de formulario</mat-label>
-          <input matInput type="text" placeholder="Nombre de formulario" formControlName="formName" />
-        </mat-form-field>      
+
+  <div class="flex gap-4">
+    <!-- Lista de preguntas disponibles -->
+    <div class="w-1/2 p-4 border rounded-lg">
+      <div>
+      <h2 class="text-lg font-semibold mb-2">Preguntas Disponibles</h2> 
       </div>
-    </form>
-    <div class="flex gap-4">
-      <!-- Lista de preguntas disponibles -->
-      <div class="w-1/2 p-4 border rounded-lg">
-        <div>
-        <h2 class="text-lg font-semibold mb-2">Preguntas Disponibles</h2> 
-        </div>
-        <div cdkDropList #preguntasList="cdkDropList" 
-            [cdkDropListData]="preguntasOriginales" 
-            [cdkDropListConnectedTo]="[preguntasSeleccionadasList]"
-            class="space-y-2 p-2 border border-gray-300 rounded-lg max-h-[235px] overflow-y-auto"
-            (cdkDropListDropped)="moverPregunta($event)">
-          
-          <div *ngFor="let pregunta of preguntasOriginales" cdkDrag class="p-2 bg-gray-100 rounded-lg cursor-move">
-            {{ pregunta.enunciado }}
-          </div>
-        </div>
+      <div cdkDropList #preguntasList="cdkDropList" 
+          [cdkDropListData]="preguntasOriginales" 
+          [cdkDropListConnectedTo]="[preguntasSeleccionadasList]"
+          class="space-y-2 p-2 border border-gray-300 rounded-lg min-h-[235px]"
+          (cdkDropListDropped)="moverPregunta($event)">
         
-      </div>
-  
-      <!-- Lista de preguntas seleccionadas -->
-      <div class="w-1/2 p-4 border rounded-lg">
-        <div class="flex w-full justify-between items-center">
-          <h2 class="text-lg font-semibold mb-2">Preguntas Seleccionadas</h2>
-          <button class="px-4 py-2 text-white rounded-lg" title="Limpiar" (click)="limpiarLista()">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16.25 12.5H12.5V11.25H16.25V12.5ZM18.75 17.5H15V16.25H18.75V17.5ZM17.5 15H13.75V13.75H17.5V15Z" fill="black"/>
-                <path d="M10.6271 12.5C10.6224 11.9727 10.4816 11.4555 10.2184 10.9986C9.95516 10.5417 9.57841 10.1605 9.12461 9.89187L13.7502 1.875L12.669 1.25L7.93336 9.45375C7.35217 9.32397 6.74772 9.34196 6.17528 9.50606C5.60283 9.67016 5.08065 9.97514 4.65649 10.3931C2.31649 12.65 2.49774 17.9263 2.50649 18.15C2.51295 18.3114 2.58164 18.464 2.69816 18.5759C2.81467 18.6877 2.96997 18.7501 3.13149 18.75H12.5009C12.632 18.75 12.7599 18.7087 12.8663 18.632C12.9727 18.5553 13.0523 18.4471 13.0938 18.3226C13.1353 18.1982 13.1365 18.0639 13.0974 17.9386C13.0583 17.8134 12.9808 17.7037 12.8759 17.625C10.6634 15.965 10.6271 12.5337 10.6271 12.5ZM7.45649 10.6231C7.95672 10.6286 8.43558 10.8268 8.79342 11.1764C9.15127 11.5259 9.36056 12 9.37774 12.5C9.37774 12.5238 9.37899 12.63 9.38836 12.7931L5.70086 11.1531C5.94376 10.9528 6.22406 10.8028 6.52546 10.7118C6.82685 10.6209 7.14333 10.5907 7.45649 10.6231ZM9.65649 17.5C9.15692 16.9913 8.83848 16.3325 8.75024 15.625H7.50024C7.545 16.2902 7.75278 16.9341 8.10524 17.5H6.71586C6.45873 16.6889 6.30235 15.8493 6.25024 15H5.00024C5.0403 15.8467 5.1798 16.6858 5.41586 17.5H3.75024C3.76961 16.3525 3.93149 13.8175 4.87711 12.1544L9.58524 14.2481C9.81095 15.4228 10.2933 16.5332 10.9977 17.5H9.65649Z" fill="black"/>
-            </svg>
-          </button>
-        </div>
-        <div cdkDropList #preguntasSeleccionadasList="cdkDropList" 
-            [cdkDropListData]="preguntasSeleccionadas" 
-            [cdkDropListConnectedTo]="[preguntasList]"
-            class="space-y-2 p-2 border border-gray-300 rounded-lg min-h-[235px]"
-            (cdkDropListDropped)="moverPregunta($event)">
-          
-          <div *ngFor="let pregunta of preguntasSeleccionadas" cdkDrag class="p-2 bg-blue-100 rounded-lg cursor-move">
-            {{ pregunta.enunciado }}
-          </div>
+        <div *ngFor="let pregunta of preguntasOriginales" cdkDrag class="p-2 bg-gray-100 rounded-lg cursor-move">
+          {{ pregunta.enunciado }}
         </div>
       </div>
     </div>
-  
-    <div class="mt-4">
-      <div class="flex w-full items-center mx-4"> 
-        <!-- Botón centrado -->
-        <div class="flex-1 flex">
-          <button class="bg-green-500 text-white p-2 rounded-lg" (click)="abrirModal()">
-            Agregar Nueva Pregunta
-          </button>
-        </div>
-    
-        <!-- Botón alineado al final -->
-        <div class="flex-1 flex">
-          <button class="bg-[#2D3480] text-white p-2 rounded-lg" (click)="enviarFormulario()">
-            Guardar Formulario
-          </button>
+
+    <!-- Lista de preguntas seleccionadas -->
+    <div class="w-1/2 p-4 border rounded-lg">
+      <div class="flex w-full justify-between items-center">
+        <h2 class="text-lg font-semibold mb-2">Preguntas Seleccionadas</h2>
+        <button class="px-4 py-2 text-white rounded-lg" title="Limpiar" (click)="limpiarLista()">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16.25 12.5H12.5V11.25H16.25V12.5ZM18.75 17.5H15V16.25H18.75V17.5ZM17.5 15H13.75V13.75H17.5V15Z" fill="black"/>
+              <path d="M10.6271 12.5C10.6224 11.9727 10.4816 11.4555 10.2184 10.9986C9.95516 10.5417 9.57841 10.1605 9.12461 9.89187L13.7502 1.875L12.669 1.25L7.93336 9.45375C7.35217 9.32397 6.74772 9.34196 6.17528 9.50606C5.60283 9.67016 5.08065 9.97514 4.65649 10.3931C2.31649 12.65 2.49774 17.9263 2.50649 18.15C2.51295 18.3114 2.58164 18.464 2.69816 18.5759C2.81467 18.6877 2.96997 18.7501 3.13149 18.75H12.5009C12.632 18.75 12.7599 18.7087 12.8663 18.632C12.9727 18.5553 13.0523 18.4471 13.0938 18.3226C13.1353 18.1982 13.1365 18.0639 13.0974 17.9386C13.0583 17.8134 12.9808 17.7037 12.8759 17.625C10.6634 15.965 10.6271 12.5337 10.6271 12.5ZM7.45649 10.6231C7.95672 10.6286 8.43558 10.8268 8.79342 11.1764C9.15127 11.5259 9.36056 12 9.37774 12.5C9.37774 12.5238 9.37899 12.63 9.38836 12.7931L5.70086 11.1531C5.94376 10.9528 6.22406 10.8028 6.52546 10.7118C6.82685 10.6209 7.14333 10.5907 7.45649 10.6231ZM9.65649 17.5C9.15692 16.9913 8.83848 16.3325 8.75024 15.625H7.50024C7.545 16.2902 7.75278 16.9341 8.10524 17.5H6.71586C6.45873 16.6889 6.30235 15.8493 6.25024 15H5.00024C5.0403 15.8467 5.1798 16.6858 5.41586 17.5H3.75024C3.76961 16.3525 3.93149 13.8175 4.87711 12.1544L9.58524 14.2481C9.81095 15.4228 10.2933 16.5332 10.9977 17.5H9.65649Z" fill="black"/>
+          </svg>
+        </button>
+      </div>
+      <div cdkDropList #preguntasSeleccionadasList="cdkDropList" 
+          [cdkDropListData]="preguntasSeleccionadas" 
+          [cdkDropListConnectedTo]="[preguntasList]"
+          class="space-y-2 p-2 border border-gray-300 rounded-lg min-h-[235px]"
+          (cdkDropListDropped)="moverPregunta($event)">
+        
+        <div *ngFor="let pregunta of preguntasSeleccionadas" cdkDrag class="p-2 bg-blue-100 rounded-lg cursor-move">
+          {{ pregunta.enunciado }}
         </div>
       </div>
     </div>
   </div>
-  
-  <div
-    *ngIf="modalAbierto"
-    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-  >
-    <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 p-6">
-      <!-- Encabezado del modal -->
-      <div class="flex justify-between items-center border-b pb-4">
-        <h3 class="text-xl font-semibold">Crear Nueva Pregunta</h3>
-        <button
-          class="text-gray-500 hover:text-gray-700 transition-colors"
-          (click)="cerrarModal()"
-        >
-          &times;
+
+  <div class="mt-4">
+    <div class="flex w-full justify-between items-center">
+      <!-- Botón centrado -->
+      <div class="flex-1 flex justify-center">
+        <button class="bg-green-500 text-white p-2 rounded-lg" (click)="abrirModal()">
+          Agregar Nueva Pregunta
         </button>
       </div>
   
-      <!-- Cuerpo del modal -->
-      <div class="mt-4">
-        <form (ngSubmit)="guardarPregunta()">
-          <div class="mb-4">
-            <label for="enunciado" class="block text-sm font-medium text-gray-700">
-              Enunciado de la pregunta
-            </label>
-            <textarea
-              id="enunciado"
-              class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-              [(ngModel)]="nuevaPregunta.enunciado"
-              name="enunciado"
-              required
-            ></textarea>
-          </div>
-  
-          <!-- Pie del modal -->
-          <div class="flex justify-end gap-2">
-            <button
-              type="button"
-              class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-              (click)="cerrarModal()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Guardar
-            </button>
-          </div>
-        </form>
+      <!-- Botón alineado al final -->
+      <div class="flex justify-end">
+        <button class="bg-[#2D3480] text-white p-2 rounded-lg" (click)="enviarFormulario()">
+          Guardar Formulario
+        </button>
       </div>
+    </div>
+  </div>  
+</div>
+
+<div
+  *ngIf="modalAbierto"
+  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+>
+  <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 p-6">
+    <!-- Encabezado del modal -->
+    <div class="flex justify-between items-center border-b pb-4">
+      <h3 class="text-xl font-semibold">Crear Nueva Pregunta</h3>
+      <button
+        class="text-gray-500 hover:text-gray-700 transition-colors"
+        (click)="cerrarModal()"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- Cuerpo del modal -->
+    <div class="mt-4">
+      <form (ngSubmit)="guardarPregunta()">
+        <div class="mb-4">
+          <label for="enunciado" class="block text-sm font-medium text-gray-700">
+            Enunciado de la pregunta
+          </label>
+          <textarea
+            id="enunciado"
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
+            [(ngModel)]="nuevaPregunta.enunciado"
+            name="enunciado"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Pie del modal -->
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+            (click)="cerrarModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            Guardar
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

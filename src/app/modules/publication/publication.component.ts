@@ -6,11 +6,11 @@ import { ActivatedRoute, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../../modules/optionsDropdown/characterization/characterization.component';
 import { ResumenService } from '../resumen/resumen.service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { QuestionnaireService } from 'app/layout/common/evaluation-questionnaire/evaluation-questionnaire.service';
 import { PublicactionService } from 'app/modules/publication/publication.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 // Definición de rutas
@@ -33,7 +33,8 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     MatIconModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatTooltipModule
   ]
 })
 export class PublicationComponent {

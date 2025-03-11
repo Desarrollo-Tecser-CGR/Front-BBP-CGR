@@ -1,7 +1,7 @@
-import { Notification } from './notifications.types';
+import { Notification } from './notifications.types'; 
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
+import { CommonModule, DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -17,6 +17,7 @@ import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { User } from 'app/core/user/user.types';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { WebSocketNotificationService } from './webSocketNotification.service';
@@ -31,6 +32,7 @@ import { WebSocketNotificationService } from './webSocketNotification.service';
     standalone: true,
     imports: [
         MatButtonModule,
+        CommonModule,
         MatIconModule,
         MatTooltipModule,
         NgClass,
@@ -40,27 +42,83 @@ import { WebSocketNotificationService } from './webSocketNotification.service';
     ],
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
-    @ViewChild('notificationsOrigin') private _notificationsOrigin!: MatButton;
-    @ViewChild('notificationsPanel') private _notificationsPanel!: TemplateRef<any>;
-
-    notifications: Notification[] = [];
-    unreadCount = 0;
-    private _overlayRef!: OverlayRef;
-    private _unsubscribeAll = new Subject<void>();
-
+    @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
+    @ViewChild('notificationsPanel')
+    private _notificationsPanel: TemplateRef<any>;
+    roles: string;
+    rol: string;
+    notifications: any[]= [];
+    unreadCount: number = 0;
+    private _overlayRef: OverlayRef;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+ 
+    /**
+     * Constructor
+     */
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _notificationsService: NotificationsService,
         private _webSocketService: WebSocketNotificationService,
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef
-    ) {}
-
-    ngOnInit(): void {
-        this._initializeNotifications();
-        this._subscribeToWebSocketNotifications();
+    ) {
     }
+ 
+    // -----------------------------------------------------------------------------------------------------
+    // @ Lifecycle hooks
+    // -----------------------------------------------------------------------------------------------------
+ 
+    /**
+     * On init
+     */
+    ngOnInit(): void {
+        this.roles = JSON.parse(localStorage.getItem('accessRoles'));
+        this.rol = this.roles[0];
+        this._notificationsService._notifications.asObservable();
 
+        if (this.rol === 'validador') {
+            forkJoin([
+                this._notificationsService.getByType(1),
+                this._notificationsService.getByType(2),
+                this._notificationsService.getByType(6)
+            ]).subscribe(
+                ([registerNotifications, validationNotifications, caracterizationNotifications])=>{
+                    const response = [
+                        ...registerNotifications,
+                        ...validationNotifications,
+                        ...caracterizationNotifications
+                    ];
+
+                    this._notificationsService._notifications.next(response);
+                    this.notifications = response;
+
+                    this._calculateUnreadCount();
+                    this._changeDetectorRef.markForCheck();
+                },
+                (error) =>{
+                    console.error('Error al obtener las notificaciones:',error);
+                    
+                }
+            )
+        } 
+        if (this.rol === 'caracterizador') {
+            this._notificationsService.getByType(3).subscribe(
+                (data) =>{
+                    this._notificationsService._notifications.next(data);
+                    this.notifications= data;
+
+                    this._calculateUnreadCount();
+                    this._changeDetectorRef.markForCheck();
+                },
+                (error)=>{
+                }
+            );
+        };
+    }
+ 
+    /**
+     * On destroy
+     */
     ngOnDestroy(): void {
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
@@ -196,6 +254,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     /**
      * Crea el overlay del panel de notificaciones
      */
+
+    private capitalizeFirstLetter(value: string): string {
+        return value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '';
+    }
+    
     private _createOverlay(): void {
         this._overlayRef = this._overlay.create({
             hasBackdrop: true,
