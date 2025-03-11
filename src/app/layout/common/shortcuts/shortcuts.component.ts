@@ -11,6 +11,8 @@ import { jsPDF } from 'jspdf';
 import Swal from 'sweetalert2';
 import { NavigationService } from 'app/core/navigation/navigation.service';
 import { Router } from '@angular/router';
+import { User } from 'app/core/user/user.types';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'shortcuts',
@@ -20,14 +22,19 @@ import { Router } from '@angular/router';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'shortcuts',
     standalone: true,
-    imports: [MatButtonModule, MatIconModule, MatTooltipModule],
+    imports: [MatButtonModule, MatIconModule, MatTooltipModule, CommonModule],
 })
 export class ShortcutsComponent {
+    user: User | null = null;
     constructor(
         private _navigationService: NavigationService,
         private _router: Router
     ) {}
-
+    ngOnInit(): void {
+            const roles = localStorage.getItem('accessRoles');
+            const cargo = roles ? JSON.parse(roles)[0] : 'Rol';
+            this.user = { cargo } as User;
+    }
     async generarPDF(): Promise<void> {
         let viewName = this._router.url.split('/').pop() || 'documento';
         viewName = viewName.replace(/[^a-zA-Z0-9-_]/g, '');

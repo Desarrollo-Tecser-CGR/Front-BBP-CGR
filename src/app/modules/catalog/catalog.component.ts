@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { CatalogService } from './catalog.service';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip'; 
 
 interface Usuario {
   id: number;
@@ -21,13 +22,15 @@ interface Usuario {
   templateUrl: './catalog.component.html',
   styleUrls: ['./catalog.component.scss'],
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [
     CommonModule,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule
   ]
 })
 export class CatalogComponent implements OnInit {

@@ -39,6 +39,7 @@ import { Subject, debounceTime, filter, map, takeUntil } from 'rxjs';
 import { AdvancedSearchModalComponent } from '../advanced-search-modal/advanced-search-modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { User } from 'app/core/user/user.types';
+import { MatTooltipModule } from '@angular/material/tooltip'; 
 
 @Component({
     selector: 'search',
@@ -62,7 +63,8 @@ import { User } from 'app/core/user/user.types';
         NgClass,
         RouterModule,
         NgForOf,
-        NgIf
+        NgIf,
+        MatTooltipModule
     ],
     providers: [
         {

@@ -5,14 +5,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, Router, RouterModule, Routes } from '@angular/router';
 import { CharacterizationComponent } from '../optionsDropdown/characterization/characterization.component';
 import { ResumenService } from '../resumen/resumen.service';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { QuestionnaireService } from 'app/layout/common/evaluation-questionnaire/evaluation-questionnaire.service';
-import { PublicactionService } from 'app/modules/publication/publication.service';
-import { Observable } from 'rxjs';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { PublicactionQuestionService } from './publication-questions.service';
-import { CdkDrag, CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop'
+import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop'
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 // Definición de rutas
@@ -36,7 +34,8 @@ const routes: Routes = [
       FormsModule,
       MatIconModule,
       ReactiveFormsModule,
-      DragDropModule
+      DragDropModule,
+      MatTooltipModule
   ]
 })
 export class PublicationComponent {
