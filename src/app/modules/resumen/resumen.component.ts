@@ -1083,11 +1083,17 @@ private handleJefeUnidadUpdate(jefe: any, flattenedValues: any): void {
 
 // ======================== Logica envio de datos estructurados por PATCH ======================== //
 private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: string): void {
+    console.log(' userName guardado:', this.selectedUserFromModal?.userName);
+
+    const userNameToSend = this.selectedUserFromModal?.userName || 'defaultUser';
+
+    console.log(' Enviando sAMAccountName:', userNameToSend);
+
     const patchData = {
         actualizaciones: {
             estadoFlujo, // Actualizar estado de flujo
         },
-        sAMAccountName: this.selectedUserFromModal?.userName || 'defaultUser', // Usuario
+        sAMAccountName: userNameToSend, // Aseguramos que es el mismo del console.log
         estadoFlujo,
         comentarioUsuario: this.additionalInfoFromModal || '', // Comentario adicional desde el modal
     };
@@ -1114,6 +1120,7 @@ private handleUpdateRequest(id: number, estadoFlujo: string, successMessage: str
         }
     );
 }
+
 
 
 // ======================== Logica multiselect entidad momentaneo ======================== //
@@ -1249,7 +1256,7 @@ dismissPractice(): void {
 
                  console.log('Usuarios seleccionados:', this.selectedUsersFromModal); // Verifica que todos los usuarios estén aquí
                  console.log('Información adicional:', this.additionalInfoFromModal);
-            } else {
+                 console.log('userName guardado:', this.selectedUserFromModal?.userName);
             }
         });
     }
@@ -1269,4 +1276,23 @@ dismissPractice(): void {
         // Para otros roles, permite avanzar sin restricciones
         return true;
     }
+
+    corregirTexto(): void {
+        const texto = this.horizontalStepperForm.get('step3.nombreDescriptivoBuenaPractica')?.value;
+    
+        if (!texto) {
+            console.warn('No hay texto para corregir.');
+            return;
+        }
+    
+        this.resumenService.corregirTexto(texto).subscribe(
+            (respuesta) => {
+                console.log('Correcciones:', respuesta);
+            },
+            (error) => {
+                console.error('Error al obtener correcciones:', error);
+            }
+        );
+    }
+    
 }

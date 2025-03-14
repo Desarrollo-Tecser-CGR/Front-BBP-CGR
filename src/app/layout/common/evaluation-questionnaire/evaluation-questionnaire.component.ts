@@ -84,6 +84,9 @@ export class EvaluationQuestionnaireComponent implements OnInit{
   additionalInfoFromModal: string = '';
   showButton: boolean;
 
+  questionsWithComments: number[] = [];
+  comments: { [key: number]: string } = {}; // Objeto para almacenar comentarios
+
   constructor(
     private resumenService: ResumenService,
     private route: ActivatedRoute,
@@ -108,7 +111,7 @@ export class EvaluationQuestionnaireComponent implements OnInit{
 
   getQuestions() {
     this.questionnaireService.getQuestion().subscribe(groups => {
-      console.log(groups);
+      console.log(" Datos obtenidos del endpoint:", groups);
       this.allForms = groups.data; // Guardamos todos los formularios
       this.filteredForms = [...this.allForms];
   
@@ -166,6 +169,9 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     this.allGroups = this.chunkArray(this.allQuestions, this.groupSize);
     this.loadGroup(this.currentGroupIndex);
   
+    // 🔹 Guardamos los IDs de las preguntas que requieren comentario
+    this.questionsWithComments = selectedForm.questionsWithCommentDtos.map((q: any) => q.id);
+
     // 🔹 Solo cambia el input si NO es la carga inicial
     if (!isInit) {
       this.searchTerm = selectedForm.formName;
@@ -251,7 +257,15 @@ export class EvaluationQuestionnaireComponent implements OnInit{
     // setTimeout(() => {
     //   this.alert();
     //}, 3000);
-    this.questionnaireService.enviarCuestionario(this.formularioId, userId, idAnswers, idQuestions,this.id, 1, estimacion).subscribe(
+
+    // 🔹 Convertir comentarios al formato "texto-id"
+    const comentarios = Object.entries(this.comments)
+        .filter(([_, texto]) => texto.trim() !== "") // Filtrar los vacíos
+        .map(([id, texto]) => `${texto}-${id}`); // Formato "comentario-id"
+
+    console.log("Comentarios enviados:", comentarios);
+
+    this.questionnaireService.enviarCuestionario(this.formularioId, userId, idAnswers, idQuestions,this.id, 1, estimacion, comentarios).subscribe(
       response => {
         this.dismissPractice();
         console.log('Cuestionario enviado con éxito', response);
@@ -260,6 +274,8 @@ export class EvaluationQuestionnaireComponent implements OnInit{
         }, 3000);
       }, error => {
         console.error('Error al enviar el cuestionario', error)
+        console.log(Array.isArray(comentarios)); // Debe imprimir true
+        console.log(comentarios);
       }
     )
   }

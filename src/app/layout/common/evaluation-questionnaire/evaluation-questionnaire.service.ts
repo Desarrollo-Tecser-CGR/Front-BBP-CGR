@@ -70,7 +70,7 @@ export class QuestionnaireService{
     }
 
     enviarCuestionario(formEntity:number, user:number,questionAnswer:any, questionEntity
-        :any, identity:number, enabled:number, estimacion:string):Observable<any>{
+        :any, identity:number, enabled:number, estimacion:string, comentario: string[]):Observable<any>{
         const url = `${this.apiUrl}`
         const params = {
             formEntity:formEntity,
@@ -79,7 +79,8 @@ export class QuestionnaireService{
             questionEntity:questionEntity,
             identity:identity,
             enabled: enabled,
-            estimacion:estimacion
+            estimacion:estimacion,
+            comentario:comentario
         }
         console.log(params)
         return this.http.post<any>(url, params)

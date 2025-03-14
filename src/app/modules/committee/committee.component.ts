@@ -56,6 +56,17 @@ export class CommitteeComponent implements OnInit {
             }
         });
         this.getRolesYUsuarios();
+        
+        // Optención de los formularios con role_form = 11
+        this.committeeService.getFormsWithRole11().subscribe(
+            data => {
+              console.log('✅ Formularios con role_form 11:', data);
+            },
+            error => {
+              console.error('⚠️ Error al cargar los formularios:', error);
+            }
+          );
+          
     }
     
      // 🔹 Método para obtener los datos del comité
@@ -92,7 +103,6 @@ private loadCommitteeData(id: number): void {
         }
     );
 }
-
 
 
     // 🔹 Método para obtener estadoFlujo y codigoPractica
@@ -190,8 +200,7 @@ private loadCommitteeData(id: number): void {
         this.selectedUsersFromModal = [];  // Limpiar la lista de usuarios seleccionados
         this.additionalInfoFromModal = ''; // Limpiar el comentario ingresado
     }
-    
-    
+
     getBoxClass(estimacion: string): string {
         if (estimacion === 'malaPractica') {
             return 'border-red';  // Rojo
@@ -202,8 +211,6 @@ private loadCommitteeData(id: number): void {
         }
         return 'border-blue';  // Azul por defecto
     }
-    
-
     
     // ======================== Logica que cambia el estado de la practica a desestimar ======================== //
     dismissPractice(): void {
@@ -264,7 +271,6 @@ private loadCommitteeData(id: number): void {
         );
     }
 
-
     // ======================== Método para ver los datos del endpoint ======================== //
     comiteTecnicoUserId: number | null = null; // Variable para almacenar el idUser del comité técnico
 
@@ -318,5 +324,4 @@ private loadCommitteeData(id: number): void {
             }
         });
     }
-    
 }    

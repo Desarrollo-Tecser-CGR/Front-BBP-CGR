@@ -61,6 +61,7 @@ export class PublicactionService{
 
     getQuestion():Observable<any>{
         const url = `${this.apiUrlGet}`
+        console.log(url)
         return this.http.get<any>(url)
     }
 

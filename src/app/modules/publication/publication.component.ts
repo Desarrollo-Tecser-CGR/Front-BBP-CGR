@@ -54,7 +54,7 @@ export class PublicationComponent {
   itemsPerPage = 6;
   totalPagesArrayAllQuestions: number[] = [];
   totalPagesArrayCustomForm: number[] = [];
-
+  
   showModal = false;  // Controla la visibilidad del modal
   questionForm: FormGroup;  // Formulario para la pregunta
 
@@ -66,6 +66,9 @@ export class PublicationComponent {
   selectedAnswer: string = '';
   tempAnswers: any[] = [];
   showAnswerModal: boolean = false;
+
+  idQuestionsWithComment: number[] = []; // Almacenar preguntas con comentario
+  addCommentCheckbox: boolean = false;// Estado del checkbox
 
   constructor(
     private resumenService: ResumenService,
@@ -101,6 +104,7 @@ export class PublicationComponent {
         this.selectedQuestion = response.data; // Guardar la pregunta seleccionada
         this.customFormQuestions.push(response.data); // Agregar la pregunta al cuestionario personalizado
         console.log('customFormQuestions después de agregar:', this.customFormQuestions); // Verificar el array
+        this.addCommentCheckbox = false; // 🔹 Siempre deseleccionar el checkbox al abrir
         this.showAnswerModal = true; // Mostrar el modal de respuestas
       }
     }, error => {
@@ -117,6 +121,7 @@ export class PublicationComponent {
       const idQuestions = this.customFormQuestions.map(question => question.id);
       const idAnswers = idQuestions.map(questionId => {
         const answer = this.tempAnswers.find(a => a.questionId === questionId);
+      
 
         // Convertir "Sí" a 1 y "No" a 2
         if (answer) {
@@ -126,13 +131,19 @@ export class PublicationComponent {
         }
       });
 
+      // NO eliminar preguntas con comentario innecesariamente
+      const filteredQuestionsWithComment = this.idQuestionsWithComment.filter(id => 
+        idQuestions.includes(id) || this.idQuestionsWithComment.includes(id)
+      );
+
       // Construir el objeto JSON
       const formData = {
         formName: nombreCuestionario,
         roleFormId: roleFormId,
         enabled: enabled,
         idQuestions: idQuestions,
-        idAnswers: idAnswers
+        idAnswers: idAnswers,
+        idQuestionsWithComment: filteredQuestionsWithComment  
       };
 
       console.log('Datos del formulario a guardar:', formData);
@@ -202,8 +213,24 @@ export class PublicationComponent {
         });
       }
 
-      console.log('Respuestas temporales:', this.tempAnswers);
-      this.showAnswerModal = false; // Cerrar el modal después de guardar
+    // Obtener ID correcto basado en customFormQuestions
+    const questionIndex = this.customFormQuestions.findIndex(q => q.id === this.selectedQuestion.id);
+    if (questionIndex !== -1) {
+      const newId = questionIndex + 1; // Para mantener la secuencia correcta
+      if (this.addCommentCheckbox) {
+        if (!this.idQuestionsWithComment.includes(newId)) {
+          this.idQuestionsWithComment.push(newId);
+        }
+      } else {
+        this.idQuestionsWithComment = this.idQuestionsWithComment.filter(id => id !== newId);
+      }
+    }
+
+
+    console.log('Respuestas temporales:', this.tempAnswers);
+    console.log('Preguntas con comentario:', this.idQuestionsWithComment);
+    
+    this.showAnswerModal = false; // Cerrar el modal después de guardar
     }
   }
 
@@ -350,4 +377,10 @@ export class PublicationComponent {
   pageLoad(): void {
     window.location.reload()
   }
+
+  getCommentStatus(index: number): string {
+    const questionNumber = (this.currentPageCustomForm - 1) * this.itemsPerPage + index + 1;
+    return this.idQuestionsWithComment.includes(questionNumber) ? 'Sí' : 'No';
+  }
+  
 }

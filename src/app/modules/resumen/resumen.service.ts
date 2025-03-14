@@ -18,6 +18,7 @@ export class ResumenService {
     private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity`;
     private apiUrlgetdates = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getAllTypes`;
     private apiUrlEntities = `${GlobalConstants.API_BASE_URL}/api/v1/entityCgr/getAllEntities`;
+    private apiUrlcorrection = `${GlobalConstants.API_BASE_URL}/api/v1/correccion`;
 
     // Propiedades para almacenar datos compartidos
     private typesData: { [key: string]: any[] } = {}; 
@@ -149,6 +150,16 @@ export class ResumenService {
             }),
             catchError(error => {
                 console.error(' Error al obtener trazabilidad:', error);
+                return throwError(error);
+            })
+        );
+    }    
+
+    corregirTexto(texto: string): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        return this.http.post<any>(this.apiUrlcorrection, { texto }, { headers }).pipe(
+            catchError((error) => {
+                console.error('Error en la corrección:', error);
                 return throwError(error);
             })
         );

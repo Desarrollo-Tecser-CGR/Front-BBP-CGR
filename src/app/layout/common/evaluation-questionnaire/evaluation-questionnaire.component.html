@@ -82,9 +82,13 @@
           <!-- <div *ngIf="question.comment">
             <textarea placeholder="Escribe un comentario..."></textarea>
           </div> -->
-          <div *ngIf="[5, 10, 15, 20, 25, 30].includes(getQuestionNumber(i))">
-            <textarea placeholder="Escribe un comentario..."></textarea>
+          <div *ngIf="questionsWithComments.includes(getQuestionNumber(i))">
+            <textarea 
+              placeholder="Escribe un comentario..." 
+              [(ngModel)]="comments[getQuestionNumber(i)]">
+            </textarea>
           </div>
+                
         </div>
         <div class="navigation flex items-center justify-center">
           <div class="flex flex-col gap-y-2">

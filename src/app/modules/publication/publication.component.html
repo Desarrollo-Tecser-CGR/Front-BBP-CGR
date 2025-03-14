@@ -96,6 +96,7 @@
             <th class="w-5/12 border-b border-gray-300 p-2 text-left">Pregunta</th>
             <th class="w-2/12 border-b border-gray-300 p-2 text-left">Opciones</th>
             <th class="w-2/12 border-b border-gray-300 p-2 text-left">Respuesta Correcta</th>
+            <th class="w-1/12 border-b border-gray-300 p-2 text-left">Comentario</th>
             <th class="w-1/12 border-b border-gray-300 p-2 text-left">Acciones</th>
           </tr>
         </thead>
@@ -110,12 +111,17 @@
                   {{ option.respuesta }}{{ !last ? ' /' : '' }}
                 </li>
               </ul>
-            </td>
+              </td>
             <td class="p-2">
               <div class="flex justify-center items-center">
                 {{ getSelectedAnswer(question.id) }}
               </div>
             </td>
+
+            <td class="p-2 text-center">
+              {{ getCommentStatus(i) }}
+            </td>            
+
             <td class="p-2">
               <button (click)="removeFromCustomForm(question.id)" class="flex justify-center items-center">
                 <mat-icon svgIcon="heroicons_solid:backspace"></mat-icon>
@@ -179,11 +185,18 @@
 
       <p class="mb-4">Pregunta: {{ selectedQuestion?.enunciado }}</p>
 
+      <div class="flex gap-4 mb-2">
+        <label class="flex items-center">
+          <input type="checkbox" [(ngModel)]="addCommentCheckbox" class="mr-2">
+          ¿Podrá agregar información extra?
+        </label>
+      </div>
+
       <div class="flex gap-4">
         <button (click)="saveAnswer('Sí')" class="bg-green-500 text-white px-3 py-1 rounded">Sí</button>
         <button (click)="saveAnswer('No')" class="bg-red-500 text-white px-3 py-1 rounded">No</button>
       </div>
-
+      
       <div class="mt-4 flex justify-end">
         <button (click)="closeAnswerModal()" class="bg-gray-400 px-3 py-1 rounded">Cerrar</button>
       </div>

@@ -7,6 +7,7 @@ import { GlobalConstants } from 'app/core/constants/GlobalConstants';
   providedIn: 'root'
 })
 export class CommitteeService {
+  private apiUrlForms = `${GlobalConstants.API_BASE_URL}/api/v1/admin/form/11`;
   private apiUrl = `${GlobalConstants.API_BASE_URL}/api/v1/admin/record`; //Api que trae los datos de evaluación
   private apiUrlSetValidateStatus = `${GlobalConstants.API_BASE_URL}/api/v1/resume/updateIdentity`;
   // private apiUrlGetIdentity = `${GlobalConstants.API_BASE_URL}/api/v1/resume/getIdentity`; //Api que trae los datos de resumen 2 datos 
@@ -29,7 +30,22 @@ export class CommitteeService {
     console.log('Datos a enviar:', formData);
 
     return this.http.patch(url, formData, { headers, responseType: 'text' as 'json' });
-}
+  }
 
-
+  // Método para obtener los formularios con role_form = 11
+  getFormsWithRole11(): Observable<any> {
+    return new Observable(observer => {
+      this.http.get<any>(this.apiUrlForms).subscribe(
+        response => {
+          console.log('🔍 Datos obtenidos de /form/11:', response);
+          observer.next(response);
+          observer.complete();
+        },
+        error => {
+          console.error('❌ Error al obtener los formularios con role_form 11:', error);
+          observer.error(error);
+        }
+      );
+    });
+  }
 }
